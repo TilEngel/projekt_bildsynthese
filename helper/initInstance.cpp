@@ -1,0 +1,233 @@
+#include "initInstance.hpp"
+#include "../HelloVulkan17.hpp"
+
+VkInstance InitInstance::createInstance(std::vector<const char*> extensions){
+    //Validation Layers (nur falls vorhanden)
+    std::vector<const char*> validationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+
+#ifdef __APPLE__
+    // macOS benötigt diese Erweiterungen
+    extensions.push_back("VK_KHR_portability_enumeration");
+    extensions.push_back("VK_KHR_get_physical_device_properties2");
+#endif
+
+
+    // Prüfe Layer 
+    uint32_t layerCount = 0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char* layerName : validationLayers) {
+        bool found = false;
+
+        for (auto& l : availableLayers)
+            if (strcmp(layerName, l.layerName) == 0)
+                found = true;
+
+        if (!found)
+            std::cerr << "[WARN] Validation Layer fehlt: " << layerName << "\n";
+    }
+
+    // Prüfe extensions
+    uint32_t extCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extCount, availableExtensions.data());
+
+    for (auto* extName : extensions) {
+        bool found = false;
+        for (auto& ext : availableExtensions)
+            if (strcmp(extName, ext.extensionName) == 0)
+                found = true;
+
+        if (!found)
+            std::cerr << "[WARN] Fehlende Extension: " << extName << "\n";
+    }
+
+
+    // Application Info
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Vulkan Instance";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_2;
+
+
+    // Instance Create Info
+    VkInstanceCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    info.pApplicationInfo = &appInfo;
+
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
+
+#ifdef __APPLE__
+    //portability-flag notwendig unter macOS
+    info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
+    // Keine Layers aktivieren für moltenVK
+    info.enabledLayerCount = 0;
+    info.ppEnabledLayerNames = nullptr;
+
+    // Instance erstellen
+    VkInstance instance = VK_NULL_HANDLE;
+    if (vkCreateInstance(&info, nullptr, &instance) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateInstance failed.");
+
+    std::cout << "Vulkan Instance erfolgreich erstellt.\n";
+    return instance;
+}
+
+void InitInstance::destroyInstance(VkInstance instance){
+    if (instance != VK_NULL_HANDLE)
+        vkDestroyInstance(instance, nullptr);
+}
+
+
+//Physical Device wählen
+VkPhysicalDevice InitInstance::pickPhysicalDevice(VkInstance instance,Surface* surface,uint32_t* graphicsQueueFamilyIndex, uint32_t* presentQueueFamilyIndex){
+    uint32_t count = 0;
+    vkEnumeratePhysicalDevices(instance, &count, nullptr);
+    if (count == 0)
+        throw std::runtime_error("Keine Vulkan-kompatible GPU gefunden.");
+
+    std::vector<VkPhysicalDevice> devices(count);
+    vkEnumeratePhysicalDevices(instance, &count, devices.data());
+
+    for (auto dev : devices) {
+
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(dev, &props);
+
+        // Prüfe Swapchain Support
+        uint32_t extCount = 0;
+        vkEnumerateDeviceExtensionProperties(dev, nullptr, &extCount, nullptr);
+
+        std::vector<VkExtensionProperties> exts(extCount);
+        vkEnumerateDeviceExtensionProperties(dev, nullptr, &extCount, exts.data());
+
+        bool hasSwapchain = false;
+        for (auto& ext : exts)
+            if (strcmp(ext.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+                hasSwapchain = true;
+
+        if (!hasSwapchain)
+            continue;
+
+        // Prüfe Surface
+        if (!surface->isAdequate(dev))
+            continue;
+
+        //Queuefamily finden
+        uint32_t qCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> qfam(qCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, qfam.data());
+
+        uint32_t g = UINT32_MAX, p = UINT32_MAX;
+
+        for (uint32_t i = 0; i < qCount; i++)
+        {
+            if (qfam[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                g = i;
+
+            if (surface->canQueueFamilyPresent(dev, i))
+                p = i;
+
+            if (g != UINT32_MAX && p != UINT32_MAX)
+                break;
+        }
+
+        if (g == UINT32_MAX || p == UINT32_MAX)
+            continue;
+
+        *graphicsQueueFamilyIndex = g;
+        *presentQueueFamilyIndex  = p;
+
+        std::cout << "GPU ausgewählt: " << props.deviceName << "\n";
+        return dev;
+    }
+    throw std::runtime_error("Keine geeignete GPU gefunden.");
+}
+
+
+// Logical Device
+VkDevice InitInstance::createLogicalDevice(VkPhysicalDevice physicalDevice,uint32_t gQueue,uint32_t pQueue){
+    float priority = 1.0f;
+
+    std::set<uint32_t> families = { gQueue, pQueue };
+    std::vector<VkDeviceQueueCreateInfo> queues;
+
+    for (uint32_t f : families) {
+        VkDeviceQueueCreateInfo q{};
+        q.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        q.queueFamilyIndex = f;
+        q.queueCount = 1;
+        q.pQueuePriorities = &priority;
+        queues.push_back(q);
+    }
+
+    std::vector<const char*> extensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+
+#ifdef __APPLE__
+    extensions.push_back("VK_KHR_portability_subset");
+#endif
+
+    VkPhysicalDeviceFeatures features{};
+    features.samplerAnisotropy = VK_TRUE;
+
+    VkDeviceCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    info.queueCreateInfoCount = queues.size();
+    info.pQueueCreateInfos = queues.data();
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
+    info.pEnabledFeatures = &features;
+
+    info.enabledLayerCount = 0;
+
+    VkDevice device = VK_NULL_HANDLE;
+    if (vkCreateDevice(physicalDevice, &info, nullptr, &device) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateDevice failed.");
+
+    return device;
+}
+
+void InitInstance::destroyDevice(VkDevice device){
+    if (device != VK_NULL_HANDLE) {
+        vkDeviceWaitIdle(device);
+        vkDestroyDevice(device, nullptr);
+    }
+}
+
+
+// Command Pool
+
+VkCommandPool InitInstance::createCommandPool(VkDevice device, uint32_t family){
+    VkCommandPoolCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    info.queueFamilyIndex = family;
+    info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+    VkCommandPool pool;
+    if (vkCreateCommandPool(device, &info, nullptr, &pool) != VK_SUCCESS)
+        throw std::runtime_error("vkCreateCommandPool failed.");
+
+    return pool;
+}
+
+void InitInstance::destroyCommandPool(VkDevice device, VkCommandPool pool){
+    if (pool != VK_NULL_HANDLE)
+        vkDestroyCommandPool(device, pool, nullptr);
+}
