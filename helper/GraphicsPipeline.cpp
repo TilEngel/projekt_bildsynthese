@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 #include <fstream>
+#include <array>
 
 // ------------------------------------------------------
 // Helper: read SPIR-V file

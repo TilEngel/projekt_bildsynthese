@@ -5,26 +5,27 @@
 CXX      = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 
-# Detect OS
 UNAME_S := $(shell uname -s)
 
-# Vulkan SDK base path detection
-# NOTE: Vulkan SDK should set VULKAN_SDK environment variable automatically.
-VULKAN_SDK ?= /usr/local # fallback, if not set
+# Vulkan SDK env var is used if available
+VULKAN_SDK ?=
 
-# Platform-specific flags
+# ------------------------------------------------------------
+# Platform-specific settings
+# ------------------------------------------------------------
+
 ifeq ($(UNAME_S), Darwin)
-    # macOS (MoltenVK) – GLM is inside VulkanSDK/.../macOS/include
-    GLM_PATH = $(VULKAN_SDK)/include
-    CXXFLAGS  += $(shell pkg-config --cflags glfw3) -I$(GLM_PATH)
-    LDFLAGS   = $(shell pkg-config --libs glfw3) \
-                -lvulkan \
-                -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo
+    # macOS
+    CXXFLAGS += $(shell pkg-config --cflags glfw3)
+    LDFLAGS  = $(shell pkg-config --libs glfw3)
+    LDFLAGS += -lvulkan \
+               -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo
+
 else ifeq ($(UNAME_S), Linux)
-    # Linux – GLM comes with Vulkan SDK or system include
-    GLM_PATH = $(VULKAN_SDK)/include
-    CXXFLAGS += $(shell pkg-config --cflags glfw3) -I$(GLM_PATH)
-    LDFLAGS  = $(shell pkg-config --libs glfw3) -lvulkan -ldl -lpthread
+    # Linux with apt-installed libs (GLM included automatically)
+    CXXFLAGS += $(shell pkg-config --cflags glfw3 vulkan)
+    LDFLAGS  = $(shell pkg-config --libs glfw3 vulkan) -ldl -lpthread
+
 else
     # Windows (MinGW)
     GLM_PATH = C:/VulkanSDK/Include
@@ -34,51 +35,55 @@ else
                -lgdi32 -luser32 -lshell32
 endif
 
-# -----------------------------
+# ------------------------------------------------------------
 # Files
-# -----------------------------
+# ------------------------------------------------------------
+
 SRC = \
     main.cpp \
-    ./helper/initInstance.cpp \
-    ./helper/initBuffer.cpp \
-    ./helper/loadObj.cpp \
-    ./helper/Texture.cpp \
-    ./helper/Window.cpp \
-    ./helper/Surface.cpp \
-    ./helper/Swapchain.cpp \
-    ./helper/Depthbuffer.cpp \
-    ./helper/GraphicsPipeline.cpp \
-    ./helper/Framebuffers.cpp
+    helper/initInstance.cpp \
+    helper/initBuffer.cpp \
+    helper/loadObj.cpp \
+    helper/Texture.cpp \
+    helper/Window.cpp \
+    helper/Surface.cpp \
+    helper/Swapchain.cpp \
+    helper/Depthbuffer.cpp \
+    helper/GraphicsPipeline.cpp \
+    helper/Framebuffers.cpp
 
 OBJ = $(SRC:.cpp=.o)
 TARGET = projekt
 
-# -----------------------------
+# ------------------------------------------------------------
 # Build
-# -----------------------------
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv HelloVulkan17.hpp helper/Texture.hpp
+# ------------------------------------------------------------
+
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# -----------------------------
-# Shader Compilation
-# -----------------------------
+# ------------------------------------------------------------
+# Shader compilation
+# ------------------------------------------------------------
+
 %.vert.spv: %.vert
-	glslangValidator -V -o $@ $<
+	glslangValidator -V $< -o $@
 
 %.frag.spv: %.frag
-	glslangValidator -V -o $@ $<
+	glslangValidator -V $< -o $@
 
-# -----------------------------
-# Utility
-# -----------------------------
-.PHONY: test clean
+# ------------------------------------------------------------
+# Utilities
+# ------------------------------------------------------------
 
-test: $(TARGET)
+.PHONY: clean run
+
+run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) $(OBJ)
-	rm -f shaders/*.spv
+	rm -f $(TARGET) $(OBJ) shaders/*.spv
+
