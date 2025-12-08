@@ -12,10 +12,10 @@
 #include <vulkan/vulkan_core.h>
 
 #define GLM_FORCE_RADIANS
-#include"/Users/tilengelbrecht/VulkanSDK/1.4.321.0/macOS/include/glm/glm.hpp"
-#include "/Users/tilengelbrecht/VulkanSDK/1.4.321.0/macOS/include/glm/gtc/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #define GLFW_INCLUDE_VULKAN
-#include <glfw/3.4/include/GLFW/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #include "./helper/Window.hpp"
 #include "./helper/Swapchain.hpp"
