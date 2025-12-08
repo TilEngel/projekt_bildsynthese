@@ -16,7 +16,8 @@ VULKAN_SDK ?=
 
 ifeq ($(UNAME_S), Darwin)
     # macOS
-    CXXFLAGS += $(shell pkg-config --cflags glfw3)
+    GLM_PATH = $(VULKAN_SDK)/include
+    CXXFLAGS += $(shell pkg-config --cflags glfw3) -I$(GLM_PATH)
     LDFLAGS  = $(shell pkg-config --libs glfw3)
     LDFLAGS += -lvulkan \
                -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo
