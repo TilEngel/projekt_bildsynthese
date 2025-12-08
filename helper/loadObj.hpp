@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
-#include "../HelloVulkan17.hpp"
+#include "GraphicsPipeline.hpp"
 
 // Führt das Laden eines OBJ-Files aus
 class LoadObj {

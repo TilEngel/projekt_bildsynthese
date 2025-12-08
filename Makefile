@@ -48,7 +48,8 @@ SRC = \
     ./helper/Swapchain.cpp \
     ./helper/Depthbuffer.cpp \
     ./helper/GraphicsPipeline.cpp \
-    ./helper/Framebuffers.cpp
+    ./helper/Framebuffers.cpp \
+    ./helper/Frame.cpp
 
 OBJ = $(SRC:.cpp=.o)
 TARGET = projekt
@@ -56,7 +57,7 @@ TARGET = projekt
 # -----------------------------
 # Build
 # -----------------------------
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv HelloVulkan17.hpp helper/Texture.hpp
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture.hpp
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 %.o: %.cpp
