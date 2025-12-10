@@ -98,6 +98,7 @@ VkSurfaceKHR Window::createSurface(VkInstance instance) {
 
 // statischer Callback: setzt das Flag im zugehörigen Window-Objekt
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+    (void) width; (void) height;
     // wir holen uns das Window-Objekt aus dem user pointer
     Window* win = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     if (win) {
