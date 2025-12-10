@@ -4,9 +4,6 @@
 #include <vector>
 #include <iostream>
 
-// ------------------------------------------------------------
-// Helper: Find memory type index
-// ------------------------------------------------------------
 uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties,
                         VkPhysicalDevice physicalDevice)
 {

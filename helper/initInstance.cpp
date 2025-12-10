@@ -1,5 +1,5 @@
 #include "initInstance.hpp"
-#include "../HelloVulkan17.hpp"
+
 
 VkInstance InitInstance::createInstance(std::vector<const char*> extensions){
     //Validation Layers (nur falls vorhanden)
@@ -231,3 +231,38 @@ void InitInstance::destroyCommandPool(VkDevice device, VkCommandPool pool){
     if (pool != VK_NULL_HANDLE)
         vkDestroyCommandPool(device, pool, nullptr);
 }
+
+//Descriptor-Pool
+
+VkDescriptorPool InitInstance::createDescriptorPool(VkDevice device, uint32_t framesInFlight) {
+    // create a descriptor pool
+    // - the number of uniform buffers is given by framesInFlight
+    // - the number of combined image samplers is also given by framesInFlight
+
+    std::vector<VkDescriptorPoolSize> poolSizes = {
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, framesInFlight },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, framesInFlight }
+    };
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.flags = 0;
+    poolInfo.maxSets = framesInFlight; // we will allocate one descriptor set per frame
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+
+    VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+    VkResult res = vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool);
+    if (res != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor pool!");
+    }
+
+    return descriptorPool;
+}
+
+void InitInstance::destroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool) {
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+    }
+}
+

@@ -20,9 +20,9 @@
 // GLFW and STB should be available using your include paths configured in the Makefile.
 // Do NOT use absolute paths here.
 #include <GLFW/glfw3.h>
-#include "../HelloVulkan17.hpp" // Enthält die Vertex-Definition u.ä.
 // stb_image.h sollte sich im Projektverzeichnis befinden oder via -I erreichbar sein.
 #include "../stb_image.h"
+#include "GraphicsPipeline.hpp"
 
 class InitBuffer {
 public:

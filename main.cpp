@@ -10,13 +10,14 @@
 #include "helper/initInstance.hpp"
 #include "helper/loadObj.hpp"
 
-#include "HelloVulkan17.hpp"
 #include "helper/Window.hpp"
 #include "helper/Surface.hpp"
 #include "helper/Swapchain.hpp"
 #include "helper/Depthbuffer.hpp"
 #include "helper/GraphicsPipeline.hpp"
 #include "helper/Texture.hpp"
+#include "helper/Scene.hpp"
+#include "helper/Frame.hpp"
 
 
 int main() {
@@ -76,8 +77,9 @@ int main() {
 
     //Command pool
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
-
-    HelloVulkanApplication* app = new HelloVulkanApplication();
+    //Descriptor Pool
+    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+    VkDescriptorPool descriptorPool = inst.createDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
 
     //Vertex-buffer füllen
     std::vector<Vertex> vertices;
@@ -95,33 +97,47 @@ int main() {
         graphicsQueue,
         "textures/crate.png"
     );
-
-    // App konfigurieren
-    app->setVertexBuffer(vertexBuffer, vertexCount);
-    app->setWindow(window);
-    app->setGraphicsQueue(graphicsQueue);
-    app->setPhysicalDevice(physicalDevice);
-    app->setLogicalDevice(device);
-    app->setSwapChain(swapChain);
-    app->setDepthBuffer(depthBuffer);
-    app->setGraphicsPipeline(pipeline);
-    app->setFramebuffers(framebuffers);
-    app->setCommandPool(commandPool);
-    app->setVertexBuffer(vertexBuffer, vertexCount);
-    app->setTexture(texture.getImageView(), texture.getSampler());
-    app->prepareRendering();
-
-    // Render Loop
-    while (!window->shouldClose()) {
-        window->pollEvents();
-        app->render();
+    // create frames in flight
+    std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        framesInFlight[i] = new Frame(physicalDevice,
+            device,
+            swapChain,
+            framebuffers,
+            graphicsQueue,
+            commandPool,
+            descriptorPool,
+            pipeline->getDescriptorSetLayout());
     }
 
-    vkDeviceWaitIdle(device);
+    // create scene object
+    Scene* scene = new Scene();
+    scene->setRenderObject(pipeline, vertexBuffer, vertexCount, texture.getImageView(), texture.getSampler());
 
+
+    // start render loop
+    uint32_t currentFrame = 0;
+    while (!window->shouldClose()) {
+        window->pollEvents();
+        bool recreate = framesInFlight[currentFrame]->render(scene);
+        if (recreate || window->wasResized()) {
+            vkDeviceWaitIdle(device);
+            swapChain->recreate();
+            depthBuffer->recreate(swapChain->getExtent());
+            framebuffers->recreate();
+        }
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+    vkDeviceWaitIdle(device);
+    
     // Cleanup
-    delete app;
+    delete scene;
     texture.destroy();
+    buff.destroyVertexBuffer(device);
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        delete framesInFlight[i];
+    }
+    inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyCommandPool(device, commandPool);
     delete framebuffers;
     delete pipeline;

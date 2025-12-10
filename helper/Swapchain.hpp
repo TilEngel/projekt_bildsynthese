@@ -75,13 +75,6 @@ public:
         return _swapChainImageViews;
     }
 
-    VkExtent2D getExtent() const {
-        return _extent;
-    }
-
-    VkFormat getImageFormat() const {
-        return _imageFormat;
-    }
 
 
 private:

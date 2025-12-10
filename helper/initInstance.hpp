@@ -13,8 +13,8 @@
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
+#include "Surface.hpp"
 
-#include "../HelloVulkan17.hpp"
 
 class InitInstance {
 public:
@@ -38,4 +38,7 @@ public:
 
     VkCommandPool createCommandPool(VkDevice device, uint32_t graphicsQueueFamilyIndex);
     void destroyCommandPool(VkDevice device, VkCommandPool commandPool);
+
+    VkDescriptorPool createDescriptorPool(VkDevice device, uint32_t framesInFlight);
+    void destroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool);
 };
