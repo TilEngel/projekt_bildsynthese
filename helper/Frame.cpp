@@ -188,7 +188,7 @@ void Frame::updateUniformBuffer() {
     glm::mat4 model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     // view: move back along z so object is visible
-    glm::mat4 view = glm::lookAtRH(glm::vec3(2.0f, 2.0f, 2.0f), // eye
+    glm::mat4 view = glm::lookAtRH(glm::vec3(4.0f, 4.0f, 4.0f), // eye
                                    glm::vec3(0.0f, 0.0f, 0.0f), // center
                                    glm::vec3(0.0f, 1.0f, 0.0f)); // up
 
