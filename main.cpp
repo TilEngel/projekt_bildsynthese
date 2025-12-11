@@ -22,7 +22,7 @@
 
 int main() {
     InitInstance inst;
-
+    Scene* scene = new Scene();
     // Window erstellen
     Window* window = new Window();
 
@@ -59,9 +59,7 @@ int main() {
     );
 
     // Depth Buffer
-    DepthBuffer* depthBuffer = new DepthBuffer(
-        physicalDevice, device, swapChain->getExtent()
-    );
+    DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
 
     // Pipeline
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -77,10 +75,7 @@ int main() {
 
     //Command pool
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
-    //Descriptor Pool
-    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    VkDescriptorPool descriptorPool = inst.createDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
-
+    
     //Vertex-buffer füllen
     std::vector<Vertex> vertices;
     LoadObj obj;
@@ -88,6 +83,13 @@ int main() {
     uint32_t vertexCount = vertices.size();
     InitBuffer buff;
     VkBuffer vertexBuffer = buff.createVertexBuffer(physicalDevice,device,commandPool, graphicsQueue, vertices);
+
+
+    //Vertex-buffer füllen
+    std::vector<Vertex> vertices2;
+    obj.objLoader("./models/flying_dutchman.obj", vertices2);
+    uint32_t vertexCount2 = vertices2.size();
+    VkBuffer vertexBuffer2 = buff.createVertexBuffer(physicalDevice,device,commandPool, graphicsQueue, vertices2);
 
     //Textur laden
     Texture texture(
@@ -97,6 +99,37 @@ int main() {
         graphicsQueue,
         "textures/crate.png"
     );
+
+
+    
+    scene->setRenderObject(pipeline, vertexBuffer2, vertexCount2, texture.getImageView(), texture.getSampler());
+    scene->setRenderObject(pipeline, vertexBuffer, vertexCount, texture.getImageView(), texture.getSampler());
+    
+    // nach dem Laden der Modelle und nachdem scene Objekte enthält:
+    size_t objectCount = scene->getObjectCount();
+    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+    uint32_t maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * objectCount);
+
+    // Descriptor pool: einen Eintrag pro (frame,object) für UB und ImageSampler
+    std::array<VkDescriptorPoolSize,2> poolSizes{};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = maxSets; // ein UBO-Eintrag pro Set (Binding 0)
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].descriptorCount = maxSets; // ein imageSampler pro Set (Binding 1)
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+    poolInfo.maxSets = maxSets;
+
+    VkDescriptorPool descriptorPool;
+    if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create descriptor pool");
+    }
+
+
+
     // create frames in flight
     std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -108,11 +141,8 @@ int main() {
             commandPool,
             descriptorPool,
             pipeline->getDescriptorSetLayout());
+            framesInFlight[i]->allocateDescriptorSets(descriptorPool, pipeline->getDescriptorSetLayout(), scene->getObjectCount());
     }
-
-    // create scene object
-    Scene* scene = new Scene();
-    scene->setRenderObject(pipeline, vertexBuffer, vertexCount, texture.getImageView(), texture.getSampler());
 
 
     // start render loop
