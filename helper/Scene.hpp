@@ -1,8 +1,10 @@
+// Scene.hpp (angepasst)
 #pragma once
 
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "GraphicsPipeline.hpp"
 
@@ -11,36 +13,37 @@ struct RenderObject {
     uint32_t vertexCount = 0;
     VkImageView textureImageView = VK_NULL_HANDLE;
     VkSampler textureSampler = VK_NULL_HANDLE;
-    // optional: per-object user data (z.B. transform index)
+    GraphicsPipeline* pipeline = nullptr; // pipeline für dieses Objekt (owner = wer created hat)
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
 };
 
 class Scene {
 public:
-    void setRenderObject(GraphicsPipeline* pipeline,
-                         VkBuffer vertexBuffer,
-                         uint32_t vertexCount,
-                         VkImageView textureImageView,
-                         VkSampler textureSampler)
+    void setRenderObject(const RenderObject& obj)
     {
-        if (!_pipeline)
-            _pipeline = pipeline;
-
-        RenderObject obj{};
-        obj.vertexBuffer = vertexBuffer;
-        obj.vertexCount = vertexCount;
-        obj.textureImageView = textureImageView;
-        obj.textureSampler = textureSampler;
+        // falls noch keine globale RenderPass/Pipeline nötig ist, kein check
         _objects.push_back(obj);
     }
 
     size_t getObjectCount() const { return _objects.size(); }
     const RenderObject& getObject(size_t idx) const { return _objects[idx]; }
 
-    VkRenderPass getRenderPass() const { return _pipeline->getRenderPass(); }
-    VkPipeline getPipeline() const { return _pipeline->getPipeline(); }
-    VkPipelineLayout getPipelineLayout() const { return _pipeline->getPipelineLayout(); }
+    // Hilfsfunktionen: falls du noch einen "default" RenderPass/Pipeline brauchst,
+    // kannst du z.B. das erste Objekt als Referenz nehmen:
+    VkRenderPass getRenderPass() const {
+        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
+        return _objects[0].pipeline->getRenderPass();
+    }
+    // Für alte Aufrufe: liefert Pipeline des ersten Objekts (nur falls nötig).
+    VkPipeline getPipeline() const {
+        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
+        return _objects[0].pipeline->getPipeline();
+    }
+    VkPipelineLayout getPipelineLayout(size_t objectIndex = 0) const {
+        if (_objects.empty() || !_objects[objectIndex].pipeline) return VK_NULL_HANDLE;
+        return _objects[objectIndex].pipeline->getPipelineLayout();
+    }
 
 private:
-    GraphicsPipeline* _pipeline = nullptr;
     std::vector<RenderObject> _objects;
 };

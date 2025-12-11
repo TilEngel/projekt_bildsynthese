@@ -18,6 +18,7 @@
 #include "helper/Texture.hpp"
 #include "helper/Scene.hpp"
 #include "helper/Frame.hpp"
+#include "ObjectFactory.hpp"
 
 
 int main() {
@@ -57,54 +58,43 @@ int main() {
         surface, physicalDevice, device,
         presentQueue, graphicsIndex, presentIndex
     );
-
-    // Depth Buffer
-    DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
-
-    // Pipeline
-    GraphicsPipeline* pipeline = new GraphicsPipeline(
-        device,
-        swapChain->getImageFormat(),
-        depthBuffer->getImageFormat()
-    );
-
-    // Framebuffers
-    Framebuffers* framebuffers = new Framebuffers(
-        device, swapChain, depthBuffer, pipeline->getRenderPass()
-    );
-
     //Command pool
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
     
-    //Vertex-buffer füllen
-    std::vector<Vertex> vertices;
-    LoadObj obj;
-    obj.objLoader("./models/teapot.obj", vertices);
-    uint32_t vertexCount = vertices.size();
-    InitBuffer buff;
-    VkBuffer vertexBuffer = buff.createVertexBuffer(physicalDevice,device,commandPool, graphicsQueue, vertices);
+    // Depth Buffer
+    DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
 
+    ObjectFactory factory(physicalDevice,device,commandPool,graphicsQueue,swapChain->getImageFormat(), depthBuffer->getImageFormat());
+    float time = static_cast<float>(glfwGetTime());
+    // Erstelle zwei Objekte:
+    glm::mat4 modelTeapot = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f,0.0f,0.0f));
+    modelTeapot = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    RenderObject teapot = factory.createTeapot("./models/teapot.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/crate.png", modelTeapot);
+    scene->setRenderObject(teapot);
 
-    //Vertex-buffer füllen
-    std::vector<Vertex> vertices2;
-    obj.objLoader("./models/flying_dutchman.obj", vertices2);
-    uint32_t vertexCount2 = vertices2.size();
-    VkBuffer vertexBuffer2 = buff.createVertexBuffer(physicalDevice,device,commandPool, graphicsQueue, vertices2);
+    // glm::mat4 modelDutch = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f,0.0f,10.0f));
+    // modelDutch = glm::scale(glm::mat4(0.5f),glm::vec3(1.0f,1.0f,1.0f));
+    // modelDutch = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // RenderObject dutch = factory.createFlyingDutchman("./models/flying_dutchman.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/crate.png", modelDutch);
+    // scene->setRenderObject(dutch);
 
-    //Textur laden
-    Texture texture(
-        physicalDevice,
-        device,
-        commandPool,
-        graphicsQueue,
-        "textures/crate.png"
+   
+
+    // Framebuffers
+    Framebuffers* framebuffers = new Framebuffers(
+        device, swapChain, depthBuffer, teapot.pipeline->getRenderPass()
     );
 
+    // //Textur laden
+    // Texture texture(
+    //     physicalDevice,
+    //     device,
+    //     commandPool,
+    //     graphicsQueue,
+    //     "textures/crate.png"
+    // );
 
-    
-    scene->setRenderObject(pipeline, vertexBuffer2, vertexCount2, texture.getImageView(), texture.getSampler());
-    scene->setRenderObject(pipeline, vertexBuffer, vertexCount, texture.getImageView(), texture.getSampler());
-    
+
     // nach dem Laden der Modelle und nachdem scene Objekte enthält:
     size_t objectCount = scene->getObjectCount();
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -140,8 +130,8 @@ int main() {
             graphicsQueue,
             commandPool,
             descriptorPool,
-            pipeline->getDescriptorSetLayout());
-            framesInFlight[i]->allocateDescriptorSets(descriptorPool, pipeline->getDescriptorSetLayout(), scene->getObjectCount());
+            teapot.pipeline->getDescriptorSetLayout());
+            framesInFlight[i]->allocateDescriptorSets(descriptorPool, teapot.pipeline->getDescriptorSetLayout(), scene->getObjectCount());
     }
 
 
@@ -162,15 +152,15 @@ int main() {
     
     // Cleanup
     delete scene;
-    texture.destroy();
-    buff.destroyVertexBuffer(device);
+    //texture.destroy();
+    //buff.destroyVertexBuffer(device);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         delete framesInFlight[i];
     }
     inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyCommandPool(device, commandPool);
     delete framebuffers;
-    delete pipeline;
+    //delete pipeline;
     delete depthBuffer;
     delete swapChain;
     inst.destroyDevice(device);

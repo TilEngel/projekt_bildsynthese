@@ -272,27 +272,30 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // bind descriptor set
     VkPipelineLayout pipelineLayout = scene->getPipelineLayout();
         //Draw object(s) in scene
-    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
-        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
 
-        // bind vertex buffer des aktuellen Objekts
+        // 1) bind pipeline des objekts
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+        // 2) bind descriptor set: _descriptorSets[i] (wie bisher)
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
+
+        // 3) bind vertex buffer
         VkBuffer vertexBuffers[] = { obj.vertexBuffer };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
+        // 4) push constants: benutze obj.modelMatrix
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
 
-        // Push constant: per-object model matrix (falls du PushConstants verwendest)
-        // Beispiel-Modelmatrix: einfache Translation je nach i
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(float(i * 2), 0.0f, 0.0f));
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(45.0f), glm::vec3(0,1,0));
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &model);
-
-
-        // draw call
+        // draw
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
+
     // end render pass
     vkCmdEndRenderPass(_commandBuffer);
 

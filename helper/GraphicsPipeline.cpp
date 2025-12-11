@@ -162,8 +162,8 @@ void GraphicsPipeline::createPipelineLayout() {
 void GraphicsPipeline::createPipeline() {
 
     // Load shader modules
-    auto vertCode = readFile("shaders/testapp.vert.spv");
-    auto fragCode = readFile("shaders/testapp.frag.spv");
+    auto vertCode = readFile(_vertexShaderPath);
+    auto fragCode = readFile(_fragmentShaderPath);
 
     VkShaderModule vertModule = createShaderModule(_device, vertCode);
     VkShaderModule fragModule = createShaderModule(_device, fragCode);

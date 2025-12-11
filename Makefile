@@ -52,7 +52,8 @@ SRC = \
     ./helper/Depthbuffer.cpp \
     ./helper/GraphicsPipeline.cpp \
     ./helper/Framebuffers.cpp \
-    ./helper/Frame.cpp
+    ./helper/Frame.cpp \
+    ObjectFactory.cpp
 
 OBJ = $(SRC:.cpp=.o)
 TARGET = projekt

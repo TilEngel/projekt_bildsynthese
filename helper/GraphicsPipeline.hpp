@@ -19,8 +19,10 @@ struct Vertex {
 class GraphicsPipeline {
 public:
 
-    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat) 
+    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath) 
     : _device(device) {
+        _vertexShaderPath = vertShaderPath;
+        _fragmentShaderPath = fragShaderPath;
         createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
         createDescriptorSetLayout();
         createPipelineLayout();
@@ -58,6 +60,8 @@ private:
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
     VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
+    const char* _vertexShaderPath;
+    const char* _fragmentShaderPath;
 
     // create a render pass object
     // - with one color and one depth attachment
