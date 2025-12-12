@@ -25,6 +25,16 @@ public:
         _objects.push_back(obj);
     }
 
+    void updateObject(size_t idx, const glm::mat4& newModel) {
+        if (idx < _objects.size()) {
+            _objects[idx].modelMatrix = newModel;
+        }
+    }
+    
+    RenderObject& getObjectMutable(size_t idx) { 
+        return _objects[idx]; 
+    }
+
     size_t getObjectCount() const { return _objects.size(); }
     const RenderObject& getObject(size_t idx) const { return _objects[idx]; }
 

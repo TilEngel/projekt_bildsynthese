@@ -8,33 +8,30 @@ RenderObject ObjectFactory::createTeapot(const char* modelPath,
                                          const char* vertShaderPath,
                                          const char* fragShaderPath,
                                          const char* texturePath,
-                                         const glm::mat4& modelMatrix)
+                                         const glm::mat4& modelMatrix, VkRenderPass renderPass)
 {
-    // --- 1) Pipeline erstellen (mit eigenen Shaderpfaden) ---
-    // Ändere ggf. GraphicsPipeline so, dass Shaderpfade als Parameter übergeben werden können.
-    // Wenn deine GraphicsPipeline zurzeit feste shader-Dateinamen verwendet,
-    // erweitere den Konstruktor um vert/frag path arguments.
+    //eigene Pipeline erstellen
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
         _depthFormat,
-        vertShaderPath, // neu: vertex shader pfad
-        fragShaderPath  // neu: fragment shader pfad
+        vertShaderPath, 
+        fragShaderPath,
+        renderPass
     );
 
-    // --- 2) Model laden und VertexBuffer erzeugen ---
+    //Model laden & Vertexbuffer erzeugen
     LoadObj loader;
     std::vector<Vertex> vertices;
     loader.objLoader(modelPath, vertices);
     InitBuffer buff;
     VkBuffer vertexBuffer = buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
-    // WICHTIG: buff muss so verwaltet werden, dass VertexBuffer-Lifetime bis Cleanup besteht.
-    // Du kannst alternativ ownership in RenderObject dokumentieren bzw. globalen InitBuffer verwenden.
 
-    // --- 3) Texture laden ---
+
+    //Textur laden
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
 
-    // --- 4) Build RenderObject ---
+    //build RenderObject
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
@@ -55,8 +52,8 @@ RenderObject ObjectFactory::createFlyingDutchman(const char* modelPath,
                                          const char* vertShaderPath,
                                          const char* fragShaderPath,
                                          const char* texturePath,
-                                         const glm::mat4& modelMatrix)
-{
-    // für dieses Beispiel identisch zur createTeapot-Implementierung
-    return createTeapot(modelPath, vertShaderPath, fragShaderPath, texturePath, modelMatrix);
+                                         const glm::mat4& modelMatrix,
+                                        VkRenderPass renderPass){
+    //theoretisch kann man jetzt was neues machen (eigener Shader oder Textur und so)
+    return createTeapot(modelPath, vertShaderPath, fragShaderPath, texturePath, modelMatrix,renderPass);
 }

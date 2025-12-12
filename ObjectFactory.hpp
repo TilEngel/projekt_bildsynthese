@@ -22,19 +22,21 @@ public:
           _colorFormat(colorFormat),
           _depthFormat(depthFormat) {}
 
-    // erstellt RenderObject für Teapot
+    //erstellt RenderObject für Teapot
     RenderObject createTeapot(const char* modelPath,
                               const char* vertShaderPath,
                               const char* fragShaderPath,
                               const char* texturePath,
-                              const glm::mat4& modelMatrix);
+                              const glm::mat4& modelMatrix,
+                            VkRenderPass renderPass);
 
-    // erstellt RenderObject für Flying Dutchman
+    //erstellt RenderObject für Flying Dutchman
     RenderObject createFlyingDutchman(const char* modelPath,
                               const char* vertShaderPath,
                               const char* fragShaderPath,
                               const char* texturePath,
-                              const glm::mat4& modelMatrix);
+                              const glm::mat4& modelMatrix,
+                              VkRenderPass renderPass);
 
 private:
     VkPhysicalDevice _physicalDevice;

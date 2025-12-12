@@ -194,31 +194,29 @@ void Frame::updateUniformBuffer() {
 
     UniformBufferObject ubo{};
 
-    // time-based rotation
-    float time = static_cast<float>(glfwGetTime());
-    glm::mat4 model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // view
+    ubo.view = glm::lookAtRH(
+        glm::vec3(4.0f, 4.0f, 4.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
 
-    // view: move back along z so object is visible
-    glm::mat4 view = glm::lookAtRH(glm::vec3(4.0f, 4.0f, 4.0f), // eye
-                                   glm::vec3(0.0f, 0.0f, 0.0f), // center
-                                   glm::vec3(0.0f, 1.0f, 0.0f)); // up
-
+    // projection
     VkExtent2D extent = _swapChain->getExtent();
     float width = static_cast<float>(extent.width);
     float height = static_cast<float>(extent.height);
 
-    // projection: perspective FOV. Using glm::perspective and flip Y.
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 10.0f);
-    proj[1][1] *= -1.0f; // invert Y for Vulkan's coordinate system with GLM
+    ubo.proj = glm::perspective(
+        glm::radians(45.0f),
+        width / height,
+        0.1f,
+        10.0f
+    );
+    ubo.proj[1][1] *= -1.0f;
 
-    // assume UniformBufferObject contains model, view, proj as glm::mat4 named model/view/proj
-    ubo.model = model;
-    ubo.view = view;
-    ubo.proj = proj;
-
-    // copy to mapped memory
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
+
 
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // reset command buffer
@@ -232,12 +230,21 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
     }
-
+    VkRenderPass rp = scene->getRenderPass();
+    VkFramebuffer fb = _framebuffers->getFramebuffer(imageIndex);
+    if (rp == VK_NULL_HANDLE) {
+        std::cerr << "recordCommandBuffer: scene renderPass is VK_NULL_HANDLE\n";
+        return;
+    }
+    if (fb == VK_NULL_HANDLE) {
+        std::cerr << "recordCommandBuffer: framebuffer is VK_NULL_HANDLE for imageIndex " << imageIndex << "\n";
+        return;
+    }
     // begin render pass
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = scene->getRenderPass();
-    renderPassInfo.framebuffer = _framebuffers->getFramebuffer(imageIndex);
+    renderPassInfo.renderPass = rp;
+    renderPassInfo.framebuffer = fb;
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
@@ -269,11 +276,13 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-    // bind descriptor set
-    VkPipelineLayout pipelineLayout = scene->getPipelineLayout();
         //Draw object(s) in scene
         for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
+            continue;
+        }
 
         // 1) bind pipeline des objekts
         VkPipeline pipelineHandle = obj.pipeline->getPipeline();
@@ -315,7 +324,7 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
     //   but follows the instructions you gave)
     // - signal semaphore: swapChain->getPresentationSemaphore(imageIndex)
     VkSemaphore waitSemaphores[] = { _renderSemaphore };
-    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
