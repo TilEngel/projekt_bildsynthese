@@ -68,17 +68,21 @@ void Frame::createUniformBuffer() {
     _uniformBufferMapped = static_cast<UniformBufferObject*>(data);
 }
 
-void Frame::allocateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool) {
+void Frame::allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount) {
+    _descriptorSets.resize(objectCount);
+
+    std::vector<VkDescriptorSetLayout> layouts(objectCount, descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &descriptorSetLayout;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(objectCount);
+    allocInfo.pSetLayouts = layouts.data();
 
-    if (vkAllocateDescriptorSets(_device, &allocInfo, &_descriptorSet) != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate descriptor set!");
+    if (vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate descriptor sets for frame!");
     }
 }
+
 
 void Frame::allocateCommandBuffer(VkCommandPool commandPool) {
     VkCommandBufferAllocateInfo allocInfo{};
@@ -139,43 +143,50 @@ void Frame::waitForFence() {
         vkWaitForFences(_device, 1, &_inFlightFence, VK_TRUE, UINT64_MAX);
         vkResetFences(_device, 1, &_inFlightFence);
     }
+
 }
 
+
+
 void Frame::updateDescriptorSet(Scene* scene) {
-    // uniform buffer at binding 0
+    // bufferInfo (gleich für alle sets: UBO pro Frame)
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = _uniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    // combined image sampler at binding 1 (image + sampler taken from scene)
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = scene->getImageView();
-    imageInfo.sampler = scene->getSampler();
+    size_t objectCount = scene->getObjectCount();
+    for (size_t i = 0; i < objectCount; ++i) {
+        const auto& obj = scene->getObject(i);
 
-    std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = obj.textureImageView;
+        imageInfo.sampler = obj.textureSampler;
 
-    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[0].dstSet = _descriptorSet;
-    descriptorWrites[0].dstBinding = 0;
-    descriptorWrites[0].dstArrayElement = 0;
-    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].pBufferInfo = &bufferInfo;
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
-    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[1].dstSet = _descriptorSet;
-    descriptorWrites[1].dstBinding = 1;
-    descriptorWrites[1].dstArrayElement = 0;
-    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[1].descriptorCount = 1;
-    descriptorWrites[1].pImageInfo = &imageInfo;
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet = _descriptorSets[i];
+        descriptorWrites[0].dstBinding = 0;
+        descriptorWrites[0].dstArrayElement = 0;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo = &bufferInfo;
 
-    vkUpdateDescriptorSets(_device,
-                           static_cast<uint32_t>(descriptorWrites.size()),
-                           descriptorWrites.data(),
-                           0, nullptr);
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = _descriptorSets[i];
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo = &imageInfo;
+
+        vkUpdateDescriptorSets(_device,
+                               static_cast<uint32_t>(descriptorWrites.size()),
+                               descriptorWrites.data(),
+                               0, nullptr);
+    }
 }
 
 void Frame::updateUniformBuffer() {
@@ -183,31 +194,29 @@ void Frame::updateUniformBuffer() {
 
     UniformBufferObject ubo{};
 
-    // time-based rotation
-    float time = static_cast<float>(glfwGetTime());
-    glm::mat4 model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // view
+    ubo.view = glm::lookAtRH(
+        glm::vec3(4.0f, 4.0f, 4.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
 
-    // view: move back along z so object is visible
-    glm::mat4 view = glm::lookAtRH(glm::vec3(4.0f, 4.0f, 4.0f), // eye
-                                   glm::vec3(0.0f, 0.0f, 0.0f), // center
-                                   glm::vec3(0.0f, 1.0f, 0.0f)); // up
-
+    // projection
     VkExtent2D extent = _swapChain->getExtent();
     float width = static_cast<float>(extent.width);
     float height = static_cast<float>(extent.height);
 
-    // projection: perspective FOV. Using glm::perspective and flip Y.
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), width / height, 0.1f, 10.0f);
-    proj[1][1] *= -1.0f; // invert Y for Vulkan's coordinate system with GLM
+    ubo.proj = glm::perspective(
+        glm::radians(45.0f),
+        width / height,
+        0.1f,
+        10.0f
+    );
+    ubo.proj[1][1] *= -1.0f;
 
-    // assume UniformBufferObject contains model, view, proj as glm::mat4 named model/view/proj
-    ubo.model = model;
-    ubo.view = view;
-    ubo.proj = proj;
-
-    // copy to mapped memory
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
+
 
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // reset command buffer
@@ -221,12 +230,21 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
     }
-
+    VkRenderPass rp = scene->getRenderPass();
+    VkFramebuffer fb = _framebuffers->getFramebuffer(imageIndex);
+    if (rp == VK_NULL_HANDLE) {
+        std::cerr << "recordCommandBuffer: scene renderPass is VK_NULL_HANDLE\n";
+        return;
+    }
+    if (fb == VK_NULL_HANDLE) {
+        std::cerr << "recordCommandBuffer: framebuffer is VK_NULL_HANDLE for imageIndex " << imageIndex << "\n";
+        return;
+    }
     // begin render pass
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = scene->getRenderPass();
-    renderPassInfo.framebuffer = _framebuffers->getFramebuffer(imageIndex);
+    renderPassInfo.renderPass = rp;
+    renderPassInfo.framebuffer = fb;
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
@@ -242,7 +260,6 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     // bind pipeline
     vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, scene->getPipeline());
-
     // viewport
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -259,18 +276,34 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-    // bind descriptor set
-    VkPipelineLayout pipelineLayout = scene->getPipelineLayout();
-    vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+        //Draw object(s) in scene
+        for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        const auto& obj = scene->getObject(i);
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
+            continue;
+        }
 
-    // bind vertex buffer
-    VkBuffer vertexBuffers[] = { scene->getVertexBuffer() };
-    VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+        // 1) bind pipeline des objekts
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
 
-    // draw
-    vkCmdDraw(_commandBuffer, scene->getVertexCount(), 1, 0, 0);
+        // 2) bind descriptor set: _descriptorSets[i] (wie bisher)
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
+
+        // 3) bind vertex buffer
+        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        // 4) push constants: benutze obj.modelMatrix
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        // draw
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    }
 
     // end render pass
     vkCmdEndRenderPass(_commandBuffer);
@@ -291,7 +324,7 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
     //   but follows the instructions you gave)
     // - signal semaphore: swapChain->getPresentationSemaphore(imageIndex)
     VkSemaphore waitSemaphores[] = { _renderSemaphore };
-    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;

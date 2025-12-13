@@ -139,13 +139,21 @@ void GraphicsPipeline::createDescriptorSetLayout() {
 // ------------------------------------------------------
 void GraphicsPipeline::createPipelineLayout() {
 
-    VkPipelineLayoutCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    info.setLayoutCount = 1;
-    info.pSetLayouts = &_descriptorSetLayout;
+    VkPushConstantRange pushRange{};
+    pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushRange.offset = 0;
+    pushRange.size = sizeof(glm::mat4); // model matrix
 
-    if (vkCreatePipelineLayout(_device, &info, nullptr, &_pipelineLayout) != VK_SUCCESS)
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &_descriptorSetLayout;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushRange;
+
+    if(vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &_pipelineLayout)!=VK_SUCCESS){
         throw std::runtime_error("Failed to create pipeline layout!");
+    }
 }
 
 // ------------------------------------------------------
@@ -154,8 +162,8 @@ void GraphicsPipeline::createPipelineLayout() {
 void GraphicsPipeline::createPipeline() {
 
     // Load shader modules
-    auto vertCode = readFile("shaders/testapp.vert.spv");
-    auto fragCode = readFile("shaders/testapp.frag.spv");
+    auto vertCode = readFile(_vertexShaderPath);
+    auto fragCode = readFile(_fragmentShaderPath);
 
     VkShaderModule vertModule = createShaderModule(_device, vertCode);
     VkShaderModule fragModule = createShaderModule(_device, fragCode);

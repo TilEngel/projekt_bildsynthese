@@ -5,7 +5,7 @@
 
 
 struct UniformBufferObject {
-    glm::mat4 model;
+//    glm::mat4 model;
     glm::mat4 view;
     glm::mat4 proj;
 };
@@ -19,9 +19,12 @@ struct Vertex {
 class GraphicsPipeline {
 public:
 
-    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat) 
+    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass) 
     : _device(device) {
-        createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
+        _vertexShaderPath = vertShaderPath;
+        _fragmentShaderPath = fragShaderPath;
+        _renderPass = renderPass;
+       // createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
         createDescriptorSetLayout();
         createPipelineLayout();
         createPipeline();
@@ -58,6 +61,8 @@ private:
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
     VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
+    const char* _vertexShaderPath;
+    const char* _fragmentShaderPath;
 
     // create a render pass object
     // - with one color and one depth attachment

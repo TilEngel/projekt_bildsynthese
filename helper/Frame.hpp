@@ -18,7 +18,7 @@ public:
     , _framebuffers(framebuffers)
     , _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
-        allocateDescriptorSet(descriptorSetLayout, descriptorPool);
+    //    allocateDescriptorSet(descriptorSetLayout, descriptorPool);
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
@@ -53,6 +53,7 @@ public:
         bool recreate = _swapChain->presentImage(imageIndex);
         return recreate;
     }
+    void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
 private:
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
@@ -65,7 +66,8 @@ private:
     VkDeviceMemory _uniformBufferMemory = VK_NULL_HANDLE;
     UniformBufferObject* _uniformBufferMapped = nullptr;
 
-    VkDescriptorSet _descriptorSet = VK_NULL_HANDLE;
+    //VkDescriptorSet _descriptorSet = VK_NULL_HANDLE;
+    std::vector<VkDescriptorSet> _descriptorSets;
 
     VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
 
@@ -85,9 +87,7 @@ private:
     //   - use _uniformBufferMapped with static_cast to store the pointer
     void createUniformBuffer();
 
-    // allocate a descriptor set
-    // - use _descriptorSet to store the descriptor set
-    void allocateDescriptorSet(VkDescriptorSetLayout descriptorSetLayout, VkDescriptorPool descriptorPool);
+
     
     // allocate a command buffer
     // - use _commandBuffer to store the command buffer
