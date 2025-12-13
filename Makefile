@@ -61,7 +61,7 @@ TARGET = projekt
 # ------------------------------------------------------------
 # Build
 # -----------------------------
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture.hpp
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture.hpp shaders/test.vert.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 %.o: %.cpp

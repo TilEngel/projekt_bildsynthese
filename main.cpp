@@ -80,7 +80,7 @@ int main() {
     glm::mat4 modelDutch = glm::mat4(1.0f);
     modelDutch= glm::translate(modelDutch, glm::vec3(0.0f,0.0f,-2.0f));
     modelDutch = glm::scale(modelDutch,glm::vec3(0.05,0.05,0.05));
-    RenderObject dutch = factory.createFlyingDutchman("./models/flying_dutchman.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/crate.png", modelDutch, renderPass);
+    RenderObject dutch = factory.createFlyingDutchman("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
 
     scene->setRenderObject(dutch);
 
