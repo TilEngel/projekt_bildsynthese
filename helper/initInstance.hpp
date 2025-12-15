@@ -41,4 +41,6 @@ public:
 
     VkDescriptorPool createDescriptorPool(VkDevice device, uint32_t framesInFlight);
     void destroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool);
+
+    VkDescriptorSetLayout createStandardDescriptorSetLayout(VkDevice device);
 };

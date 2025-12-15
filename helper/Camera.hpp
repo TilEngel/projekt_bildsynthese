@@ -102,6 +102,7 @@ public:
     void setMouseSensitivity(float sensitivity) { _mouseSensitivity = sensitivity; }
 
 private:
+
     // Kamera-Attribute
     glm::vec3 _position;
     glm::vec3 _front;

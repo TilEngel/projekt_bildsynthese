@@ -19,13 +19,14 @@ struct Vertex {
 class GraphicsPipeline {
 public:
 
-    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass) 
-    : _device(device) {
-        _vertexShaderPath = vertShaderPath;
-        _fragmentShaderPath = fragShaderPath;
+    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass, VkDescriptorSetLayout descriptorSetLayout) 
+    : _device(device)
+        , _vertexShaderPath(vertShaderPath)
+        , _fragmentShaderPath(fragShaderPath)
+        , _descriptorSetLayout(descriptorSetLayout){
         _renderPass = renderPass;
        // createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
-        createDescriptorSetLayout();
+    //    createDescriptorSetLayout();
         createPipelineLayout();
         createPipeline();
     }
@@ -33,8 +34,8 @@ public:
     ~GraphicsPipeline() {
         cleanupPipeline();
         cleanupPipelineLayout();
-        cleanupDescriptorSetLayout();
-        cleanupRenderPass();
+    //    cleanupDescriptorSetLayout();
+    //    cleanupRenderPass();
     }
 
     VkRenderPass getRenderPass() {
@@ -71,12 +72,7 @@ private:
     // - store object in _renderpass
     void createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat);
 
-    // create a descriptor set layout object
-    // - binding 0: uniform buffer for the vertex shader
-    // - binding 1: image sampler for the fragment shader
-    // - store object in _descriptorSetLayout
-    void createDescriptorSetLayout();
-
+   
     // create a pipeline layout object
     // - contains descriptor set layout from the previous function
     // - store object in _pipeline layout
@@ -115,9 +111,6 @@ private:
     
     // destroy the render pass object    
     void cleanupRenderPass();
-
-    // destroy the descriptor set layout object
-    void cleanupDescriptorSetLayout();
 
     // destroy the pipeline layout object
     void cleanupPipelineLayout();

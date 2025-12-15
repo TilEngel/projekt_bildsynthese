@@ -1,14 +1,15 @@
 // ObjectFactory.cpp
 #include "ObjectFactory.hpp"
 #include "helper/loadObj.hpp"
-#include "helper/initBuffer.hpp"
+
 #include "helper/Texture.hpp"
 
 RenderObject ObjectFactory::createTeapot(const char* modelPath,
                                          const char* vertShaderPath,
                                          const char* fragShaderPath,
                                          const char* texturePath,
-                                         const glm::mat4& modelMatrix, VkRenderPass renderPass)
+                                         const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass)
 {
     //eigene Pipeline erstellen
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -17,7 +18,8 @@ RenderObject ObjectFactory::createTeapot(const char* modelPath,
         _depthFormat,
         vertShaderPath, 
         fragShaderPath,
-        renderPass
+        renderPass,
+        _descriptorSetLayout
     );
 
     //Model laden & Vertexbuffer erzeugen
@@ -56,4 +58,40 @@ RenderObject ObjectFactory::createFlyingDutchman(const char* modelPath,
                                         VkRenderPass renderPass){
     //theoretisch kann man jetzt was neues machen (eigener Shader oder Textur und so)
     return createTeapot(modelPath, vertShaderPath, fragShaderPath, texturePath, modelMatrix,renderPass);
+}
+RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass){
+    //eigene Pipeline erstellen
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/test.vert.spv", 
+        "shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout
+    );
+
+
+    //Model laden & Vertexbuffer erzeugen
+    LoadObj loader;
+    std::vector<Vertex> vertices;
+    loader.objLoader("models/wooden_bowl.obj", vertices);
+   
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+
+
+    //Textur laden
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, "textures/wooden_bowl.jpg");
+
+    //build RenderObject
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+
+    return obj;
+
 }
