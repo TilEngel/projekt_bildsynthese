@@ -189,28 +189,24 @@ void Frame::updateDescriptorSet(Scene* scene) {
     }
 }
 
-void Frame::updateUniformBuffer() {
+void Frame::updateUniformBuffer(Camera* camera) {
     if (!_uniformBufferMapped) return;
 
     UniformBufferObject ubo{};
 
-    // view
-    ubo.view = glm::lookAtRH(
-        glm::vec3(4.0f, 4.0f, 4.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
+    // View-Matrix von der Kamera
+    ubo.view = camera->getViewMatrix();
 
-    // projection
+    // Projection
     VkExtent2D extent = _swapChain->getExtent();
     float width = static_cast<float>(extent.width);
     float height = static_cast<float>(extent.height);
 
     ubo.proj = glm::perspective(
-        glm::radians(45.0f),
+        glm::radians(camera->getZoom()),
         width / height,
         0.1f,
-        10.0f
+        100.0f
     );
     ubo.proj[1][1] *= -1.0f;
 

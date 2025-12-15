@@ -20,13 +20,26 @@
 #include "helper/Frame.hpp"
 #include "ObjectFactory.hpp"
 #include "helper/RenderPass.hpp"
-
+#include "helper/Camera.hpp"
 
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
     // Window erstellen
     Window* window = new Window();
+    //Kamera erstellen
+    Camera* camera = new Camera(glm::vec3(4.0f, 4.0f, 4.0f),  // Startposition
+        glm::vec3(0.0f, 1.0f, 0.0f),   // World Up
+        -135.0f,                        // Yaw (schaut zum Ursprung)
+        -35.0f                          // Pitch (schaut leicht nach unten)
+    );
+    window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // Maus-Tracking Variablen
+    VkExtent2D windowExtent = window->getExtent();
+    double lastX = windowExtent.width / 2.0;
+    double lastY = windowExtent.height / 2.0;
+    bool firstMouse = true;
+
     // Instance + Extensions
     auto extensions = window->getRequiredExtensions();
     VkInstance instance = inst.createInstance(extensions);
@@ -134,6 +147,31 @@ int main() {
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
+        // === MAUS-INPUT VERARBEITEN ===
+        double xpos, ypos;
+        window->getCursorPos(&xpos, &ypos);
+
+        if (firstMouse) {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = static_cast<float>(xpos - lastX);
+        float yoffset = static_cast<float>(lastY - ypos); // Umgekehrt: y geht von oben nach unten
+        lastX = xpos;
+        lastY = ypos;
+
+        //Tastatureingabe checken
+        camera->processMouseMovement(xoffset, yoffset);
+        camera->checkKeyboard(window, deltaTime);
+        if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            firstMouse = true; //Reset falls man wieder zurück in capture mode geht
+        }
+
+
+        
         //Model-Matrizen jeden Frame aktualisieren (falls nötig)
         modelTeapot = glm::rotate(modelTeapot, deltaTime*glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         scene->updateObject(0,modelTeapot);
@@ -142,7 +180,7 @@ int main() {
         scene->updateObject(1, modelDutch);
 
         //Basic stuff
-        bool recreate = framesInFlight[currentFrame]->render(scene);
+        bool recreate = framesInFlight[currentFrame]->render(scene, camera);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();
@@ -155,6 +193,7 @@ int main() {
     
     // Cleanup
     //TODO: cleanup überarbeiten 
+    delete camera;
     delete scene;
     //texture.destroy();
     //buff.destroyVertexBuffer(device);

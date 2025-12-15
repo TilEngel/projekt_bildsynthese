@@ -4,6 +4,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <vector>
+#include <cstdint>
 
 class Window {
 public:
@@ -36,6 +38,12 @@ public:
     
     // create a surface for this window
     VkSurfaceKHR createSurface(VkInstance instance);
+
+    //Für Maus-Steuerung
+    void getCursorPos(double* xpos, double* ypos);
+    void setInputMode(int mode, int value);
+    int getKey(int key);
+    GLFWwindow* getWindow() {return _window;};
     
 private:
 

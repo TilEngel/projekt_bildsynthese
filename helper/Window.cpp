@@ -105,3 +105,32 @@ void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height
         win->_framebufferResized = true;
     }
 }
+
+//liefert die aktuelle Cursorposition im Fenster 
+void Window::getCursorPos(double* xpos, double* ypos){
+    if(_window){
+        glfwGetCursorPos(_window, xpos, ypos);
+    }else{ //Falls gerade kein Window existiert
+        if(xpos){
+            *xpos = 0.0;
+        }
+        if(ypos){
+            *ypos =0.0;
+        }
+    }
+}
+
+//setzt halt Input mode
+void Window::setInputMode(int mode, int value){
+    if(_window){
+        glfwSetInputMode(_window, mode, value);
+    }
+}
+
+//liefert, welche Taste gedrückt wird
+int Window::getKey(int key){
+    if(_window){
+        return glfwGetKey(_window,key);
+    }
+    return GLFW_RELEASE; //keine Taste
+}
