@@ -85,7 +85,20 @@ int main() {
 
     ObjectFactory factory(physicalDevice,device,commandPool,graphicsQueue,swapChain->getImageFormat(), depthBuffer->getImageFormat(),descriptorSetLayout);
 
-   
+    //Skybox
+    std::array<const char*, 6> skyboxFaces = {
+        "textures/skybox/crate.png",    //rechts
+        "textures/skybox/crate.png",     //links
+        "textures/skybox/crate.png",      //oben
+        "textures/skybox/crate.png",   //unten
+        "textures/skybox/crate.png",    //vorne
+        "textures/skybox/crate.png"      //hinten
+    };
+    RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
+    scene->setRenderObject(skybox);
+
+
+    //Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f,0.92f,0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f,3.0f,3.0f));
@@ -94,13 +107,14 @@ int main() {
     //Zu Szene hinzufügen
     scene->setRenderObject(chair);
 
-
+    //Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
     modelDutch= glm::translate(modelDutch, glm::vec3(-2.0f,3.0f,1.0f));
     modelDutch = glm::scale(modelDutch,glm::vec3(0.05,0.05,0.05));
     RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
 
+    //Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
     modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f,2.25f,0.0f));
     modelGnome = glm::scale(modelGnome, glm::vec3(3.0f,3.0f,3.0f));
@@ -109,9 +123,9 @@ int main() {
     //Zu Szene hinzufügen
     scene->setRenderObject(gnome);
 
+    //Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f,10.0f,20.0f));
-    
     RenderObject ground = factory.createGround(modelGround, renderPass);
     scene->setRenderObject(ground);
 
@@ -193,7 +207,7 @@ int main() {
         
         modelDutch = glm::rotate(modelDutch,deltaTime*glm::radians(75.0f), glm::vec3(0.0f,1.0f,0.0f));
         modelDutch = glm::translate(modelDutch, glm::vec3(1.0f,0.0f,0.0f));
-        scene->updateObject(1, modelDutch);
+        scene->updateObject(2, modelDutch);
 
         //Basic stuff
         bool recreate = framesInFlight[currentFrame]->render(scene, camera);

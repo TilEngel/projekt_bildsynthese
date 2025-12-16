@@ -1,6 +1,7 @@
 // ObjectFactory.cpp
 #include "ObjectFactory.hpp"
 #include "helper/loadObj.hpp"
+#include "helper/CubeMap.hpp"
 
 #include "helper/Texture.hpp"
 
@@ -80,5 +81,85 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
     obj.modelMatrix = modelMatrix;
 
     return obj;
+}
 
+
+
+RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
+                                         const std::array<const char*, 6>& cubemapFaces) {
+    // Skybox ist ein Würfel
+    std::vector<Vertex> vertices = {
+        // Positionen für einen Würfel (nur Position, keine Textur-Koordinaten nötig)
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}}
+    };
+
+    // Pipeline für Skybox
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/skybox.vert.spv",
+        "shaders/skybox.frag.spv",
+        renderPass,
+        _descriptorSetLayout
+    );
+
+    // Vertex Buffer
+    InitBuffer buff;
+    VkBuffer vertexBuffer = buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+
+    // CubeMap Textur laden
+    CubeMap* cubemap = new CubeMap(_physicalDevice, _device,
+                                                  _commandPool, _graphicsQueue, cubemapFaces);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = cubemap->getImageView();
+    obj.textureSampler = cubemap->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = glm::mat4(1.0f); // Keine Transformation nötig
+
+    return obj;
 }

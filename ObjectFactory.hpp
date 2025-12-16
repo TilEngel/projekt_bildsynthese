@@ -44,6 +44,7 @@ public:
 
     RenderObject createGround(const glm::mat4& modelMatrix,VkRenderPass renderPass);
 
+    RenderObject createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
 private:
     LoadObj _loader;
     InitBuffer _buff;
