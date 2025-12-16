@@ -158,7 +158,7 @@ void Texture::copyBufferToImage() {
     // copy buffer to image
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
-    region.bufferRowLength = 0; // tightly packed
+    region.bufferRowLength = 0;
     region.bufferImageHeight = 0;
     region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     region.imageSubresource.mipLevel = 0;

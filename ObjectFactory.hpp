@@ -6,6 +6,7 @@
 #include "helper/GraphicsPipeline.hpp"
 #include "helper/Scene.hpp"
 #include "helper/initBuffer.hpp"
+#include "helper/loadObj.hpp"
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
@@ -25,8 +26,8 @@ public:
           _depthFormat(depthFormat),
           _descriptorSetLayout(descriptorSetLayout) {}
 
-    //erstellt RenderObject für Teapot
-    RenderObject createTeapot(const char* modelPath,
+    //erstellt RenderObject für beliebige Objekte ohne bestimmten Shader o.Ä.
+    RenderObject createGenericObject(const char* modelPath,
                               const char* vertShaderPath,
                               const char* fragShaderPath,
                               const char* texturePath,
@@ -44,6 +45,7 @@ public:
     RenderObject createGround(const glm::mat4& modelMatrix,VkRenderPass renderPass);
 
 private:
+    LoadObj _loader;
     InitBuffer _buff;
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;

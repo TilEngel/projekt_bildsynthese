@@ -90,15 +90,24 @@ int main() {
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f,0.92f,0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f,3.0f,3.0f));
     //Model-Matrix wird im Render-Loop gemacht
-    RenderObject chair = factory.createTeapot("./models/plastic_monobloc_chair.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
+    RenderObject chair = factory.createGenericObject("./models/plastic_monobloc_chair.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
     //Zu Szene hinzufügen
     scene->setRenderObject(chair);
+
 
     glm::mat4 modelDutch = glm::mat4(1.0f);
     modelDutch= glm::translate(modelDutch, glm::vec3(-2.0f,3.0f,1.0f));
     modelDutch = glm::scale(modelDutch,glm::vec3(0.05,0.05,0.05));
-    RenderObject dutch = factory.createFlyingDutchman("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
+    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
+
+    glm::mat4 modelGnome = glm::mat4(1.0f);
+    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f,2.25f,0.0f));
+    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f,3.0f,3.0f));
+    //Model-Matrix wird im Render-Loop gemacht
+    RenderObject gnome = factory.createGenericObject("./models/garden_gnome.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/garden_gnome.jpg", modelGnome, renderPass);
+    //Zu Szene hinzufügen
+    scene->setRenderObject(gnome);
 
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f,10.0f,20.0f));
