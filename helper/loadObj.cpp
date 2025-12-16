@@ -4,6 +4,7 @@
 #include "loadObj.hpp"
 #include <iostream>
 
+//Konfiguriert den tinyObjLoader
 bool LoadObj::objLoader(const std::string& filename, std::vector<Vertex>& outVertices) {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -13,7 +14,9 @@ bool LoadObj::objLoader(const std::string& filename, std::vector<Vertex>& outVer
     bool ret = tinyobj::LoadObj(
         &attrib, &shapes, &materials,
         &warn, &err,
-        filename.c_str()
+        filename.c_str(),
+        "models/mtl/",
+        true
     );
 
     if (!warn.empty()) 
