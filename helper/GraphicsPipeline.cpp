@@ -5,9 +5,7 @@
 #include <fstream>
 #include <array>
 
-// ------------------------------------------------------
 // Helper: read SPIR-V file
-// ------------------------------------------------------
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("Failed to open shader file!");
@@ -20,9 +18,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// ------------------------------------------------------
 // Helper: create shader module
-// ------------------------------------------------------
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -36,9 +32,8 @@ VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code
     return module;
 }
 
-// ------------------------------------------------------
-// 1) RenderPass
-// ------------------------------------------------------
+//RenderPass
+
 void GraphicsPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat) {
 
     // --- COLOR ATTACHMENT ---
@@ -104,39 +99,9 @@ void GraphicsPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat
         throw std::runtime_error("Failed to create render pass!");
 }
 
-// ------------------------------------------------------
-// 2) DescriptorSetLayout
-// ------------------------------------------------------
-void GraphicsPipeline::createDescriptorSetLayout() {
+//Pipeline layout
 
-    // Binding 0 : Uniform Buffer
-    VkDescriptorSetLayoutBinding ubo{};
-    ubo.binding = 0;
-    ubo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    ubo.descriptorCount = 1;
-    ubo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 1 : Combined Image Sampler
-    VkDescriptorSetLayoutBinding sampler{};
-    sampler.binding = 1;
-    sampler.descriptorCount = 1;
-    sampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    sampler.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = { ubo, sampler };
-
-    VkDescriptorSetLayoutCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.bindingCount = bindings.size();
-    info.pBindings = bindings.data();
-
-    if (vkCreateDescriptorSetLayout(_device, &info, nullptr, &_descriptorSetLayout) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create descriptor set layout!");
-}
-
-// ------------------------------------------------------
-// 3) PipelineLayout
-// ------------------------------------------------------
 void GraphicsPipeline::createPipelineLayout() {
 
     VkPushConstantRange pushRange{};
@@ -298,12 +263,6 @@ void GraphicsPipeline::cleanupRenderPass() {
     if (_renderPass)
         vkDestroyRenderPass(_device, _renderPass, nullptr);
 }
-
-void GraphicsPipeline::cleanupDescriptorSetLayout() {
-    if (_descriptorSetLayout)
-        vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
-}
-
 void GraphicsPipeline::cleanupPipelineLayout() {
     if (_pipelineLayout)
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);

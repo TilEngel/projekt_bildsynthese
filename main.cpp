@@ -20,13 +20,26 @@
 #include "helper/Frame.hpp"
 #include "ObjectFactory.hpp"
 #include "helper/RenderPass.hpp"
-
+#include "helper/Camera.hpp"
 
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
     // Window erstellen
     Window* window = new Window();
+    //Kamera erstellen
+    Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),  // Startposition
+        glm::vec3(0.0f, 1.0f, 0.0f),   // World Up
+        -90.0f,                        // Yaw 
+        -10.0f                          // Pitch 
+    );
+    window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // Maus-Tracking Variablen
+    VkExtent2D windowExtent = window->getExtent();
+    double lastX = windowExtent.width / 2.0;
+    double lastY = windowExtent.height / 2.0;
+    bool firstMouse = true;
+
     // Instance + Extensions
     auto extensions = window->getRequiredExtensions();
     VkInstance instance = inst.createInstance(extensions);
@@ -64,25 +77,43 @@ int main() {
     VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
     // Framebuffers mit diesem RenderPass erzeugen
     Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
-    
+    //DescriptorSet layout 
+    VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
+    scene->setDescriptorSetLayout(descriptorSetLayout);
+
 //Erstellen der Objekte #######################
 
-    ObjectFactory factory(physicalDevice,device,commandPool,graphicsQueue,swapChain->getImageFormat(), depthBuffer->getImageFormat());
+    ObjectFactory factory(physicalDevice,device,commandPool,graphicsQueue,swapChain->getImageFormat(), depthBuffer->getImageFormat(),descriptorSetLayout);
 
    
-    glm::mat4 modelTeapot = glm::mat4(1.0f);
-    modelTeapot = glm::translate(modelTeapot, glm::vec3(-2.0f,0.0f,0.0f));
+    glm::mat4 modelChair = glm::mat4(1.0f);
+    modelChair = glm::translate(modelChair, glm::vec3(-2.0f,0.92f,0.0f));
+    modelChair = glm::scale(modelChair, glm::vec3(3.0f,3.0f,3.0f));
     //Model-Matrix wird im Render-Loop gemacht
-    RenderObject teapot = factory.createTeapot("./models/teapot.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/crate.png", modelTeapot, renderPass);
+    RenderObject chair = factory.createGenericObject("./models/plastic_monobloc_chair.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
     //Zu Szene hinzufügen
-    scene->setRenderObject(teapot);
+    scene->setRenderObject(chair);
+
 
     glm::mat4 modelDutch = glm::mat4(1.0f);
-    modelDutch= glm::translate(modelDutch, glm::vec3(0.0f,0.0f,-2.0f));
+    modelDutch= glm::translate(modelDutch, glm::vec3(-2.0f,3.0f,1.0f));
     modelDutch = glm::scale(modelDutch,glm::vec3(0.05,0.05,0.05));
-    RenderObject dutch = factory.createFlyingDutchman("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
-
+    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
+
+    glm::mat4 modelGnome = glm::mat4(1.0f);
+    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f,2.25f,0.0f));
+    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f,3.0f,3.0f));
+    //Model-Matrix wird im Render-Loop gemacht
+    RenderObject gnome = factory.createGenericObject("./models/garden_gnome.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/garden_gnome.jpg", modelGnome, renderPass);
+    //Zu Szene hinzufügen
+    scene->setRenderObject(gnome);
+
+    glm::mat4 modelGround = glm::mat4(1.0f);
+    modelGround = glm::scale(modelGround, glm::vec3(20.0f,10.0f,20.0f));
+    
+    RenderObject ground = factory.createGround(modelGround, renderPass);
+    scene->setRenderObject(ground);
 
 
 
@@ -119,8 +150,8 @@ int main() {
             graphicsQueue,
             commandPool,
             descriptorPool,
-            teapot.pipeline->getDescriptorSetLayout());
-            framesInFlight[i]->allocateDescriptorSets(descriptorPool, teapot.pipeline->getDescriptorSetLayout(), scene->getObjectCount());
+            scene->getDescriptorSetLayout());
+            framesInFlight[i]->allocateDescriptorSets(descriptorPool, scene->getDescriptorSetLayout(), scene->getObjectCount());
     }
 
 // start render loop ########################
@@ -134,15 +165,38 @@ int main() {
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        //Model-Matrizen jeden Frame aktualisieren (falls nötig)
-        modelTeapot = glm::rotate(modelTeapot, deltaTime*glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        scene->updateObject(0,modelTeapot);
+        //maus-input verarbeiten
+        double xpos, ypos;
+        window->getCursorPos(&xpos, &ypos);
 
-        modelDutch = glm::rotate(modelDutch,deltaTime*glm::radians(20.0f), glm::vec3(0.0f,1.0f,0.0f));
+        if (firstMouse) {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = static_cast<float>(xpos - lastX);
+        float yoffset = static_cast<float>(lastY - ypos); // Umgekehrt: y geht von oben nach unten
+        lastX = xpos;
+        lastY = ypos;
+
+        //Tastatureingabe checken
+        camera->processMouseMovement(xoffset, yoffset);
+        camera->checkKeyboard(window, deltaTime);
+        if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            firstMouse = true; //Reset falls man wieder zurück in capture mode geht
+        }
+
+
+        //Model-Matrizen jeden Frame aktualisieren (falls nötig)
+        
+        modelDutch = glm::rotate(modelDutch,deltaTime*glm::radians(75.0f), glm::vec3(0.0f,1.0f,0.0f));
+        modelDutch = glm::translate(modelDutch, glm::vec3(1.0f,0.0f,0.0f));
         scene->updateObject(1, modelDutch);
 
         //Basic stuff
-        bool recreate = framesInFlight[currentFrame]->render(scene);
+        bool recreate = framesInFlight[currentFrame]->render(scene, camera);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();
@@ -155,6 +209,7 @@ int main() {
     
     // Cleanup
     //TODO: cleanup überarbeiten 
+    delete camera;
     delete scene;
     //texture.destroy();
     //buff.destroyVertexBuffer(device);

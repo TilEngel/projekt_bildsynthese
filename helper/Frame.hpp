@@ -6,6 +6,7 @@
 #include "Swapchain.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Camera.hpp"
 
 class Frame {
 public:
@@ -27,7 +28,7 @@ public:
         cleanup();
     }
 
-    bool render(Scene* scene)  {
+    bool render(Scene* scene, Camera* camera)  {
         // wait for fence
         waitForFence();
 
@@ -36,12 +37,11 @@ public:
         if (imageIndex == UINT32_MAX) {
             return true;
         }
-        
         // update descriptor set
         updateDescriptorSet(scene);
 
         // update uniform buffer
-        updateUniformBuffer();
+        updateUniformBuffer(camera);
 
         // record command buffer
         recordCommandBuffer(scene, imageIndex);
@@ -126,7 +126,7 @@ private:
     // - set a view matrix such that the object is visible
     // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
     //   (do not forget to proj[1][1] *= -1)
-    void updateUniformBuffer();
+    void updateUniformBuffer(Camera* camera);
 
     // record the command buffer _commandBuffer
     // - reset the command buffer

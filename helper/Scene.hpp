@@ -5,7 +5,6 @@
 #include <vulkan/vulkan_core.h>
 #include <vector>
 #include <glm/glm.hpp>
-
 #include "GraphicsPipeline.hpp"
 
 struct RenderObject {
@@ -53,7 +52,15 @@ public:
         if (_objects.empty() || !_objects[objectIndex].pipeline) return VK_NULL_HANDLE;
         return _objects[objectIndex].pipeline->getPipelineLayout();
     }
+    void setDescriptorSetLayout(VkDescriptorSetLayout layout) {
+        _descriptorSetLayout = layout;
+    }
+
+    VkDescriptorSetLayout getDescriptorSetLayout() const {
+        return _descriptorSetLayout;
+    }
 
 private:
     std::vector<RenderObject> _objects;
+    VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

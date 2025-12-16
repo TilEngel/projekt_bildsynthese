@@ -266,3 +266,31 @@ void InitInstance::destroyDescriptorPool(VkDevice device, VkDescriptorPool descr
     }
 }
 
+VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice device) {
+    // Binding 0: Uniform Buffer
+    VkDescriptorSetLayoutBinding ubo{};
+    ubo.binding = 0;
+    ubo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    ubo.descriptorCount = 1;
+    ubo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    // Binding 1: Combined Image Sampler
+    VkDescriptorSetLayoutBinding sampler{};
+    sampler.binding = 1;
+    sampler.descriptorCount = 1;
+    sampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    sampler.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings = { ubo, sampler };
+
+    VkDescriptorSetLayoutCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    info.bindingCount = static_cast<uint32_t>(bindings.size());
+    info.pBindings = bindings.data();
+
+    VkDescriptorSetLayout layout;
+    if (vkCreateDescriptorSetLayout(device, &info, nullptr, &layout) != VK_SUCCESS)
+        throw std::runtime_error("Failed to create descriptor set layout!");
+
+    return layout;
+}
