@@ -10,4 +10,5 @@ S - Zurück
 D - Rechts
 Space - Hoch
 Shift - Runter
+Q - Geschwindigkeit * 5
 Esc - Cursor vom Fenster lösen

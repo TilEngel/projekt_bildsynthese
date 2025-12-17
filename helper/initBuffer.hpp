@@ -17,10 +17,8 @@
 #include <optional>
 #include <set>
 
-// GLFW and STB should be available using your include paths configured in the Makefile.
-// Do NOT use absolute paths here.
+
 #include <GLFW/glfw3.h>
-// stb_image.h sollte sich im Projektverzeichnis befinden oder via -I erreichbar sein.
 #include "../stb_image.h"
 #include "Rendering/GraphicsPipeline.hpp"
 

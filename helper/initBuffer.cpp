@@ -1,9 +1,9 @@
 // initBuffer.cpp
 #include "initBuffer.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"
 
+//Passenden MemoryType für dieses Device unter berücksichtigung der Properties
 uint32_t InitBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, VkPhysicalDevice physicalDevice) {
     VkPhysicalDeviceMemoryProperties memProperties{};
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -13,7 +13,6 @@ uint32_t InitBuffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags p
             return i;
         }
     }
-
     throw std::runtime_error("InitBuffer::findMemoryType: failed to find suitable memory type!");
 }
 
@@ -81,7 +80,7 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
 
     VkDeviceSize bufferSize = sizeof(Vertex) * vertices.size();
 
-    // 1) Create staging buffer (host visible)
+    //Staging Buffer erstellen
     VkBuffer stagingBuffer = VK_NULL_HANDLE;
     VkDeviceMemory stagingBufferMemory = VK_NULL_HANDLE;
 
@@ -113,13 +112,13 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
 
     vkBindBufferMemory(device, stagingBuffer, stagingBufferMemory, 0);
 
-    // Copy vertex data to staging buffer
+    //vertex Daten -> staging buffer
     void* data = nullptr;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
     std::memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
     vkUnmapMemory(device, stagingBufferMemory);
 
-    // 2) Create device local vertex buffer
+    //device local VertexBuffer
     VkBufferCreateInfo vertexInfo{};
     vertexInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vertexInfo.size = bufferSize;
@@ -152,10 +151,10 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
 
     vkBindBufferMemory(device, _vertexBuffer, _vertexBufferMemory, 0);
 
-    // 3) Copy from staging -> device local
+    // 3) staging -> device lokal
     copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, _vertexBuffer, bufferSize);
 
-    // Cleanup staging resources
+    // Cleanup
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
@@ -175,7 +174,7 @@ void InitBuffer::destroyVertexBuffer(VkDevice device) {
 }
 
 VkBuffer InitBuffer::createImageBuffer(VkPhysicalDevice physicalDevice, VkDevice device, const char* imagePath) {
-    // Load image (force 4 channels RGBA)
+    // rgba Bild laden
     int texChannels = 0;
     stbi_uc* pixels = stbi_load(imagePath, &_texWidth, &_texHeight, &texChannels, STBI_rgb_alpha);
     if (!pixels) {
@@ -184,7 +183,7 @@ VkBuffer InitBuffer::createImageBuffer(VkPhysicalDevice physicalDevice, VkDevice
 
     VkDeviceSize imageSize = static_cast<VkDeviceSize>(_texWidth) * static_cast<VkDeviceSize>(_texHeight) * 4u; // 4 bytes per pixel
 
-    // Create host-visible buffer to hold pixels
+    //host-visible Buffer für Pixel
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = imageSize;
@@ -214,7 +213,7 @@ VkBuffer InitBuffer::createImageBuffer(VkPhysicalDevice physicalDevice, VkDevice
 
     vkBindBufferMemory(device, _imageBuffer, _imageBufferMemory, 0);
 
-    // Copy pixel data into the buffer
+    // pixel Daten -> buffer
     void* data = nullptr;
     vkMapMemory(device, _imageBufferMemory, 0, imageSize, 0, &data);
     std::memcpy(data, pixels, static_cast<size_t>(imageSize));

@@ -9,33 +9,12 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "../initBuffer.hpp"
 
-extern InitBuffer buff; // in main.cpp you have a global InitBuffer named 'buff'
-
-/*
-  Hinweis:
-  - UniformBufferObject muss in einem deiner Header (z.B. Scene.hpp) definiert sein.
-  - Scene wird hier verwendet, es muss Methoden wie getImageView(), getSampler(),
-    getRenderPass(), getPipeline(), getPipelineLayout(), getVertexBuffer(), getVertexCount() bereitstellen.
-  - SwapChain muss getExtent() und getPresentationSemaphore(imageIndex) und acquireNextImage/presentImage implementieren.
-*/
-
-static uint32_t findMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
-        if ((typeFilter & (1u << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-            return i;
-        }
-    }
-    throw std::runtime_error("failed to find suitable memory type!");
-}
 
 void Frame::createUniformBuffer() {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-    // create buffer
+    //buffer erstellen
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = bufferSize;
@@ -46,15 +25,16 @@ void Frame::createUniformBuffer() {
         throw std::runtime_error("failed to create uniform buffer!");
     }
 
-    // allocate memory
+    //Speicher allokieren 
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(_device, _uniformBuffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryTypeIndex(_physicalDevice, memRequirements.memoryTypeBits,
-                                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    //MemoryType finden
+    allocInfo.memoryTypeIndex = _buff.findMemoryType( memRequirements.memoryTypeBits,
+                                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _physicalDevice);
 
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_uniformBufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate uniform buffer memory!");
@@ -62,7 +42,7 @@ void Frame::createUniformBuffer() {
 
     vkBindBufferMemory(_device, _uniformBuffer, _uniformBufferMemory, 0);
 
-    // map memory
+    //Speicher mappen
     void* data = nullptr;
     vkMapMemory(_device, _uniformBufferMemory, 0, bufferSize, 0, &data);
     _uniformBufferMapped = static_cast<UniformBufferObject*>(data);
@@ -105,7 +85,7 @@ void Frame::createSyncObjects() {
         throw std::runtime_error("failed to create render semaphore!");
     }
 
-    // fence (start signaled so first wait doesn't stall)
+    // fence
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
@@ -132,13 +112,11 @@ void Frame::cleanup() {
         vkDestroyFence(_device, _inFlightFence, nullptr);
         _inFlightFence = VK_NULL_HANDLE;
     }
-    // The command buffer will be freed by the owner of the command pool at destruction time,
-    // but it's safe to free it explicitly here if command pool is still valid.
-    // We don't have commandPool stored; it's freed elsewhere -- assume owner frees it.
+   
 }
 
 void Frame::waitForFence() {
-    // wait for previous frame to finish
+    //auf vorherigen Frame warten
     if (_inFlightFence != VK_NULL_HANDLE) {
         vkWaitForFences(_device, 1, &_inFlightFence, VK_TRUE, UINT64_MAX);
         vkResetFences(_device, 1, &_inFlightFence);
@@ -149,13 +127,14 @@ void Frame::waitForFence() {
 
 
 void Frame::updateDescriptorSet(Scene* scene) {
-    // bufferInfo (gleich für alle sets: UBO pro Frame)
+    // bufferInfo 
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = _uniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
     size_t objectCount = scene->getObjectCount();
+    //Für jedes Objekt
     for (size_t i = 0; i < objectCount; ++i) {
         const auto& obj = scene->getObject(i);
 
@@ -205,8 +184,8 @@ void Frame::updateUniformBuffer(Camera* camera) {
     ubo.proj = glm::perspective(
         glm::radians(camera->getZoom()),
         width / height,
-        0.1f,
-        100.0f
+        0.1f,       //Near-Plane
+        100.0f      //Far-Plane
     );
     ubo.proj[1][1] *= -1.0f;
 
@@ -244,7 +223,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
-    // clear values: color + depth
+    // clear color & depth Werte
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };
@@ -254,7 +233,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     vkCmdBeginRenderPass(_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // bind pipeline
+    // pipeline binden
     vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, scene->getPipeline());
     // viewport
     VkViewport viewport{};
@@ -272,34 +251,34 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-        //Draw object(s) in scene
+        //Objekte in Szene zeichnen
         for (size_t i = 0; i < scene->getObjectCount(); i++) {
-        const auto& obj = scene->getObject(i);
-        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
-            continue;
+            const auto& obj = scene->getObject(i);
+            if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+                std::cerr << "Skipping object " << i << ": invalid vertex data\n";
+                continue;
+            }
+
+            //  bind pipeline des objekts
+            VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+            vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+            //DescriptorSets binden
+            VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
+
+            // Vertex buffer binden
+            VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+            VkDeviceSize offsets[] = { 0 };
+            vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+            // 4) push constants.  eigene ModelMatrix pro Objekt nutzen
+            vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+            // Draw-Call
+            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
         }
-
-        // 1) bind pipeline des objekts
-        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
-        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-
-        // 2) bind descriptor set: _descriptorSets[i] (wie bisher)
-        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
-        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
-
-        // 3) bind vertex buffer
-        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
-
-        // 4) push constants: benutze obj.modelMatrix
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
-
-        // draw
-        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
-    }
 
     // end render pass
     vkCmdEndRenderPass(_commandBuffer);
@@ -310,15 +289,11 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 }
 
 void Frame::submitCommandBuffer(uint32_t imageIndex) {
-    // reset fence already done in waitForFence() before we start rendering
-    // prepare submission
+    
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    // We follow your comments:
-    // - wait semaphore: _renderSemaphore (this is a bit unusual naming-wise,
-    //   but follows the instructions you gave)
-    // - signal semaphore: swapChain->getPresentationSemaphore(imageIndex)
+  
     VkSemaphore waitSemaphores[] = { _renderSemaphore };
     VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
     submitInfo.waitSemaphoreCount = 1;
