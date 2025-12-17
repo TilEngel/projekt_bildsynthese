@@ -131,11 +131,11 @@ int main() {
     RenderObject ground = factory.createGround(modelGround, renderPass);
     scene->setRenderObject(ground);
 
-    // Spiegel auf dem Boden
+    // vertikaler Spiegel
     glm::mat4 modelMirror = glm::mat4(1.0f);
-    modelMirror = glm::translate(modelMirror, glm::vec3(-2.0f, 2.25f, 2.0f)); // Der 1. Param (height) muss auch in Frame.cpp beim Erstellen der Reflection Matrix angegeben werden
+    modelMirror = glm::translate(modelMirror, glm::vec3(-2.0f, 2.25f, 2.0f));
     modelMirror = glm::rotate(modelMirror, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMirror = glm::scale(modelMirror, glm::vec3(1.5f, 1.5f, 1.5f));
+    modelMirror = glm::scale(modelMirror, glm::vec3(5.0f, 5.0f, 5.0f));
     RenderObject mirror = factory.createMirror(modelMirror, renderPass);
     int mirrorIdx = scene->setRenderObject(mirror);
     scene->setMirrorIndex(mirrorIdx); // Wichtig!

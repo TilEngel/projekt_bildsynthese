@@ -1,14 +1,13 @@
+// mirror.frag
 #version 450
-
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    // leicht dunkles Glas / Metall
-    vec3 mirrorColor = vec3(0.08, 0.08, 0.1);
-
-    // Alpha < 1.0 → Reflektion scheint durch
-    float alpha = 0.4;
-
-    outColor = vec4(mirrorColor, alpha);
+    // Leicht getöntes Glas mit hoher Transparenz
+    vec3 mirrorTint = vec3(0.9, 0.95, 1.0); // Leichter Blau-Stich
+    
+    // Sehr transparent, damit Reflektion durchscheint
+    float alpha = 0.15; // Weniger deckkraft = mehr Reflektion sichtbar
+    
+    outColor = vec4(mirrorTint, alpha);
 }
-
