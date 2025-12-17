@@ -205,7 +205,8 @@ void GraphicsPipeline::createPipeline() {
     depth.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depth.depthTestEnable = VK_TRUE;
     depth.depthWriteEnable = VK_TRUE;
-    depth.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;// <= für Skybox
+
     depth.stencilTestEnable = VK_FALSE;
 
     // --- Color Blend ---

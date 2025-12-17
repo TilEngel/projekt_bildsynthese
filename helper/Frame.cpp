@@ -273,7 +273,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
         //Draw object(s) in scene
-        for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             std::cerr << "Skipping object " << i << ": invalid vertex data\n";
