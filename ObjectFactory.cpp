@@ -1,9 +1,9 @@
 // ObjectFactory.cpp
 #include "ObjectFactory.hpp"
-#include "helper/loadObj.hpp"
-#include "helper/CubeMap.hpp"
+#include "helper/ObjectLoading/loadObj.hpp"
+#include "helper/Texture/CubeMap.hpp"
 
-#include "helper/Texture.hpp"
+#include "helper/Texture/Texture.hpp"
 
 RenderObject ObjectFactory::createGenericObject(const char* modelPath,
                                          const char* vertShaderPath,

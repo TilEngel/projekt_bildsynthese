@@ -13,7 +13,7 @@
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
-#include "Surface.hpp"
+#include "Rendering/Surface.hpp"
 
 
 class InitInstance {

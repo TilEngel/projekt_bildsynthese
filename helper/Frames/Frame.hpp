@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
-#include "Framebuffers.hpp"
-#include "Scene.hpp"
-#include "Swapchain.hpp"
+#include "../Rendering/Framebuffers.hpp"
+#include "../../Scene.hpp"
+#include "../Rendering/Swapchain.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
+#include "../initBuffer.hpp"
 
 class Frame {
 public:
@@ -56,6 +57,7 @@ public:
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
 private:
+    InitBuffer _buff;
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
     VkDevice _device = VK_NULL_HANDLE;
     SwapChain* _swapChain = nullptr;

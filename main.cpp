@@ -8,19 +8,19 @@
 
 #include "helper/initBuffer.hpp"
 #include "helper/initInstance.hpp"
-#include "helper/loadObj.hpp"
+#include "helper/ObjectLoading/loadObj.hpp"
 
-#include "helper/Window.hpp"
-#include "helper/Surface.hpp"
-#include "helper/Swapchain.hpp"
-#include "helper/Depthbuffer.hpp"
-#include "helper/GraphicsPipeline.hpp"
-#include "helper/Texture.hpp"
-#include "helper/Scene.hpp"
-#include "helper/Frame.hpp"
+#include "helper/Rendering/Window.hpp"
+#include "helper/Rendering/Surface.hpp"
+#include "helper/Rendering/Swapchain.hpp"
+#include "helper/Rendering/Depthbuffer.hpp"
+#include "helper/Rendering/GraphicsPipeline.hpp"
+#include "helper/Texture/Texture.hpp"
+#include "Scene.hpp"
+#include "helper/Frames/Frame.hpp"
 #include "ObjectFactory.hpp"
-#include "helper/RenderPass.hpp"
-#include "helper/Camera.hpp"
+#include "helper/Rendering/RenderPass.hpp"
+#include "helper/Frames/Camera.hpp"
 
 int main() {
     InitInstance inst;
@@ -182,37 +182,37 @@ int main() {
         //maus-input verarbeiten
         double xpos, ypos;
         window->getCursorPos(&xpos, &ypos);
-
+        //Springen der Kamera vermeiden
         if (firstMouse) {
             lastX = xpos;
             lastY = ypos;
             firstMouse = false;
         }
-
         float xoffset = static_cast<float>(xpos - lastX);
         float yoffset = static_cast<float>(lastY - ypos); // Umgekehrt: y geht von oben nach unten
         lastX = xpos;
         lastY = ypos;
 
-        //Tastatureingabe checken
+        //Maus- und Tastatureingabe checken
         camera->processMouseMovement(xoffset, yoffset);
+        //Falls q erhöht sich die Geschwindigkeit
+        if(window->getKey(GLFW_KEY_Q) == GLFW_PRESS){
+            deltaTime *=5;
+        }
         camera->checkKeyboard(window, deltaTime);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true; //Reset falls man wieder zurück in capture mode geht
         }
-
-
-       // Fliegender Holländer: Kreisbewegung um den Ursprung
-        dutchAngle += deltaTime * glm::radians(5.0f); // Winkel erhöhen
-        
+       
+       // Schiff dreht seine Runden
+        dutchAngle += deltaTime * glm::radians(5.0f); 
         float radius = 60.0f;
         float circleX = radius * cos(dutchAngle);
         float circleY = radius * sin(dutchAngle);
-        
         modelDutch = glm::mat4(1.0f);
-        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY)); // Y=3.0 (Höhe)
-        modelDutch = glm::rotate(modelDutch, -1.75f-dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f)); // Optional: Rotation des Modells
+        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY)); //Rotation um Szene
+        modelDutch = glm::rotate(modelDutch, -1.75f-dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f)); //Rotation um eigene Achse
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
         scene->updateObject(2,modelDutch);
     

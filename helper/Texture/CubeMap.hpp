@@ -2,7 +2,7 @@
 #include <vulkan/vulkan.h>
 #include <string>
 #include <array>
-#include "initBuffer.hpp"
+#include "../initBuffer.hpp"
 
 //Klasse für die Darstellung der CubeMap Textur aka Skybox
 class CubeMap{

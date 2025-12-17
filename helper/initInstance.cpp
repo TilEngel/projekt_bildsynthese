@@ -12,8 +12,6 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions){
     extensions.push_back("VK_KHR_portability_enumeration");
     extensions.push_back("VK_KHR_get_physical_device_properties2");
 #endif
-
-
     // Prüfe Layer 
     uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -25,11 +23,12 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions){
         bool found = false;
 
         for (auto& l : availableLayers)
-            if (strcmp(layerName, l.layerName) == 0)
+            if (strcmp(layerName, l.layerName) == 0){
                 found = true;
-
-        if (!found)
+            }
+        if (!found){
             std::cerr << "[WARN] Validation Layer fehlt: " << layerName << "\n";
+        }
     }
 
     // Prüfe extensions
@@ -86,9 +85,11 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions){
     return instance;
 }
 
+//Instance zerstören
 void InitInstance::destroyInstance(VkInstance instance){
-    if (instance != VK_NULL_HANDLE)
+    if (instance != VK_NULL_HANDLE){
         vkDestroyInstance(instance, nullptr);
+    }
 }
 
 
@@ -96,8 +97,9 @@ void InitInstance::destroyInstance(VkInstance instance){
 VkPhysicalDevice InitInstance::pickPhysicalDevice(VkInstance instance,Surface* surface,uint32_t* graphicsQueueFamilyIndex, uint32_t* presentQueueFamilyIndex){
     uint32_t count = 0;
     vkEnumeratePhysicalDevices(instance, &count, nullptr);
-    if (count == 0)
+    if (count == 0){
         throw std::runtime_error("Keine Vulkan-kompatible GPU gefunden.");
+    }
 
     std::vector<VkPhysicalDevice> devices(count);
     vkEnumeratePhysicalDevices(instance, &count, devices.data());
@@ -116,45 +118,44 @@ VkPhysicalDevice InitInstance::pickPhysicalDevice(VkInstance instance,Surface* s
 
         bool hasSwapchain = false;
         for (auto& ext : exts)
-            if (strcmp(ext.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+            if (strcmp(ext.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0){
                 hasSwapchain = true;
+            }
 
-        if (!hasSwapchain)
-            continue;
+            if (!hasSwapchain)continue;
+            // Prüfe Surface
+            if (!surface->isAdequate(dev)) continue;
+            //Queuefamily finden
+            uint32_t qCount = 0;
+            vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, nullptr);
 
-        // Prüfe Surface
-        if (!surface->isAdequate(dev))
-            continue;
+            std::vector<VkQueueFamilyProperties> qfam(qCount);
+            vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, qfam.data());
 
-        //Queuefamily finden
-        uint32_t qCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, nullptr);
+            uint32_t g = UINT32_MAX, p = UINT32_MAX;
 
-        std::vector<VkQueueFamilyProperties> qfam(qCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, qfam.data());
+            for (uint32_t i = 0; i < qCount; i++){
+                if (qfam[i].queueFlags & VK_QUEUE_GRAPHICS_BIT){
+                    g = i;
+                }
 
-        uint32_t g = UINT32_MAX, p = UINT32_MAX;
+                if (surface->canQueueFamilyPresent(dev, i)){
+                    p = i;
+                }
 
-        for (uint32_t i = 0; i < qCount; i++)
-        {
-            if (qfam[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                g = i;
+                if (g != UINT32_MAX && p != UINT32_MAX){
+                    break;
+                }
+            }
 
-            if (surface->canQueueFamilyPresent(dev, i))
-                p = i;
+            if (g == UINT32_MAX || p == UINT32_MAX)
+                continue;
 
-            if (g != UINT32_MAX && p != UINT32_MAX)
-                break;
-        }
+            *graphicsQueueFamilyIndex = g;
+            *presentQueueFamilyIndex  = p;
 
-        if (g == UINT32_MAX || p == UINT32_MAX)
-            continue;
-
-        *graphicsQueueFamilyIndex = g;
-        *presentQueueFamilyIndex  = p;
-
-        std::cout << "GPU ausgewählt: " << props.deviceName << "\n";
-        return dev;
+            std::cout << "GPU ausgewählt: " << props.deviceName << "\n";
+            return dev;
     }
     throw std::runtime_error("Keine geeignete GPU gefunden.");
 }
@@ -233,12 +234,7 @@ void InitInstance::destroyCommandPool(VkDevice device, VkCommandPool pool){
 }
 
 //Descriptor-Pool
-
 VkDescriptorPool InitInstance::createDescriptorPool(VkDevice device, uint32_t framesInFlight) {
-    // create a descriptor pool
-    // - the number of uniform buffers is given by framesInFlight
-    // - the number of combined image samplers is also given by framesInFlight
-
     std::vector<VkDescriptorPoolSize> poolSizes = {
         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, framesInFlight },
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, framesInFlight }

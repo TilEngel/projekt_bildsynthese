@@ -3,10 +3,10 @@
 
 #include <string>
 #include <glm/glm.hpp>
-#include "helper/GraphicsPipeline.hpp"
-#include "helper/Scene.hpp"
+#include "helper/Rendering/GraphicsPipeline.hpp"
+#include "Scene.hpp"
 #include "helper/initBuffer.hpp"
-#include "helper/loadObj.hpp"
+#include "helper/ObjectLoading/loadObj.hpp"
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
