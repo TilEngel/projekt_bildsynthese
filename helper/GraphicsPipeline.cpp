@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <array>
+#include <vulkan/vulkan_core.h>
 
 // Helper: read SPIR-V file
 static std::vector<char> readFile(const std::string& filename) {
@@ -42,8 +43,8 @@ void GraphicsPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat
     color.samples = VK_SAMPLE_COUNT_1_BIT;
     color.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
@@ -53,8 +54,8 @@ void GraphicsPipeline::createRenderPass(VkFormat colorAttachmentFormat, VkFormat
     depth.samples = VK_SAMPLE_COUNT_1_BIT;
     depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
     depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -192,7 +193,7 @@ void GraphicsPipeline::createPipeline() {
     raster.rasterizerDiscardEnable = VK_FALSE;
     raster.polygonMode = VK_POLYGON_MODE_FILL;
     raster.lineWidth = 1.0f;
-    raster.cullMode = VK_CULL_MODE_BACK_BIT;
+    raster.cullMode = VK_CULL_MODE_NONE;
     raster.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
     // --- Multisampling ---
@@ -204,10 +205,27 @@ void GraphicsPipeline::createPipeline() {
     VkPipelineDepthStencilStateCreateInfo depth{};
     depth.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depth.depthTestEnable = VK_TRUE;
-    depth.depthWriteEnable = VK_TRUE;
-    depth.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;// <= für Skybox
+    depth.depthWriteEnable = (_stencilMode != StencilMode::Write);
+    depth.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 
-    depth.stencilTestEnable = VK_FALSE;
+    depth.stencilTestEnable = (_stencilMode != StencilMode::Disabled);
+
+    VkStencilOpState stencil{};
+    stencil.reference = 1;
+    stencil.compareMask = 0xFF;
+    stencil.writeMask = 0xFF;
+
+    if (_stencilMode == StencilMode::Write) {
+        stencil.compareOp = VK_COMPARE_OP_ALWAYS;
+        stencil.passOp    = VK_STENCIL_OP_REPLACE;
+    } 
+    else if (_stencilMode == StencilMode::Test) {
+        stencil.compareOp = VK_COMPARE_OP_EQUAL;
+        stencil.passOp    = VK_STENCIL_OP_KEEP;
+    }
+
+    depth.front = stencil;
+    depth.back  = stencil;
 
     // --- Color Blend ---
     VkPipelineColorBlendAttachmentState blendAttachment{};

@@ -7,6 +7,7 @@
 #include "helper/Scene.hpp"
 #include "helper/initBuffer.hpp"
 #include "helper/loadObj.hpp"
+#include <array>
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
@@ -41,8 +42,10 @@ public:
                               const char* texturePath,
                               const glm::mat4& modelMatrix,
                               VkRenderPass renderPass);
+    
+    RenderObject createMirror(const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
-    RenderObject createGround(const glm::mat4& modelMatrix,VkRenderPass renderPass);
+    RenderObject createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
     RenderObject createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
 private:

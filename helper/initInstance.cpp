@@ -1,4 +1,5 @@
 #include "initInstance.hpp"
+#include <array>
 
 
 VkInstance InitInstance::createInstance(std::vector<const char*> extensions){

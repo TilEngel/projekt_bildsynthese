@@ -1,5 +1,6 @@
 // ObjectFactory.cpp
 #include "ObjectFactory.hpp"
+#include "helper/GraphicsPipeline.hpp"
 #include "helper/loadObj.hpp"
 #include "helper/CubeMap.hpp"
 
@@ -20,7 +21,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         vertShaderPath, 
         fragShaderPath,
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        StencilMode::Disabled
     );
 
     //Model laden & Vertexbuffer erzeugen
@@ -59,7 +61,8 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
         "shaders/test.vert.spv", 
         "shaders/testapp.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        StencilMode::Disabled
     );
 
     //Model laden & Vertexbuffer erzeugen
@@ -83,6 +86,54 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
     return obj;
 }
 
+RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, VkRenderPass renderPass) {
+    // 1) Spiegel-Geometrie (Quad)
+    std::vector<Vertex> vertices = {
+        // Position              // UV (egal)
+        {{-1.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
+
+        {{-1.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, 0.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-1.0f, 0.0f,  1.0f}, {0.0f, 1.0f}},
+    };
+
+    VkBuffer vertexBuffer =
+        _buff.createVertexBuffer(
+            _physicalDevice,
+            _device,
+            _commandPool,
+            _graphicsQueue,
+            vertices
+        );
+
+    // 2) Pipeline: STENCIL WRITE
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/mirror.vert.spv",
+        "shaders/mirror.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        StencilMode::Write //wichtig
+    );
+
+    Texture* dummyTex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
+                                    "textures/whitepixel.jpg");
+
+    // 3) RenderObject bauen
+    RenderObject mirror{};
+    mirror.vertexBuffer = vertexBuffer;
+    mirror.vertexCount  = static_cast<uint32_t>(vertices.size());
+    mirror.pipeline     = pipeline;
+    mirror.modelMatrix  = modelMatrix;
+    mirror.textureImageView = dummyTex->getImageView();
+    mirror.textureSampler   = dummyTex->getSampler();
+
+    return mirror;
+}
 
 
 RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
@@ -141,7 +192,8 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.vert.spv",
         "shaders/skybox.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        StencilMode::Disabled
     );
 
     // Vertex Buffer

@@ -32,6 +32,22 @@ static uint32_t findMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t ty
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
+// Hilfsfunktionen für Spiegelung
+static glm::mat4 makeReflectionMatrixY(float height) {
+    glm::mat4 m(1.0f);
+    m[1][1] = -1.0f;
+    m[3][1] = 2.0f * height;
+    return m;
+}
+
+glm::mat4 makeReflectionMatrixZ(float zPlane) {
+    glm::mat4 R(1.0f);
+    R[2][2] = -1.0f;           // Z spiegeln
+    R[3][2] = 2.0f * zPlane;  // Verschiebung
+    return R;
+}
+
+
 void Frame::createUniformBuffer() {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
@@ -213,100 +229,142 @@ void Frame::updateUniformBuffer(Camera* camera) {
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
 
-
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
-    // reset command buffer
     vkResetCommandBuffer(_commandBuffer, 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = 0;
-    beginInfo.pInheritanceInfo = nullptr;
 
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
     }
-    VkRenderPass rp = scene->getRenderPass();
-    VkFramebuffer fb = _framebuffers->getFramebuffer(imageIndex);
-    if (rp == VK_NULL_HANDLE) {
-        std::cerr << "recordCommandBuffer: scene renderPass is VK_NULL_HANDLE\n";
-        return;
-    }
-    if (fb == VK_NULL_HANDLE) {
-        std::cerr << "recordCommandBuffer: framebuffer is VK_NULL_HANDLE for imageIndex " << imageIndex << "\n";
-        return;
-    }
-    // begin render pass
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = rp;
-    renderPassInfo.framebuffer = fb;
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
-    // clear values: color + depth
+    VkRenderPass renderPass = scene->getRenderPass();
+    VkFramebuffer framebuffer = _framebuffers->getFramebuffer(imageIndex);
+
+    if (renderPass == VK_NULL_HANDLE || framebuffer == VK_NULL_HANDLE) {
+        std::cerr << "recordCommandBuffer: invalid render pass or framebuffer\n";
+        vkEndCommandBuffer(_commandBuffer);
+        return;
+    }
+
+    // Clear values
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
-    clearValues[1].depthStencil = { 1.0f, 0 };
+    clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+    clearValues[1].depthStencil = {1.0f, 0};
 
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    renderPassInfo.pClearValues = clearValues.data();
+    VkRenderPassBeginInfo rpInfo{};
+    rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpInfo.renderPass = renderPass;
+    rpInfo.framebuffer = framebuffer;
+    rpInfo.renderArea.offset = {0, 0};
+    rpInfo.renderArea.extent = _swapChain->getExtent();
+    rpInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    rpInfo.pClearValues = clearValues.data();
 
-    vkCmdBeginRenderPass(_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(_commandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // bind pipeline
-    vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, scene->getPipeline());
-    // viewport
+    // Viewport
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(_swapChain->getExtent().width);
+    viewport.width  = static_cast<float>(_swapChain->getExtent().width);
     viewport.height = static_cast<float>(_swapChain->getExtent().height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
 
-    // scissor
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = _swapChain->getExtent();
+    // Scissor
+    VkRect2D scissor{{0,0}, _swapChain->getExtent()};
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-        //Draw object(s) in scene
-        for (size_t i = 0; i < scene->getObjectCount(); i++) {
-        const auto& obj = scene->getObject(i);
-        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
-            continue;
+    // ---------------------------
+    // PASS 1: Mirror → Stencil Write
+    // ---------------------------
+    size_t mirrorIndex = scene->getMirrorIndex();
+    if (mirrorIndex < scene->getObjectCount()) {
+        const RenderObject& mirror = scene->getObject(mirrorIndex);
+        if (mirror.vertexBuffer != VK_NULL_HANDLE && mirror.vertexCount > 0 && mirror.pipeline) {
+            VkPipelineLayout layout = mirror.pipeline->getPipelineLayout();
+            vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mirror.pipeline->getPipeline());
+
+            // DescriptorSet nur binden wenn vorhanden
+            if (_descriptorSets.size() > mirrorIndex && _descriptorSets[mirrorIndex] != VK_NULL_HANDLE) {
+                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        layout, 0, 1, &_descriptorSets[mirrorIndex], 0, nullptr);
+            }
+
+            VkBuffer vb[] = { mirror.vertexBuffer };
+            VkDeviceSize offsets[] = { 0 };
+            vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, offsets);
+
+            vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT,
+                               0, sizeof(glm::mat4), &mirror.modelMatrix);
+
+            // Stencil Reference setzen
+            vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
+
+            vkCmdDraw(_commandBuffer, mirror.vertexCount, 1, 0, 0);
         }
+    }
 
-        // 1) bind pipeline des objekts
-        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
-        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+    // ---------------------------
+    // PASS 2: Reflected Scene → Stencil Test
+    // ---------------------------
+    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        if (i == mirrorIndex) continue; // Spiegel selbst nicht reflektieren
 
-        // 2) bind descriptor set: _descriptorSets[i] (wie bisher)
-        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+        const RenderObject& obj = scene->getObject(i);
+        if (obj.vertexBuffer == VK_NULL_HANDLE || obj.vertexCount == 0 || !obj.pipeline) continue;
+        if (_descriptorSets.size() <= i || _descriptorSets[i] == VK_NULL_HANDLE) continue;
+
+        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, obj.pipeline->getPipeline());
         vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
+                                layout, 0, 1, &_descriptorSets[i], 0, nullptr);
 
-        // 3) bind vertex buffer
-        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkBuffer vb[] = { obj.vertexBuffer };
         VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, offsets);
 
-        // 4) push constants: benutze obj.modelMatrix
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+        // WICHTIG: Model-Matrix reflektieren statt View-Matrix zu ändern!
+        glm::mat4 reflectedModel = makeReflectionMatrixZ(2.0f) * obj.modelMatrix;
+        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT,
+                           0, sizeof(glm::mat4), &reflectedModel);
 
-        // draw
+        // Stencil Reference setzen
+        vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
+
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
 
-    // end render pass
+    // ---------------------------
+    // PASS 3: Normal Scene
+    // ---------------------------
+    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        const RenderObject& obj = scene->getObject(i);
+        if (obj.vertexBuffer == VK_NULL_HANDLE || obj.vertexCount == 0 || !obj.pipeline) continue;
+        if (_descriptorSets.size() <= i || _descriptorSets[i] == VK_NULL_HANDLE) continue;
+
+        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, obj.pipeline->getPipeline());
+        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                layout, 0, 1, &_descriptorSets[i], 0, nullptr);
+
+        VkBuffer vb[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, offsets);
+
+        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT,
+                           0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    }
+
     vkCmdEndRenderPass(_commandBuffer);
 
-    if (vkEndCommandBuffer(_commandBuffer) != VK_SUCCESS) {
+    if (vkEndCommandBuffer(_commandBuffer) != VK_SUCCESS)
         throw std::runtime_error("failed to record command buffer!");
-    }
 }
 
 void Frame::submitCommandBuffer(uint32_t imageIndex) {

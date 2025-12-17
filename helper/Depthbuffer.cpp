@@ -21,6 +21,11 @@ uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties,
     throw std::runtime_error("Failed to find suitable memory type for depth buffer!");
 }
 
+static bool hasStencilComponent(VkFormat format) {
+    return format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+           format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
 
 // ------------------------------------------------------------
 // create depth image with memory
@@ -115,6 +120,11 @@ void DepthBuffer::createDepthImageView()
     viewInfo.format = _depthImageFormat;
 
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+    if (hasStencilComponent(_depthImageFormat)) {
+        viewInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
+
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;

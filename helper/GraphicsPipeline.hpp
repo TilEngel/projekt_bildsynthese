@@ -15,18 +15,25 @@ struct Vertex {
     glm::vec2 tex;
 };
 
+enum class StencilMode {
+    Disabled,
+    Write,
+    Test
+};
+
 
 class GraphicsPipeline {
 public:
 
-    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass, VkDescriptorSetLayout descriptorSetLayout) 
+    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass, VkDescriptorSetLayout descriptorSetLayout, StencilMode stencilMode = StencilMode::Disabled) 
     : _device(device)
         , _vertexShaderPath(vertShaderPath)
         , _fragmentShaderPath(fragShaderPath)
-        , _descriptorSetLayout(descriptorSetLayout){
+        , _descriptorSetLayout(descriptorSetLayout)
+        , _stencilMode(stencilMode){
         _renderPass = renderPass;
        // createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
-    //    createDescriptorSetLayout();
+       // createDescriptorSetLayout();
         createPipelineLayout();
         createPipeline();
     }
@@ -53,6 +60,10 @@ public:
     VkPipeline getPipeline() {
         return _graphicsPipeline;
     }
+    StencilMode getStencilMode() {
+        return _stencilMode;
+    }
+
 
 private:
 
@@ -64,6 +75,8 @@ private:
     VkPipeline _graphicsPipeline = VK_NULL_HANDLE;
     const char* _vertexShaderPath;
     const char* _fragmentShaderPath;
+
+    StencilMode _stencilMode = StencilMode::Disabled;
 
     // create a render pass object
     // - with one color and one depth attachment

@@ -1,6 +1,7 @@
 // Scene.hpp (angepasst)
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <vector>
@@ -18,10 +19,11 @@ struct RenderObject {
 
 class Scene {
 public:
-    void setRenderObject(const RenderObject& obj)
+    size_t setRenderObject(const RenderObject& obj)
     {
         // falls noch keine globale RenderPass/Pipeline nötig ist, kein check
         _objects.push_back(obj);
+        return _objects.size() - 1; // Index zurückgeben
     }
 
     void updateObject(size_t idx, const glm::mat4& newModel) {
@@ -59,8 +61,11 @@ public:
     VkDescriptorSetLayout getDescriptorSetLayout() const {
         return _descriptorSetLayout;
     }
+    void setMirrorIndex(size_t index) { _mirrorIndex = index; }
+    size_t getMirrorIndex() const { return _mirrorIndex; }
 
 private:
     std::vector<RenderObject> _objects;
+    size_t _mirrorIndex = SIZE_MAX;
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

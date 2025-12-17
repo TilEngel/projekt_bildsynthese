@@ -1,5 +1,6 @@
 #include <vulkan/vulkan_core.h>
 #include <array>
+#include <stdexcept>
 
 
 class RenderPass{
@@ -23,8 +24,8 @@ class RenderPass{
         depth.samples = VK_SAMPLE_COUNT_1_BIT;
         depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depth.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
