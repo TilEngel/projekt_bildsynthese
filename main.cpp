@@ -109,8 +109,7 @@ int main() {
 
     //Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
-    modelDutch= glm::translate(modelDutch, glm::vec3(-2.0f,3.0f,1.0f));
-    modelDutch = glm::scale(modelDutch,glm::vec3(0.05,0.05,0.05));
+    //modelDutch= glm::rotate(modelDutch, -90.0f, glm::vec3(0.0f,1.0f,0.0f));
     RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
 
@@ -170,6 +169,7 @@ int main() {
 
 // start render loop ########################
     float lastTime = static_cast<float>(glfwGetTime());
+    float dutchAngle = 0.0f;
     uint32_t currentFrame = 0;
     while (!window->shouldClose()) {
         window->pollEvents();
@@ -203,12 +203,19 @@ int main() {
         }
 
 
-        //Model-Matrizen jeden Frame aktualisieren (falls nötig)
+       // Fliegender Holländer: Kreisbewegung um den Ursprung
+        dutchAngle += deltaTime * glm::radians(5.0f); // Winkel erhöhen
         
-        modelDutch = glm::rotate(modelDutch,deltaTime*glm::radians(75.0f), glm::vec3(0.0f,1.0f,0.0f));
-        modelDutch = glm::translate(modelDutch, glm::vec3(1.0f,0.0f,0.0f));
-        scene->updateObject(2, modelDutch);
-
+        float radius = 60.0f;
+        float circleX = radius * cos(dutchAngle);
+        float circleY = radius * sin(dutchAngle);
+        
+        modelDutch = glm::mat4(1.0f);
+        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY)); // Y=3.0 (Höhe)
+        modelDutch = glm::rotate(modelDutch, -1.75f-dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f)); // Optional: Rotation des Modells
+        modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
+        scene->updateObject(2,modelDutch);
+    
         //Basic stuff
         bool recreate = framesInFlight[currentFrame]->render(scene, camera);
         if (recreate || window->wasResized()) {
