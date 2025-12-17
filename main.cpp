@@ -87,12 +87,12 @@ int main() {
 
     //Skybox
     std::array<const char*, 6> skyboxFaces = {
-        "textures/skybox/crate.png",    //rechts
-        "textures/skybox/crate.png",     //links
-        "textures/skybox/crate.png",      //oben
-        "textures/skybox/crate.png",   //unten
-        "textures/skybox/crate.png",    //vorne
-        "textures/skybox/crate.png"      //hinten
+        "textures/skybox/right.jpg",    //rechts
+        "textures/skybox/left.jpg",     //links
+        "textures/skybox/top.jpg",      //oben
+        "textures/skybox/bottom.jpg",   //unten
+        "textures/skybox/front.jpg",    //vorne
+        "textures/skybox/back.jpg"      //hinten
     };
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
