@@ -4,9 +4,8 @@
 
 CXX      = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
-
 UNAME_S := $(shell uname -s)
-
+BUILD_DIR = build
 # Vulkan SDK env var is used if available
 VULKAN_SDK ?=
 
@@ -21,11 +20,13 @@ ifeq ($(UNAME_S), Darwin)
     LDFLAGS  = $(shell pkg-config --libs glfw3)
     LDFLAGS += -lvulkan \
                -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreVideo
+    MKDIR = mkdir -p
 
 else ifeq ($(UNAME_S), Linux)
     # Linux with apt-installed libs (GLM included automatically)
     CXXFLAGS += $(shell pkg-config --cflags glfw3 vulkan)
     LDFLAGS  = $(shell pkg-config --libs glfw3 vulkan) -ldl -lpthread
+    MKDIR = mkdir -p
 
 else
     # Windows (MinGW)
@@ -34,6 +35,7 @@ else
     LDFLAGS  = -L"C:/VulkanSDK/Lib" -lvulkan-1 \
                -L"C:/glfw/lib" -lglfw3 \
                -lgdi32 -luser32 -lshell32
+    MKDIR = mkdir
 endif
 
 # ------------------------------------------------------------
@@ -42,32 +44,36 @@ endif
 
 SRC = \
     main.cpp \
-    ./helper/initInstance.cpp \
-    ./helper/initBuffer.cpp \
-    ./helper/loadObj.cpp \
-    ./helper/Texture.cpp \
-    ./helper/Window.cpp \
-    ./helper/Surface.cpp \
-    ./helper/Swapchain.cpp \
-    ./helper/Depthbuffer.cpp \
-    ./helper/GraphicsPipeline.cpp \
-    ./helper/Framebuffers.cpp \
-    ./helper/Frame.cpp \
-    ./helper/CubeMap.cpp\
+    helper/initInstance.cpp \
+    helper/initBuffer.cpp \
+    helper/ObjectLoading/loadObj.cpp \
+    helper/Texture/Texture.cpp \
+    helper/Rendering/Window.cpp \
+    helper/Rendering/Surface.cpp \
+    helper/Rendering/Swapchain.cpp \
+    helper/Rendering/Depthbuffer.cpp \
+    helper/Rendering/GraphicsPipeline.cpp \
+    helper/Rendering/Framebuffers.cpp \
+    helper/Frames/Frame.cpp \
+    helper/Texture/CubeMap.cpp\
     ObjectFactory.cpp 
 
-OBJ = $(SRC:.cpp=.o)
+#source-paths zu build-Ordner-paths 
+OBJ = $(SRC:%.cpp=$(BUILD_DIR)/%.o)
 TARGET = projekt
 
 # ------------------------------------------------------------
 # Build
 # -----------------------------
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv
+.PHONY: all clean run
+all: $(TARGET)
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
-%.o: %.cpp
+# build Ordner erstellen
+$(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
 # ------------------------------------------------------------
 # Shader compilation
 # ------------------------------------------------------------
@@ -82,11 +88,10 @@ $(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Textu
 # Utilities
 # ------------------------------------------------------------
 
-.PHONY: clean run
 
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) $(OBJ) shaders/*.spv
+	rm -f $(TARGET) shaders/*.spv rm -rf $(BULID_DIR)
 

@@ -8,19 +8,19 @@
 
 #include "helper/initBuffer.hpp"
 #include "helper/initInstance.hpp"
-#include "helper/loadObj.hpp"
+#include "helper/ObjectLoading/loadObj.hpp"
 
-#include "helper/Window.hpp"
-#include "helper/Surface.hpp"
-#include "helper/Swapchain.hpp"
-#include "helper/Depthbuffer.hpp"
-#include "helper/GraphicsPipeline.hpp"
-#include "helper/Texture.hpp"
-#include "helper/Scene.hpp"
-#include "helper/Frame.hpp"
+#include "helper/Rendering/Window.hpp"
+#include "helper/Rendering/Surface.hpp"
+#include "helper/Rendering/Swapchain.hpp"
+#include "helper/Rendering/Depthbuffer.hpp"
+#include "helper/Rendering/GraphicsPipeline.hpp"
+#include "helper/Texture/Texture.hpp"
+#include "Scene.hpp"
+#include "helper/Frames/Frame.hpp"
 #include "ObjectFactory.hpp"
-#include "helper/RenderPass.hpp"
-#include "helper/Camera.hpp"
+#include "helper/Rendering/RenderPass.hpp"
+#include "helper/Frames/Camera.hpp"
 
 int main() {
     InitInstance inst;

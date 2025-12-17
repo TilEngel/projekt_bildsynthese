@@ -22,7 +22,7 @@
 #include <GLFW/glfw3.h>
 // stb_image.h sollte sich im Projektverzeichnis befinden oder via -I erreichbar sein.
 #include "../stb_image.h"
-#include "GraphicsPipeline.hpp"
+#include "Rendering/GraphicsPipeline.hpp"
 
 class InitBuffer {
 public:

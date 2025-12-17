@@ -5,7 +5,7 @@
 #include <vulkan/vulkan_core.h>
 #include <vector>
 #include <glm/glm.hpp>
-#include "GraphicsPipeline.hpp"
+#include "helper/Rendering/GraphicsPipeline.hpp"
 
 struct RenderObject {
     VkBuffer vertexBuffer = VK_NULL_HANDLE;

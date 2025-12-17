@@ -1,6 +1,6 @@
 #include "CubeMap.hpp"
-#include "../stb_image.h"
-#include "initBuffer.hpp"
+#include "../../stb_image.h"
+
 #include <stdexcept>
 #include <cstring>
 

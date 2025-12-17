@@ -9,7 +9,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "initBuffer.hpp"
+#include "../initBuffer.hpp"
 
 extern InitBuffer buff; // in main.cpp you have a global InitBuffer named 'buff'
 

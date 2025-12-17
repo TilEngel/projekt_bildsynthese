@@ -1,14 +1,7 @@
 // Texture.cpp
 
 #include "Texture.hpp"
-#include "../stb_image.h"
 
-#include <vector>
-#include <cstring>
-#include <iostream>
-#include <stdexcept>
-
-#include "initBuffer.hpp"
 
 static uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
