@@ -4,16 +4,6 @@
 #include <stdexcept>
 #include <cstring>
 
-static uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
-        if ((typeFilter & (1u << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-            return i;
-        }
-    }
-    throw std::runtime_error("failed to find suitable memory type!");
-}
 
 void CubeMap::loadCubeMap(const std::array<const char*, 6>& faces) {
     // Lade die erste Textur um Größe zu bestimmen
@@ -44,8 +34,8 @@ void CubeMap::loadCubeMap(const std::array<const char*, 6>& faces) {
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(_physicalDevice, memRequirements.memoryTypeBits,
-                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    allocInfo.memoryTypeIndex = _buff.findMemoryType( memRequirements.memoryTypeBits,
+                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _physicalDevice);
 
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_imageBufferMemory) != VK_SUCCESS) {
         stbi_image_free(firstPixels);
@@ -54,7 +44,7 @@ void CubeMap::loadCubeMap(const std::array<const char*, 6>& faces) {
 
     vkBindBufferMemory(_device, _imageBuffer, _imageBufferMemory, 0);
 
-    // Map memory und kopiere alle 6 Faces
+    // Map memory und kopiere alle Faces
     void* data;
     vkMapMemory(_device, _imageBufferMemory, 0, imageSize, 0, &data);
 
@@ -112,8 +102,8 @@ void CubeMap::allocateTextureImageMemory() {
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(_physicalDevice, memRequirements.memoryTypeBits, 
-                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    allocInfo.memoryTypeIndex = _buff.findMemoryType( memRequirements.memoryTypeBits, 
+                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _physicalDevice);
 
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_textureImageMemory) != VK_SUCCESS) {
         throw std::runtime_error("Failed to allocate cubemap image memory!");
@@ -146,7 +136,7 @@ void CubeMap::copyBufferToImage() {
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
         0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    // Copy buffer to image (alle 6 Faces)
+    //copy buffer to image (alle 6 Faces)
     VkDeviceSize layerSize = static_cast<VkDeviceSize>(_texWidth) * _texHeight * 4;
     
     for (uint32_t face = 0; face < 6; ++face) {
@@ -169,7 +159,7 @@ void CubeMap::copyBufferToImage() {
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     }
 
-    // Transition: TRANSFER_DST_OPTIMAL -> SHADER_READ_ONLY_OPTIMAL
+    //TRANSFER_DST_OPTIMAL -> SHADER_READ_ONLY_OPTIMAL
     barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;

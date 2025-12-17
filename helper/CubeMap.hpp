@@ -2,20 +2,25 @@
 #include <vulkan/vulkan.h>
 #include <string>
 #include <array>
+#include "initBuffer.hpp"
 
+//Klasse für die Darstellung der CubeMap Textur aka Skybox
 class CubeMap{
 public:
     CubeMap(VkPhysicalDevice physicalDevice,
                    VkDevice device,
                    VkCommandPool commandPool,
                    VkQueue queue,
-                   const std::array<const char*, 6>& faces)
+                   const std::array<const char*, 6>& faces) //Je ein Bild für jede Seite
         : _physicalDevice(physicalDevice)
         , _device(device)
         , _commandPool(commandPool)
         , _queue(queue)
     {
+        //speichert 6 Images aus faces
         loadCubeMap(faces);
+
+        //sollte klar sein
         createTextureImage();
         allocateTextureImageMemory();
         copyBufferToImage();
@@ -51,6 +56,7 @@ private:
 
     VkBuffer _imageBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _imageBufferMemory = VK_NULL_HANDLE;
+    InitBuffer _buff;
 
     int _texWidth = 0;
     int _texHeight = 0;
