@@ -134,10 +134,23 @@ void Frame::updateDescriptorSet(Scene* scene) {
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    size_t objectCount = scene->getObjectCount();
-    //Für jedes Objekt
-    for (size_t i = 0; i < objectCount; ++i) {
+    // NUR normale Objekte (nicht Schnee!)
+    size_t descriptorSetIndex = 0;
+    
+    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
+        
+        // Schnee-Objekte überspringen - die werden separat behandelt
+        if (obj.isSnow) {
+            continue;
+        }
+        
+        // Sicherheitscheck
+        if (descriptorSetIndex >= _descriptorSets.size()) {
+            std::cerr << "ERROR: Descriptor set index " << descriptorSetIndex 
+                      << " out of range (max: " << _descriptorSets.size() << ")\n";
+            break;
+        }
 
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -147,7 +160,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
         std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = _descriptorSets[i];
+        descriptorWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -155,7 +168,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = _descriptorSets[i];
+        descriptorWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -166,6 +179,8 @@ void Frame::updateDescriptorSet(Scene* scene) {
                                static_cast<uint32_t>(descriptorWrites.size()),
                                descriptorWrites.data(),
                                0, nullptr);
+        
+        descriptorSetIndex++;
     }
 }
 

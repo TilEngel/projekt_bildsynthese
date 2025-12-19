@@ -15,7 +15,7 @@ struct alignas(32) Particle {
     alignas(16) glm::vec3 velocity;
 };
 
-const uint32_t NUMBER_PARTICLES = 256;
+const uint32_t NUMBER_PARTICLES = 128;
 
 class Snow {
 public:

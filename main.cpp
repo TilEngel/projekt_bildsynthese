@@ -132,6 +132,16 @@ int main() {
         "textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setRenderObject(gnome);
 
+
+    glm::mat4 modelUmbrella = glm::mat4(1.0f);
+    modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
+    modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
+    modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
+    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj", 
+        "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", 
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
+    scene->setRenderObject(umbrella);
+
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
