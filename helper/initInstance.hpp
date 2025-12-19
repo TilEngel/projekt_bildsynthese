@@ -43,4 +43,6 @@ public:
     void destroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool);
 
     VkDescriptorSetLayout createStandardDescriptorSetLayout(VkDevice device);
+
+    VkDescriptorSetLayout createSnowDescriptorSetLayout(VkDevice device);
 };

@@ -21,6 +21,7 @@
 #include "ObjectFactory.hpp"
 #include "helper/Rendering/RenderPass.hpp"
 #include "helper/Frames/Camera.hpp"
+#include "helper/Compute/Snow.hpp"
 
 int main() {
     InitInstance inst;
@@ -57,12 +58,16 @@ int main() {
     );
     // Logical Device
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
+   
     // Queues
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
 
     VkQueue presentQueue;
     vkGetDeviceQueue(device, presentIndex, 0, &presentQueue);
+
+    VkQueue computeQueue;
+    vkGetDeviceQueue(device, graphicsIndex, 0, &computeQueue);
     // Swapchain
     SwapChain* swapChain = new SwapChain(
         surface, physicalDevice, device,
@@ -77,146 +82,194 @@ int main() {
     VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
     // Framebuffers mit diesem RenderPass erzeugen
     Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
-    //DescriptorSet layout 
+    // Descriptor Set Layouts
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
+    VkDescriptorSetLayout snowDescriptorSetLayout = inst.createSnowDescriptorSetLayout(device);
     scene->setDescriptorSetLayout(descriptorSetLayout);
 
-//Erstellen der Objekte #######################
+    // Schneeflocken-Simulation erstellen
+    Snow* snow = new Snow(physicalDevice, device, graphicsIndex);
 
-    ObjectFactory factory(physicalDevice,device,commandPool,graphicsQueue,swapChain->getImageFormat(), depthBuffer->getImageFormat(),descriptorSetLayout);
+    // Objekte erstellen
+    ObjectFactory factory(physicalDevice, device, commandPool, graphicsQueue,
+                         swapChain->getImageFormat(), depthBuffer->getImageFormat(),
+                         descriptorSetLayout);
 
-    //Skybox
+    // Skybox
     std::array<const char*, 6> skyboxFaces = {
-        "textures/skybox/right.jpg",    //rechts
-        "textures/skybox/left.jpg",     //links
-        "textures/skybox/top.jpg",      //oben
-        "textures/skybox/bottom.jpg",   //unten
-        "textures/skybox/front.jpg",    //vorne
-        "textures/skybox/back.jpg"      //hinten
+        "textures/skybox/right.jpg",
+        "textures/skybox/left.jpg",
+        "textures/skybox/top.jpg",
+        "textures/skybox/bottom.jpg",
+        "textures/skybox/front.jpg",
+        "textures/skybox/back.jpg"
     };
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
 
-
-    //Monobloc Gartenstuhl
+    // Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
-    modelChair = glm::translate(modelChair, glm::vec3(-2.0f,0.92f,0.0f));
-    modelChair = glm::scale(modelChair, glm::vec3(3.0f,3.0f,3.0f));
-    //Model-Matrix wird im Render-Loop gemacht
-    RenderObject chair = factory.createGenericObject("./models/plastic_monobloc_chair.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
-    //Zu Szene hinzufügen
+    modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
+    modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
+    RenderObject chair = factory.createGenericObject("./models/plastic_monobloc_chair.obj", 
+        "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", 
+        "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
     scene->setRenderObject(chair);
 
-    //Fliegender Holländer
+    // Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
-    //modelDutch= glm::rotate(modelDutch, -90.0f, glm::vec3(0.0f,1.0f,0.0f));
-    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv", "textures/duck.jpg", modelDutch, renderPass);
+    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", 
+        "shaders/test.vert.spv", "shaders/testapp.frag.spv", 
+        "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
 
-    //Gartenzwerg
+    // Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
-    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f,2.25f,0.0f));
-    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f,3.0f,3.0f));
-    //Model-Matrix wird im Render-Loop gemacht
-    RenderObject gnome = factory.createGenericObject("./models/garden_gnome.obj", "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", "textures/garden_gnome.jpg", modelGnome, renderPass);
-    //Zu Szene hinzufügen
+    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
+    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
+    RenderObject gnome = factory.createGenericObject("./models/garden_gnome.obj", 
+        "shaders/testapp.vert.spv", "shaders/testapp.frag.spv", 
+        "textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setRenderObject(gnome);
 
-    //Boden
+    // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
-    modelGround = glm::scale(modelGround, glm::vec3(20.0f,10.0f,20.0f));
+    modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
     RenderObject ground = factory.createGround(modelGround, renderPass);
     scene->setRenderObject(ground);
 
+    // Schneeflocken ZULETZT hinzufügen
+    RenderObject snowflakes = factory.createSnowflake(
+        "textures/snowflake.png",
+        renderPass,
+        snow->getCurrentBuffer(),
+        snowDescriptorSetLayout
+    );
+    scene->setRenderObject(snowflakes);
 
-
-    // Object count
-    size_t objectCount = scene->getObjectCount();
+    // Object counts
+    size_t normalObjectCount = scene->getNormalObjectCount();
+    size_t snowObjectCount = scene->getSnowObjectCount();
+    
+    std::cout << "Normal objects: " << normalObjectCount << std::endl;
+    std::cout << "Snow objects: " << snowObjectCount << std::endl;
+    
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    uint32_t maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * objectCount);
+    uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalObjectCount);
+    uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowObjectCount);
 
-    // Descriptor pool: einen Eintrag pro (frame,object) für UB und ImageSampler
-    std::array<VkDescriptorPoolSize,2> poolSizes{};
+    // Descriptor pool
+    std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = maxSets; // ein UBO-Eintrag pro Set (Binding 0)
+    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = maxSets; // ein imageSampler pro Set (Binding 1)
+    poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets;
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizes[2].descriptorCount = maxSnowSets;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = maxSets;
+    poolInfo.maxSets = maxNormalSets + maxSnowSets;
 
     VkDescriptorPool descriptorPool;
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool");
     }
 
-    // create frames in flight
+    // Create frames in flight
     std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-        framesInFlight[i] = new Frame(physicalDevice,
-            device,
-            swapChain,
-            framebuffers,
-            graphicsQueue,
-            commandPool,
-            descriptorPool,
-            scene->getDescriptorSetLayout());
-            framesInFlight[i]->allocateDescriptorSets(descriptorPool, scene->getDescriptorSetLayout(), scene->getObjectCount());
+        framesInFlight[i] = new Frame(physicalDevice, device, swapChain, framebuffers,
+                                     graphicsQueue, commandPool, descriptorPool,
+                                     scene->getDescriptorSetLayout());
+        
+        // Allocate descriptor sets
+        framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, 
+                                                  normalObjectCount);
+        framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout,
+                                                      snowObjectCount);
     }
 
-// start render loop ########################
+    // Render loop
     float lastTime = static_cast<float>(glfwGetTime());
     float dutchAngle = 0.0f;
     uint32_t currentFrame = 0;
+    
     while (!window->shouldClose()) {
         window->pollEvents();
 
-        // Berechne Delta-Time
         float currentTime = static_cast<float>(glfwGetTime());
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        //maus-input verarbeiten
+        // Kamera-Input
         double xpos, ypos;
         window->getCursorPos(&xpos, &ypos);
-        //Springen der Kamera vermeiden
         if (firstMouse) {
             lastX = xpos;
             lastY = ypos;
             firstMouse = false;
         }
         float xoffset = static_cast<float>(xpos - lastX);
-        float yoffset = static_cast<float>(lastY - ypos); // Umgekehrt: y geht von oben nach unten
+        float yoffset = static_cast<float>(lastY - ypos);
         lastX = xpos;
         lastY = ypos;
 
-        //Maus- und Tastatureingabe checken
         camera->processMouseMovement(xoffset, yoffset);
-        //Falls q erhöht sich die Geschwindigkeit
-        if(window->getKey(GLFW_KEY_Q) == GLFW_PRESS){
-            deltaTime *=5;
+        if (window->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
+            deltaTime *= 5;
         }
         camera->checkKeyboard(window, deltaTime);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            firstMouse = true; //Reset falls man wieder zurück in capture mode geht
+            firstMouse = true;
         }
-       
-       // Schiff dreht seine Runden
+
+        // Schiff bewegen
         dutchAngle += deltaTime * glm::radians(5.0f); 
         float radius = 60.0f;
         float circleX = radius * cos(dutchAngle);
         float circleY = radius * sin(dutchAngle);
         modelDutch = glm::mat4(1.0f);
-        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY)); //Rotation um Szene
-        modelDutch = glm::rotate(modelDutch, -1.75f-dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f)); //Rotation um eigene Achse
+        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
+        modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
-        scene->updateObject(2,modelDutch);
-    
-        //Basic stuff
+        scene->updateObject(2, modelDutch);
+
+        // Compute Shader für Schnee ausführen
+        VkSubmitInfo computeSubmit{};
+        computeSubmit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        computeSubmit.commandBufferCount = 1;
+        VkCommandBuffer computeCmd = snow->getCommandBuffer();
+        computeSubmit.pCommandBuffers = &computeCmd;
+        
+        vkQueueSubmit(graphicsQueue, 1, &computeSubmit, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
+
+        // Update uniform buffers
+        framesInFlight[currentFrame]->updateUniformBuffer(camera);
+        
+        // Update normal object descriptor sets
+        framesInFlight[currentFrame]->updateDescriptorSet(scene);
+        
+        // Update snow descriptor sets
+        size_t snowIdx = 0;
+        for (size_t i = 0; i < scene->getObjectCount(); i++) {
+            if (scene->isSnowObject(i)) {
+                const auto& obj = scene->getObject(i);
+                framesInFlight[currentFrame]->updateSnowDescriptorSet(
+                    snowIdx,
+                    snow->getCurrentBuffer(),
+                    obj.textureImageView,
+                    obj.textureSampler
+                );
+                snowIdx++;
+            }
+        }
+
+        // Render
         bool recreate = framesInFlight[currentFrame]->render(scene, camera);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
@@ -226,19 +279,13 @@ int main() {
         }
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
+
     vkDeviceWaitIdle(device);
     
     // Cleanup
-    //TODO: cleanup überarbeiten 
-    delete camera;
-    delete scene;
-    //texture.destroy();
-    //buff.destroyVertexBuffer(device);
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        delete framesInFlight[i];
-    }
-    inst.destroyDescriptorPool(device, descriptorPool);
-    inst.destroyCommandPool(device, commandPool);
+    snow->destroy();
+    delete snow;
+   // inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
     delete framebuffers;
     //delete pipeline;
     delete depthBuffer;

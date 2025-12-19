@@ -290,3 +290,41 @@ VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice d
 
     return layout;
 }
+VkDescriptorSetLayout InitInstance::createSnowDescriptorSetLayout(VkDevice device) {
+    // Binding 0: UBO (model, view, proj)
+    VkDescriptorSetLayoutBinding uboBinding{};
+    uboBinding.binding = 0;
+    uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboBinding.descriptorCount = 1;
+    uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    // Binding 1: Storage Buffer (Particles)
+    VkDescriptorSetLayoutBinding storageBinding{};
+    storageBinding.binding = 1;
+    storageBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    storageBinding.descriptorCount = 1;
+    storageBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    // Binding 2: Texture Sampler
+    VkDescriptorSetLayoutBinding samplerBinding{};
+    samplerBinding.binding = 2;
+    samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerBinding.descriptorCount = 1;
+    samplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+        uboBinding, storageBinding, samplerBinding
+    };
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
+
+    VkDescriptorSetLayout descriptorSetLayout;
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create snow descriptor set layout!");
+    }
+
+    return descriptorSetLayout;
+}

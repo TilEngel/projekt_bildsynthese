@@ -12,16 +12,31 @@ struct RenderObject {
     uint32_t vertexCount = 0;
     VkImageView textureImageView = VK_NULL_HANDLE;
     VkSampler textureSampler = VK_NULL_HANDLE;
-    GraphicsPipeline* pipeline = nullptr; // pipeline für dieses Objekt (owner = wer created hat)
+    GraphicsPipeline* pipeline = nullptr; // pipeline für dieses Objekt
     glm::mat4 modelMatrix = glm::mat4(1.0f);
+    VkBuffer instanceBuffer = VK_NULL_HANDLE; //für Instancing
+    uint32_t instanceCount = 200;
+    bool isSnow = false;
 };
 
 class Scene {
 public:
-    void setRenderObject(const RenderObject& obj)
-    {
-        // falls noch keine globale RenderPass/Pipeline nötig ist, kein check
+    void setRenderObject(RenderObject obj) {
+        if (obj.isSnow) {
+            _snowObjectIndices.push_back(_objects.size());
+        }
         _objects.push_back(obj);
+    }
+
+    size_t getObjectCount() const { return _objects.size(); }
+    size_t getSnowObjectCount() const { return _snowObjectIndices.size(); }
+    size_t getNormalObjectCount() const { return _objects.size() - _snowObjectIndices.size(); }
+    
+    const RenderObject& getObject(size_t index) const { return _objects[index]; }
+    const std::vector<size_t>& getSnowIndices() const { return _snowObjectIndices; }
+    
+    bool isSnowObject(size_t index) const {
+        return std::find(_snowObjectIndices.begin(), _snowObjectIndices.end(), index) != _snowObjectIndices.end();
     }
 
     void updateObject(size_t idx, const glm::mat4& newModel) {
@@ -33,9 +48,6 @@ public:
     RenderObject& getObjectMutable(size_t idx) { 
         return _objects[idx]; 
     }
-
-    size_t getObjectCount() const { return _objects.size(); }
-    const RenderObject& getObject(size_t idx) const { return _objects[idx]; }
 
     // Hilfsfunktionen: falls du noch einen "default" RenderPass/Pipeline brauchst,
     // kannst du z.B. das erste Objekt als Referenz nehmen:
@@ -62,5 +74,6 @@ public:
 
 private:
     std::vector<RenderObject> _objects;
+    std::vector<size_t> _snowObjectIndices;
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

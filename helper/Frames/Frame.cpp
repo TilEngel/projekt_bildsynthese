@@ -8,6 +8,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "../Compute/Snow.hpp"
 
 
 
@@ -194,7 +195,6 @@ void Frame::updateUniformBuffer(Camera* camera) {
 
 
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
-    // reset command buffer
     vkResetCommandBuffer(_commandBuffer, 0);
 
     VkCommandBufferBeginInfo beginInfo{};
@@ -205,17 +205,14 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
     }
+
     VkRenderPass rp = scene->getRenderPass();
     VkFramebuffer fb = _framebuffers->getFramebuffer(imageIndex);
-    if (rp == VK_NULL_HANDLE) {
-        std::cerr << "recordCommandBuffer: scene renderPass is VK_NULL_HANDLE\n";
-        return;
+    
+    if (rp == VK_NULL_HANDLE || fb == VK_NULL_HANDLE) {
+        throw std::runtime_error("invalid renderpass or framebuffer!");
     }
-    if (fb == VK_NULL_HANDLE) {
-        std::cerr << "recordCommandBuffer: framebuffer is VK_NULL_HANDLE for imageIndex " << imageIndex << "\n";
-        return;
-    }
-    // begin render pass
+
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = rp;
@@ -223,7 +220,6 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
-    // clear color & depth Werte
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };
@@ -233,9 +229,6 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     vkCmdBeginRenderPass(_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // pipeline binden
-    vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, scene->getPipeline());
-    // viewport
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -245,42 +238,66 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
 
-    // scissor
     VkRect2D scissor{};
     scissor.offset = {0, 0};
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-        //Objekte in Szene zeichnen
-        for (size_t i = 0; i < scene->getObjectCount(); i++) {
-            const auto& obj = scene->getObject(i);
-            if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-                std::cerr << "Skipping object " << i << ": invalid vertex data\n";
-                continue;
-            }
-
-            //  bind pipeline des objekts
-            VkPipeline pipelineHandle = obj.pipeline->getPipeline();
-            vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-
-            //DescriptorSets binden
-            VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
-            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipelineLayout, 0, 1, &_descriptorSets[i], 0, nullptr);
-
-            // Vertex buffer binden
-            VkBuffer vertexBuffers[] = { obj.vertexBuffer };
-            VkDeviceSize offsets[] = { 0 };
-            vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
-
-            // 4) push constants.  eigene ModelMatrix pro Objekt nutzen
-            vkCmdPushConstants(_commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
-
-            // Draw-Call
-            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    // Draw all objects
+    size_t normalObjIdx = 0;
+    size_t snowObjIdx = 0;
+    
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const auto& obj = scene->getObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
+            continue;
         }
 
-    // end render pass
+        // Bind pipeline
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+
+        // Bind correct descriptor set based on object type
+        if (obj.isSnow) {
+            if (snowObjIdx >= _snowDescriptorSets.size()) {
+                std::cerr << "ERROR: Snow descriptor set index " << snowObjIdx << " out of range!\n";
+                continue;
+            }
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
+            snowObjIdx++;
+        } else {
+            if (normalObjIdx >= _descriptorSets.size()) {
+                std::cerr << "ERROR: Normal descriptor set index " << normalObjIdx << " out of range!\n";
+                continue;
+            }
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
+            normalObjIdx++;
+        }
+
+        // Bind vertex buffer
+        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        // Push constants
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        // Draw with or without instancing
+        if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
+           
+            vkCmdDraw(_commandBuffer, obj.vertexCount, obj.instanceCount, 0, 0);
+        } else {
+            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+        }
+    }
+
     vkCmdEndRenderPass(_commandBuffer);
 
     if (vkEndCommandBuffer(_commandBuffer) != VK_SUCCESS) {
@@ -310,4 +327,78 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
     if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
+}
+
+//Schnee(Command-Shader) braucht andere DescriptorSets
+void Frame::allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
+                                      VkDescriptorSetLayout descriptorSetLayout, 
+                                      size_t snowObjectCount) {
+    if (snowObjectCount == 0) return;
+    
+    _snowDescriptorSets.resize(snowObjectCount);
+
+    std::vector<VkDescriptorSetLayout> layouts(snowObjectCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(snowObjectCount);
+    allocInfo.pSetLayouts = layouts.data();
+
+    if (vkAllocateDescriptorSets(_device, &allocInfo, _snowDescriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate snow descriptor sets!");
+    }
+}
+
+void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
+                                   VkImageView imageView, VkSampler sampler) {
+    // UBO
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = _uniformBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(UniformBufferObject);
+
+    // Storage Buffer (Particles)
+    VkDescriptorBufferInfo storageInfo{};
+    storageInfo.buffer = particleBuffer;
+    storageInfo.offset = 0;
+    storageInfo.range = sizeof(Particle) *NUMBER_PARTICLES;
+
+    // Texture
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = imageView;
+    imageInfo.sampler = sampler;
+
+    std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
+    // Binding 0: UBO
+    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[0].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[0].dstBinding = 0;
+    descriptorWrites[0].dstArrayElement = 0;
+    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[0].descriptorCount = 1;
+    descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+    // Binding 1: Storage Buffer
+    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].dstArrayElement = 0;
+    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pBufferInfo = &storageInfo;
+
+    // Binding 2: Texture
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].dstArrayElement = 0;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pImageInfo = &imageInfo;
+
+    vkUpdateDescriptorSets(_device, 
+                          static_cast<uint32_t>(descriptorWrites.size()),
+                          descriptorWrites.data(), 0, nullptr);
 }
