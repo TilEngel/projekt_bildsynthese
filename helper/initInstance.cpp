@@ -328,3 +328,8 @@ VkDescriptorSetLayout InitInstance::createSnowDescriptorSetLayout(VkDevice devic
 
     return descriptorSetLayout;
 }
+void InitInstance::destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descriptorSetLayout) {
+    if (descriptorSetLayout!= VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout,nullptr);
+    }
+}

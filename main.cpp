@@ -297,7 +297,8 @@ int main() {
     // Cleanup
     snow->destroy();
     delete snow;
-   // inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device,snowDescriptorSetLayout);
     delete framebuffers;
     //delete pipeline;
     delete depthBuffer;

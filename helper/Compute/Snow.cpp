@@ -85,7 +85,9 @@ void Snow::waitForCompute() {
     }
 }
 
+//Layout für den ComputeShader
 void Snow::createDescriptorSetLayout() {
+    //StorageBuffer für die beiden Bindings
     VkDescriptorSetLayoutBinding b0{};
     b0.binding = 0;
     b0.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -153,6 +155,7 @@ void Snow::createPipeline() {
     vkDestroyShaderModule(_device, shaderModule, nullptr);
 }
 
+//Erstellt Buffer für die Daten der Partikel
 void Snow::createStorageBuffers() {
     std::vector<Particle> particles(NUMBER_PARTICLES);
     std::random_device rd;
@@ -175,7 +178,7 @@ void Snow::createStorageBuffers() {
 
     VkDeviceSize bufSize = sizeof(Particle) * NUMBER_PARTICLES;
 
-    // Init buffer
+    // Buffer mit Initialdaten der Schneeflocken
     createBuffer(_physicalDevice, _device, bufSize,
                  VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -186,7 +189,7 @@ void Snow::createStorageBuffers() {
     std::memcpy(data, particles.data(), static_cast<size_t>(bufSize));
     vkUnmapMemory(_device, _initBufferMemory);
 
-    // Current buffer
+    //Buffer mit aktuellen Daten
     createBuffer(_physicalDevice, _device, bufSize,
                  VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,

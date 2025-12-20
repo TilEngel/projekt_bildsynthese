@@ -44,5 +44,8 @@ public:
 
     VkDescriptorSetLayout createStandardDescriptorSetLayout(VkDevice device);
 
+    // != snow::createDescriptorSetLayout (für ComputeShader)
+    //erstellt DSL für render-shader
     VkDescriptorSetLayout createSnowDescriptorSetLayout(VkDevice device);
+    void destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
 };
