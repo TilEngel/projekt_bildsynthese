@@ -1,6 +1,7 @@
 // ObjectFactory.cpp
 #include "ObjectFactory.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
+#include "helper/Rendering/GraphicsPipeline.hpp"
 #include "helper/Texture/CubeMap.hpp"
 
 #include "helper/Texture/Texture.hpp"
@@ -10,7 +11,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
                                          const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass)
+                                         VkRenderPass renderPass,
+                                         PipelineType type)
 {
     //eigene Pipeline erstellen
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -20,7 +22,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         vertShaderPath, 
         fragShaderPath,
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        type
     );
 
     //Model laden & Vertexbuffer erzeugen
@@ -59,7 +62,8 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
         "shaders/test.vert.spv", 
         "shaders/testapp.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        PipelineType::STANDARD
     );
 
     //Model laden & Vertexbuffer erzeugen
@@ -82,8 +86,6 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
 
     return obj;
 }
-
-
 
 RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
                                          const std::array<const char*, 6>& cubemapFaces) {
@@ -141,7 +143,8 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.vert.spv",
         "shaders/skybox.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+       PipelineType::STANDARD
     );
 
     // Vertex Buffer
@@ -160,6 +163,56 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
     obj.textureSampler = cubemap->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = glm::mat4(1.0f); // Keine Transformation nötig
+
+    return obj;
+}
+
+RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass,
+                                         PipelineType pipelineType) {
+    // Einfache Quad-Geometrie für Spiegel
+    std::vector<Vertex> vertices = {
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},  // Oben links
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},  // Unten links
+        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},  // Unten rechts
+        
+        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},  // Unten rechts
+        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},  // Oben rechts
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}}   // Oben links
+    };
+
+    const char* fragShader;
+    if (pipelineType == PipelineType::MIRROR_BLEND) {
+        fragShader = "shaders/mirror.frag.spv";  // Transparenter Shader
+    } else {
+        fragShader = "shaders/testapp.frag.spv";
+    }
+
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/testapp.vert.spv",
+        fragShader,
+        renderPass,
+        _descriptorSetLayout,
+        pipelineType  // Pipeline-Typ übergeben
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(
+        _physicalDevice, _device, _commandPool, _graphicsQueue, vertices
+    );
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, 
+                               _graphicsQueue, "textures/mirror.jpg");
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
 
     return obj;
 }

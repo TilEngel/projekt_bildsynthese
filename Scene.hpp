@@ -60,7 +60,51 @@ public:
         return _descriptorSetLayout;
     }
 
+        void setMirrorMarkObject(const RenderObject& obj) {
+        _mirrorMarkIndex = _objects.size();
+        _objects.push_back(obj);
+    }
+
+    void setMirrorBlendObject(const RenderObject& obj) {
+        _mirrorBlendIndex = _objects.size();
+        _objects.push_back(obj);
+    }
+
+    void addReflectedObject(const RenderObject& obj, size_t originalIndex) {
+        _reflectedObjects.push_back(obj);
+        _reflectedDescriptorIndices.push_back(originalIndex);
+    }
+
+    size_t getMirrorMarkIndex() const { return _mirrorMarkIndex; }
+    size_t getMirrorBlendIndex() const { return _mirrorBlendIndex; }
+    
+    size_t getReflectedObjectCount() const { return _reflectedObjects.size(); }
+    const RenderObject& getReflectedObject(size_t idx) const { 
+        return _reflectedObjects[idx]; 
+    }
+    size_t getReflectedDescriptorIndex(size_t idx) const {
+        return _reflectedDescriptorIndices[idx];
+    }
+
+    bool isMirrorObject(size_t idx) const {
+        return idx == _mirrorMarkIndex || idx == _mirrorBlendIndex;
+    }
+
+    bool isReflectedObject(size_t idx) const {
+        // Prüfe ob Index zu einem zu spiegelnden Objekt gehört
+        return idx == _gnomeIndex;  // Nur Gnome spiegeln
+    }
+
+    void setGnomeIndex(size_t idx) { _gnomeIndex = idx; }
+
 private:
     std::vector<RenderObject> _objects;
+    std::vector<RenderObject> _reflectedObjects;
+    std::vector<size_t> _reflectedDescriptorIndices;
+    
+    size_t _mirrorMarkIndex = SIZE_MAX;
+    size_t _mirrorBlendIndex = SIZE_MAX;
+    size_t _gnomeIndex = SIZE_MAX;
+    
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

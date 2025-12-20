@@ -31,9 +31,9 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
     // 1. Find suitable depth format
     // ---------------------------------------------
     const std::vector<VkFormat> candidates = {
-        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D24_UNORM_S8_UINT,  // Bevorzugt für Stencil
         VK_FORMAT_D32_SFLOAT_S8_UINT,
-        VK_FORMAT_D24_UNORM_S8_UINT
+        VK_FORMAT_D32_SFLOAT
     };
 
     _depthImageFormat = VK_FORMAT_UNDEFINED;
@@ -49,7 +49,6 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
             break;
         }
     }
-
     if (_depthImageFormat == VK_FORMAT_UNDEFINED) {
         throw std::runtime_error("No suitable depth format found!");
     }
@@ -114,7 +113,15 @@ void DepthBuffer::createDepthImageView()
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = _depthImageFormat;
 
+    // Prüfen ob Format Stencil enthält
+    bool hasStencil = (_depthImageFormat == VK_FORMAT_D24_UNORM_S8_UINT ||
+                       _depthImageFormat == VK_FORMAT_D32_SFLOAT_S8_UINT);
+
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    if (hasStencil) {
+        viewInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
+    
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -124,7 +131,6 @@ void DepthBuffer::createDepthImageView()
         throw std::runtime_error("Failed to create depth image view!");
     }
 }
-
 
 // ------------------------------------------------------------
 // destroy all depth buffer resources

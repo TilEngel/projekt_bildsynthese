@@ -46,6 +46,7 @@ public:
 
         // record command buffer
         recordCommandBuffer(scene, imageIndex);
+
         
         // submit command buffer
         submitCommandBuffer(imageIndex);
@@ -55,6 +56,10 @@ public:
         return recreate;
     }
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
+
+    void renderObject(const RenderObject& obj, size_t descriptorIndex);
+
+    void renderObjectWithStencil(const RenderObject& obj, size_t descriptorIndex, uint32_t stencilRef);
 
 private:
     InitBuffer _buff;
