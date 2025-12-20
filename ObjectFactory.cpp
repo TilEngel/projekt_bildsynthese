@@ -163,3 +163,47 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
 
     return obj;
 }
+
+RenderObject ObjectFactory::createSnowflake(const char* texturePath, 
+                                           VkRenderPass renderPass,
+                                           VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout) {
+    // Einfaches Quad für Schneeflocke
+    std::vector<Vertex> vertices = {
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
+        {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
+        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
+        
+        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.1f,  0.1f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}}
+    };
+
+    // Pipeline für Schneeflocken (mit Instancing)
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/snow.vert.spv",
+        "shaders/snow.frag.spv",
+        renderPass,
+        snowDescriptorSetLayout
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = glm::mat4(1.0f);
+    obj.instanceBuffer = particleBuffer;    //Particle Buffer
+    obj.instanceCount = NUMBER_PARTICLES;              //Anzahl Instanzen
+    obj.isSnow= true;
+
+    return obj;
+}

@@ -56,6 +56,7 @@ SRC = \
     helper/Rendering/Framebuffers.cpp \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
+    helper/Compute/Snow.cpp\
     ObjectFactory.cpp 
 
 #source-paths zu build-Ordner-paths 
@@ -67,7 +68,7 @@ TARGET = projekt
 # -----------------------------
 .PHONY: all clean run
 all: $(TARGET)
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 # build Ordner erstellen
@@ -83,7 +84,8 @@ $(BUILD_DIR)/%.o: %.cpp
 
 %.frag.spv: %.frag
 	glslangValidator -V $< -o $@
-
+%.comp.spv: %.comp
+	glslangValidator -V $< -o $@
 # ------------------------------------------------------------
 # Utilities
 # ------------------------------------------------------------

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
+#include <array>
 #include "../Rendering/Framebuffers.hpp"
 #include "../../Scene.hpp"
 #include "../Rendering/Swapchain.hpp"
@@ -56,6 +57,29 @@ public:
     }
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
+    void allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
+                                    VkDescriptorSetLayout layout,
+                                    size_t count);
+    void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer, 
+                                VkImageView imageView, VkSampler sampler);
+
+       // update _descriptorSet
+    // - write _uniformBuffer to binding 0
+    //   - descriptor type is "uniform buffer"
+    // - write the image view and sampler from the scene object to binding 1
+    //   - image layout is "shader read-only optimal"
+    //   - descriptor type is "combined image sampler"
+    void updateDescriptorSet(Scene* scene);
+
+    // update the uniform buffer
+    // - use _uniformBufferMapped to write to the buffer
+    // - rotate the object in the model matrix
+    //   (animation time could be obtained by calling glfwGetTime())
+    // - set a view matrix such that the object is visible
+    // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
+    //   (do not forget to proj[1][1] *= -1)
+    void updateUniformBuffer(Camera* camera);
+
 private:
     InitBuffer _buff;
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
@@ -63,6 +87,7 @@ private:
     SwapChain* _swapChain = nullptr;
     Framebuffers* _framebuffers = nullptr;
     VkQueue _graphicsQueue = VK_NULL_HANDLE;
+    std::vector<VkDescriptorSet> _snowDescriptorSets;
 
     VkBuffer _uniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _uniformBufferMemory = VK_NULL_HANDLE;
@@ -113,22 +138,6 @@ private:
     // wait for _inFlightFence
     void waitForFence();
 
-    // update _descriptorSet
-    // - write _uniformBuffer to binding 0
-    //   - descriptor type is "uniform buffer"
-    // - write the image view and sampler from the scene object to binding 1
-    //   - image layout is "shader read-only optimal"
-    //   - descriptor type is "combined image sampler"
-    void updateDescriptorSet(Scene* scene);
-
-    // update the uniform buffer
-    // - use _uniformBufferMapped to write to the buffer
-    // - rotate the object in the model matrix
-    //   (animation time could be obtained by calling glfwGetTime())
-    // - set a view matrix such that the object is visible
-    // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
-    //   (do not forget to proj[1][1] *= -1)
-    void updateUniformBuffer(Camera* camera);
 
     // record the command buffer _commandBuffer
     // - reset the command buffer
