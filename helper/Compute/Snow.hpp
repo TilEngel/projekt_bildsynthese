@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
 #include <vulkan/vulkan.h>
 
 struct alignas(32) Particle {
@@ -23,10 +24,12 @@ public:
     
     VkCommandBuffer getCommandBuffer() { return _commandBuffer; }
     VkBuffer getCurrentBuffer() { return _currBuffer; }
-    
+    VkFence getComputeFence() { return _computeFence; } 
+    void waitForCompute();
     void destroy();
 
 private:
+    
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
     VkDevice _device = VK_NULL_HANDLE;
     uint32_t _computeQueueIndex;
@@ -46,6 +49,9 @@ private:
 
     VkCommandPool _commandPool = VK_NULL_HANDLE;
     VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
+
+    VkFence _computeFence = VK_NULL_HANDLE;
+    void createComputeFence();
 
     void createDescriptorSetLayout();
     void createPipelineLayout();

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
+#include "../initBuffer.hpp"
 
 // Helper: read file
 static std::vector<char> readFile(const std::string& filename) {
@@ -19,19 +20,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// Helper: find memory type
-static uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
-        if ((typeFilter & (1u << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-            return i;
-        }
-    }
-    throw std::runtime_error("failed to find suitable memory type!");
-}
-
-// Helper: create buffer + allocate memory
+// Helper: Buffer erstellen & Speicher allokieren
 static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize size, 
                          VkBufferUsageFlags usage, VkMemoryPropertyFlags memProps,
                          VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
@@ -51,7 +40,8 @@ static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDev
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memReq.size;
-    allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memReq.memoryTypeBits, memProps);
+    InitBuffer buff;
+    allocInfo.memoryTypeIndex = buff.findMemoryType(memReq.memoryTypeBits, memProps, physicalDevice);
 
     if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate buffer memory");
@@ -74,6 +64,25 @@ Snow::Snow(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t queueIndex
     createCommandPool();
     allocateCommandBuffer();
     recordCommandBuffer();
+    createComputeFence();
+}
+
+
+void Snow::createComputeFence() {
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;  // Start signaled
+
+    if (vkCreateFence(_device, &fenceInfo, nullptr, &_computeFence) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create compute fence");
+    }
+}
+
+void Snow::waitForCompute() {
+    if (_computeFence != VK_NULL_HANDLE) {
+        vkWaitForFences(_device, 1, &_computeFence, VK_TRUE, UINT64_MAX);
+        vkResetFences(_device, 1, &_computeFence);
+    }
 }
 
 void Snow::createDescriptorSetLayout() {
@@ -293,6 +302,10 @@ void Snow::recordCommandBuffer() {
 }
 
 void Snow::destroy() {
+    if (_computeFence != VK_NULL_HANDLE) {  // NEU
+        vkDestroyFence(_device, _computeFence, nullptr);
+        _computeFence = VK_NULL_HANDLE;
+    }
     if (_commandPool != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(_device);
         vkDestroyCommandPool(_device, _commandPool, nullptr);

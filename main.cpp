@@ -249,14 +249,16 @@ int main() {
         scene->updateObject(2, modelDutch);
 
         // Compute Shader für Schnee ausführen
+        snow->waitForCompute();
         VkSubmitInfo computeSubmit{};
         computeSubmit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         computeSubmit.commandBufferCount = 1;
         VkCommandBuffer computeCmd = snow->getCommandBuffer();
         computeSubmit.pCommandBuffers = &computeCmd;
         
-        vkQueueSubmit(graphicsQueue, 1, &computeSubmit, VK_NULL_HANDLE);
-        vkQueueWaitIdle(graphicsQueue);
+        if (vkQueueSubmit(graphicsQueue, 1, &computeSubmit, snow->getComputeFence()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to submit compute command buffer");
+        }
 
         // Update uniform buffers
         framesInFlight[currentFrame]->updateUniformBuffer(camera);
