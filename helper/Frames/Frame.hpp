@@ -21,7 +21,7 @@ public:
     , _framebuffers(framebuffers)
     , _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
-    //    allocateDescriptorSet(descriptorSetLayout, descriptorPool);
+        createLitUniformBuffer();
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
@@ -54,6 +54,9 @@ public:
         // present image
         bool recreate = _swapChain->presentImage(imageIndex);
         return recreate;
+
+
+       
     }
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
@@ -80,6 +83,12 @@ public:
     //   (do not forget to proj[1][1] *= -1)
     void updateUniformBuffer(Camera* camera);
 
+    void createLitUniformBuffer();
+    void allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
+                                    VkDescriptorSetLayout layout, size_t count);
+    void updateLitUniformBuffer(Camera* camera, Scene* scene);
+    void updateLitDescriptorSet(Scene* scene);
+
 private:
     InitBuffer _buff;
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
@@ -100,6 +109,12 @@ private:
 
     VkSemaphore _renderSemaphore = VK_NULL_HANDLE;
     VkFence _inFlightFence = VK_NULL_HANDLE;
+
+    VkBuffer _litUniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory _litUniformBufferMemory = VK_NULL_HANDLE;
+    LitUniformBufferObject* _litUniformBufferMapped = nullptr;
+    
+    std::vector<VkDescriptorSet> _litDescriptorSets;
 
     // create a buffer for UniformBufferObject
     // - create the buffer object

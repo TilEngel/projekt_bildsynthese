@@ -49,6 +49,18 @@ public:
 
     RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
 
+    LightSourceObject createLightSource(const glm::vec3& position,
+                                       const glm::vec3& color,
+                                       float intensity,
+                                       float radius,
+                                       VkRenderPass renderPass);
+    
+    RenderObject createLitObject(const char* modelPath,
+                                const char* texturePath,
+                                const glm::mat4& modelMatrix,
+                                VkRenderPass renderPass,
+                                VkDescriptorSetLayout litDescriptorSetLayout);
+
 private:
     LoadObj _loader;
     InitBuffer _buff;
