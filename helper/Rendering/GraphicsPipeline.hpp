@@ -15,21 +15,37 @@ struct Vertex {
     glm::vec2 tex;
 };
 
+enum class PipelineType {
+    STANDARD,
+    MIRROR_MARK,      // Schreibt in Stencil
+    MIRROR_REFLECT,   // Rendert gespiegelt
+    MIRROR_BLEND      // Rendert Spiegel selbst
+};
 
 class GraphicsPipeline {
 public:
 
-    GraphicsPipeline(VkDevice device, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat,const char* vertShaderPath, const char* fragShaderPath, VkRenderPass renderPass, VkDescriptorSetLayout descriptorSetLayout) 
+GraphicsPipeline(
+    VkDevice device,
+    VkFormat colorFormat,
+    VkFormat depthFormat,
+    const char* vertexShaderPath,
+    const char* fragmentShaderPath,
+    VkRenderPass renderPass,
+    VkDescriptorSetLayout descriptorSetLayout,
+    PipelineType type)
     : _device(device)
-        , _vertexShaderPath(vertShaderPath)
-        , _fragmentShaderPath(fragShaderPath)
-        , _descriptorSetLayout(descriptorSetLayout){
-        _renderPass = renderPass;
-       // createRenderPass(colorAttachmentFormat, depthAttachmentFormat);
-    //    createDescriptorSetLayout();
-        createPipelineLayout();
-        createPipeline();
-    }
+    , _colorFormat(colorFormat)
+    , _depthFormat(depthFormat)
+    , _vertexShaderPath(vertexShaderPath)
+    , _fragmentShaderPath(fragmentShaderPath)
+    , _renderPass(renderPass)
+    , _descriptorSetLayout(descriptorSetLayout)
+    , _pipelineType(type)
+{
+    createPipelineLayout();
+    createPipeline();
+}
 
     ~GraphicsPipeline() {
         cleanupPipeline();
@@ -53,10 +69,17 @@ public:
     VkPipeline getPipeline() {
         return _graphicsPipeline;
     }
+    VkDevice getDevice() const { return _device; }
+    VkFormat getColorFormat() const { return _colorFormat; }
+    VkFormat getDepthFormat() const { return _depthFormat; }
 
 private:
 
     VkDevice _device = VK_NULL_HANDLE;
+
+    VkFormat _colorFormat;
+    VkFormat _depthFormat;
+    PipelineType _pipelineType;
 
     VkRenderPass _renderPass = VK_NULL_HANDLE;
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;

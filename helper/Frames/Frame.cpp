@@ -208,15 +208,12 @@ void Frame::updateUniformBuffer(Camera* camera) {
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
 
-
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkResetCommandBuffer(_commandBuffer, 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = 0;
-    beginInfo.pInheritanceInfo = nullptr;
-
+    
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
     }
@@ -230,14 +227,14 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = rp;
-    renderPassInfo.framebuffer = fb;
+    renderPassInfo.renderPass = scene->getRenderPass();
+    renderPassInfo.framebuffer = _framebuffers->getFramebuffer(imageIndex);
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
-    clearValues[1].depthStencil = { 1.0f, 0 };
+    clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+    clearValues[1].depthStencil = {1.0f, 0};
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -257,6 +254,36 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.offset = {0, 0};
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
+
+    // ========== PASS 0: Normale Szene (ohne Spiegel-Objekte) ==========
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        if (scene->isMirrorObject(i)) continue;
+        const auto& obj = scene->getObject(i);
+        renderObject(obj, i);
+    }
+
+    // ========== PASS 1: Alle Spiegel-Markierungen im Stencil Buffer ==========
+    const auto& mirrorMarkIndices = scene->getMirrorMarkIndices();
+    for (size_t markIndex : mirrorMarkIndices) {
+        const auto& mirrorMark = scene->getObject(markIndex);
+        renderObject(mirrorMark, markIndex);
+    }
+
+    // ========== PASS 2: Gespiegelte Objekte rendern ==========
+    for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
+        const auto& reflected = scene->getReflectedObject(i);
+        size_t descriptorIndex = scene->getReflectedDescriptorIndex(i);
+        
+        // Render mit Stencil Reference = 1
+        renderObjectWithStencil(reflected, descriptorIndex, 1);
+    }
+
+    // ========== PASS 3: Alle Spiegel selbst (mit Transparenz) ==========
+    const auto& mirrorBlendIndices = scene->getMirrorBlendIndices();
+    for (size_t blendIndex : mirrorBlendIndices) {
+        const auto& mirrorBlend = scene->getObject(blendIndex);
+        renderObject(mirrorBlend, blendIndex);
+    }
 
     // Draw all objects
     size_t normalObjIdx = 0;
@@ -330,6 +357,60 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         throw std::runtime_error("failed to record command buffer!");
     }
 }
+
+void Frame::renderObject(const RenderObject& obj, size_t descriptorIndex) {
+    if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+        return;
+    }
+
+    VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+    vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+    VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+    vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipelineLayout, 0, 1, &_descriptorSets[descriptorIndex], 
+                            0, nullptr);
+
+    VkBuffer vertexBuffers[] = {obj.vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                       VK_SHADER_STAGE_VERTEX_BIT, 0, 
+                       sizeof(glm::mat4), &obj.modelMatrix);
+
+    vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+}
+
+// NEUE METHODE: Render mit explizitem Stencil Reference
+void Frame::renderObjectWithStencil(const RenderObject& obj, size_t descriptorIndex, uint32_t stencilRef) {
+    if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+        return;
+    }
+
+    VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+    vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+    // KRITISCH: Stencil Reference dynamisch setzen!
+    // Dies sorgt dafür, dass nur Pixel mit Stencil=1 gerendert werden
+    vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, stencilRef);
+
+    VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+    vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipelineLayout, 0, 1, &_descriptorSets[descriptorIndex], 
+                            0, nullptr);
+
+    VkBuffer vertexBuffers[] = {obj.vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                       VK_SHADER_STAGE_VERTEX_BIT, 0, 
+                       sizeof(glm::mat4), &obj.modelMatrix);
+
+    vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+}
+
 
 void Frame::submitCommandBuffer(uint32_t imageIndex) {
     

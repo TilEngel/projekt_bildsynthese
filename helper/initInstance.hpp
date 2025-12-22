@@ -10,6 +10,7 @@
 #include <set>
 #include <cstring>
 #include <stdexcept>
+#include <array>
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
