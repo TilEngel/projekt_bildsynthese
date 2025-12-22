@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include "helper/Rendering/GraphicsPipeline.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <algorithm>
 
 // Licht-Daten für Shader
 struct PointLight {

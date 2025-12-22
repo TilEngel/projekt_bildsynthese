@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cstring>
 #include "../initBuffer.hpp"
+#include <array>
 
 // Helper: read file
 static std::vector<char> readFile(const std::string& filename) {

@@ -8,6 +8,7 @@
 #include "helper/initBuffer.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Compute/Snow.hpp"
+#include <array>
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
