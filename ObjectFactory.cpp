@@ -41,10 +41,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
 
-    // WICHTIG: Eigentum / Cleanup-Regel festlegen:
-    // - ObjectFactory returned RenderObject mit pointer auf pipeline und pointer auf Texture
-    // - Du musst sicherstellen, dass main bzw. Scene diese Ressourcen beim Programmende löscht.
-    // Alternativ: benutzte SmartPointer (unique_ptr) an den passenden Stellen.
+
 
     return obj;
 }
@@ -205,5 +202,90 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
     obj.instanceCount = NUMBER_PARTICLES;              //Anzahl Instanzen
     obj.isSnow= true;
 
+    return obj;
+}
+
+//Lichtquelle
+LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
+                                                const glm::vec3& color,
+                                                float intensity,
+                                                float radius,
+                                                VkRenderPass renderPass) {
+    LightSourceObject light;
+    light.position = position;
+    light.color = color;
+    light.intensity = intensity;
+    light.radius = radius;
+    
+    // Erstelle kleine Kugel zur Visualisierung
+    std::vector<Vertex> sphereVertices;
+    _loader.objLoader("models/teapot.obj", sphereVertices);
+    
+    
+    // Pipeline für Lichtquelle
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/testapp.vert.spv",
+        "shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout
+    );
+    
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, sphereVertices);
+    
+    //Weiße Textur für Lichtquelle
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
+                              "textures/white.png");
+    
+    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), position);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f));
+    
+    light.renderObject.vertexBuffer = vertexBuffer;
+    light.renderObject.vertexCount = static_cast<uint32_t>(sphereVertices.size());
+    light.renderObject.textureImageView = tex->getImageView();
+    light.renderObject.textureSampler = tex->getSampler();
+    light.renderObject.pipeline = pipeline;
+    light.renderObject.modelMatrix = modelMatrix;
+    light.renderObject.instanceCount = 1;
+    light.renderObject.isLit = false;  // Lichtquelle selbst ist nicht beleuchtet
+    
+    return light;
+}
+
+//Objekte die Beleuchtet werden
+RenderObject ObjectFactory::createLitObject(const char* modelPath,
+                                          const char* texturePath,
+                                          const glm::mat4& modelMatrix,
+                                          VkRenderPass renderPass) {
+    // Pipeline mit Lighting-Layout
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/lit.vert.spv",
+        "shaders/lit.frag.spv",
+        renderPass,
+        _litDescriptorSetLayout
+    );
+    
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+    
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+    
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.isLit = true;
+    
     return obj;
 }
