@@ -7,7 +7,6 @@
 #include "Scene.hpp"
 #include "helper/initBuffer.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
-#include <array>
 #include "helper/Compute/Snow.hpp"
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
@@ -35,8 +34,7 @@ public:
                               const char* fragShaderPath,
                               const char* texturePath,
                               const glm::mat4& modelMatrix,
-                            VkRenderPass renderPass,
-                            PipelineType type);
+                            VkRenderPass renderPass);
 
     //erstellt RenderObject für Flying Dutchman
     RenderObject createFlyingDutchman(const char* modelPath,
@@ -49,9 +47,6 @@ public:
     RenderObject createGround(const glm::mat4& modelMatrix,VkRenderPass renderPass);
 
     RenderObject createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
-    RenderObject createMirror(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
-    RenderObject createMirror(const glm::mat4& modelMatrix, VkRenderPass renderPass, PipelineType pipelineType);
-
 
     RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
 

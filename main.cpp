@@ -21,36 +21,42 @@
 #include "ObjectFactory.hpp"
 #include "helper/Rendering/RenderPass.hpp"
 #include "helper/Frames/Camera.hpp"
-#include "helper/MirrorSystem.hpp"
 #include "helper/Compute/Snow.hpp"
 
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
+    // Window erstellen
     Window* window = new Window();
-    
-    Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        -90.0f,
-        -10.0f
+    //Kamera erstellen
+    Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),  // Startposition
+        glm::vec3(0.0f, 1.0f, 0.0f),   // World Up
+        -90.0f,                        // Yaw 
+        -10.0f                          // Pitch 
     );
     window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
+    // Maus-Tracking Variablen
     VkExtent2D windowExtent = window->getExtent();
     double lastX = windowExtent.width / 2.0;
     double lastY = windowExtent.height / 2.0;
     bool firstMouse = true;
 
+    // Instance + Extensions
     auto extensions = window->getRequiredExtensions();
     VkInstance instance = inst.createInstance(extensions);
 
+    // Surface
     Surface* surface = new Surface(window, instance);
 
+    // Physical Device
     uint32_t graphicsIndex, presentIndex;
     VkPhysicalDevice physicalDevice = inst.pickPhysicalDevice(
-        instance, surface, &graphicsIndex, &presentIndex
+        instance,
+        surface,
+        &graphicsIndex,
+        &presentIndex
     );
-    
+    // Logical Device
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
    
     // Queues
@@ -67,13 +73,14 @@ int main() {
         surface, physicalDevice, device,
         presentQueue, graphicsIndex, presentIndex
     );
-    
+    //Command pool
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
+    // Depth Buffer
     DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
-    
+    //RenderPass
     RenderPass rp;
     VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
-    
+    // Framebuffers mit diesem RenderPass erzeugen
     Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
     // Descriptor Set Layouts
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
@@ -101,16 +108,6 @@ int main() {
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
 
-    //Monobloc Gartenstuhl
-    glm::mat4 modelChair = glm::mat4(1.0f);
-    modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
-    modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    RenderObject chair = factory.createGenericObject(
-        "./models/plastic_monobloc_chair.obj",
-        "shaders/testapp.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/plastic_monobloc_chair.jpg",
-        modelChair, renderPass, PipelineType::STANDARD);
     //Licht
     LightSourceObject light1 = factory.createLightSource(
         glm::vec3(-2.3f, 3.0f, 0.2f),  // Position
@@ -133,30 +130,29 @@ int main() {
     );
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
-    size_t chairIndex = scene->getObjectCount() - 1;
+
+    // Monobloc Gartenstuhl
+    glm::mat4 modelChair = glm::mat4(1.0f);
+    modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
+    modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
+    RenderObject chair = factory.createLitObject("./models/plastic_monobloc_chair.obj", 
+        "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
+    scene->setRenderObject(chair);
 
     // Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
-    RenderObject dutch = factory.createGenericObject(
-        "./models/flying_dutchman.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/duck.jpg",
-        modelDutch, renderPass, PipelineType::STANDARD);
+    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", 
+        "shaders/test.vert.spv", "shaders/testapp.frag.spv", 
+        "textures/duck.jpg", modelDutch, renderPass);
     scene->setRenderObject(dutch);
 
     // Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
     modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
     modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
-    RenderObject gnome = factory.createGenericObject(
-        "./models/garden_gnome.obj",
-        "shaders/testapp.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/garden_gnome.jpg",
-        modelGnome, renderPass, PipelineType::STANDARD);
+    RenderObject gnome = factory.createLitObject("./models/garden_gnome.obj",
+        "textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setRenderObject(gnome);
-    size_t gnomeIndex = scene->getObjectCount() - 1;
 
 
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
@@ -180,35 +176,7 @@ int main() {
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
-
-    // ========== SPIEGEL-SYSTEM SETUP ==========
-    
-    MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
-    
-    // Spiegel 1: Hinter dem Gnom
-    MirrorConfig mirror1;
-    mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
-    mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f);  // Zeigt zum Betrachter
-    mirror1.scale = glm::vec3(1.5f, 2.5f, 0.1f);
-    mirrorSystem->addMirror(scene, mirror1);
-    
-    // Optional: Zweiter Spiegel an anderer Position
-    MirrorConfig mirror2;
-    mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
-    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f);  // Zeigt nach links
-    mirror2.scale = glm::vec3(1.5f, 2.5f, 0.1f);
-    mirrorSystem->addMirror(scene, mirror2);
-    
-    // Objekte markieren, die gespiegelt werden sollen
-    mirrorSystem->addReflectableObject(gnomeIndex);
-    mirrorSystem->addReflectableObject(chairIndex);
-    scene->markObjectAsReflectable(gnomeIndex);
-    scene->markObjectAsReflectable(chairIndex);
-    
-    // Reflexionen erstellen
-    mirrorSystem->createReflections(scene);
-    
-  RenderObject ground = factory.createLitObject("./models/wooden_bowl.obj",
+    RenderObject ground = factory.createLitObject("./models/wooden_bowl.obj",
         "textures/wooden_bowl.jpg", modelGround, renderPass);
     scene->setRenderObject(ground);
 
@@ -303,8 +271,8 @@ int main() {
             firstMouse = true;
         }
 
-        // Schiff animation
-        dutchAngle += deltaTime * glm::radians(5.0f);
+        // Schiff bewegen
+        dutchAngle += deltaTime * glm::radians(5.0f); 
         float radius = 60.0f;
         float circleX = radius * cos(dutchAngle);
         float circleY = radius * sin(dutchAngle);
@@ -356,23 +324,16 @@ int main() {
         }
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
-    
-    vkDeviceWaitIdle(device);
 
+    vkDeviceWaitIdle(device);
+    
     // Cleanup
-    delete mirrorSystem;
-    delete camera;
-    delete scene;
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        delete framesInFlight[i];
-    }
-    inst.destroyDescriptorPool(device, descriptorPool);
-    inst.destroyCommandPool(device, commandPool);
     snow->destroy();
     delete snow;
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
     inst.destroyDescriptorSetLayout(device,snowDescriptorSetLayout);
     delete framebuffers;
+    //delete pipeline;
     delete depthBuffer;
     delete swapChain;
     inst.destroyDevice(device);
