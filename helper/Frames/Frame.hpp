@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
+#include <array>
 #include "../Rendering/Framebuffers.hpp"
 #include "../../Scene.hpp"
 #include "../Rendering/Swapchain.hpp"
@@ -20,7 +21,7 @@ public:
     , _framebuffers(framebuffers)
     , _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
-    //    allocateDescriptorSet(descriptorSetLayout, descriptorPool);
+        createLitUniformBuffer();
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
@@ -54,12 +55,43 @@ public:
         // present image
         bool recreate = _swapChain->presentImage(imageIndex);
         return recreate;
+
+
+       
     }
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
     void renderObject(const RenderObject& obj, size_t descriptorIndex);
 
     void renderObjectWithStencil(const RenderObject& obj, size_t descriptorIndex, uint32_t stencilRef);
+    void allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
+                                    VkDescriptorSetLayout layout,
+                                    size_t count);
+    void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer, 
+                                VkImageView imageView, VkSampler sampler);
+
+       // update _descriptorSet
+    // - write _uniformBuffer to binding 0
+    //   - descriptor type is "uniform buffer"
+    // - write the image view and sampler from the scene object to binding 1
+    //   - image layout is "shader read-only optimal"
+    //   - descriptor type is "combined image sampler"
+    void updateDescriptorSet(Scene* scene);
+
+    // update the uniform buffer
+    // - use _uniformBufferMapped to write to the buffer
+    // - rotate the object in the model matrix
+    //   (animation time could be obtained by calling glfwGetTime())
+    // - set a view matrix such that the object is visible
+    // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
+    //   (do not forget to proj[1][1] *= -1)
+    void updateUniformBuffer(Camera* camera);
+
+    void createLitUniformBuffer();
+    void allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
+                                    VkDescriptorSetLayout layout, size_t count);
+    void updateLitUniformBuffer(Camera* camera, Scene* scene);
+    void updateLitDescriptorSet(Scene* scene);
 
 private:
     InitBuffer _buff;
@@ -68,6 +100,7 @@ private:
     SwapChain* _swapChain = nullptr;
     Framebuffers* _framebuffers = nullptr;
     VkQueue _graphicsQueue = VK_NULL_HANDLE;
+    std::vector<VkDescriptorSet> _snowDescriptorSets;
 
     VkBuffer _uniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _uniformBufferMemory = VK_NULL_HANDLE;
@@ -80,6 +113,12 @@ private:
 
     VkSemaphore _renderSemaphore = VK_NULL_HANDLE;
     VkFence _inFlightFence = VK_NULL_HANDLE;
+
+    VkBuffer _litUniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory _litUniformBufferMemory = VK_NULL_HANDLE;
+    LitUniformBufferObject* _litUniformBufferMapped = nullptr;
+    
+    std::vector<VkDescriptorSet> _litDescriptorSets;
 
     // create a buffer for UniformBufferObject
     // - create the buffer object
@@ -118,22 +157,6 @@ private:
     // wait for _inFlightFence
     void waitForFence();
 
-    // update _descriptorSet
-    // - write _uniformBuffer to binding 0
-    //   - descriptor type is "uniform buffer"
-    // - write the image view and sampler from the scene object to binding 1
-    //   - image layout is "shader read-only optimal"
-    //   - descriptor type is "combined image sampler"
-    void updateDescriptorSet(Scene* scene);
-
-    // update the uniform buffer
-    // - use _uniformBufferMapped to write to the buffer
-    // - rotate the object in the model matrix
-    //   (animation time could be obtained by calling glfwGetTime())
-    // - set a view matrix such that the object is visible
-    // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
-    //   (do not forget to proj[1][1] *= -1)
-    void updateUniformBuffer(Camera* camera);
 
     // record the command buffer _commandBuffer
     // - reset the command buffer

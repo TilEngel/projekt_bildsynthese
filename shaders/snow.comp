@@ -1,0 +1,32 @@
+//snow.comp
+#version 450 core
+
+struct Particle {
+   vec3 position;
+   vec3 velocity;
+};
+
+layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) readonly buffer initial {
+   Particle init[];
+};
+
+layout(set = 0, binding = 1) buffer current {
+   Particle curr[];
+};
+
+void main(void)
+{
+  uint index = gl_GlobalInvocationID.x;
+  
+  if (curr[index].position.y < 0.0) {
+    curr[index].position = init[index].position;
+    curr[index].velocity = init[index].velocity;
+  }
+
+  vec3 currAcceleration = vec3(0.0, -0.001, 0.0); 
+
+  curr[index].position += curr[index].velocity*0.5;
+  curr[index].velocity += currAcceleration;
+}

@@ -8,6 +8,7 @@
 #include "helper/initBuffer.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
 #include <array>
+#include "helper/Compute/Snow.hpp"
 
 // Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
@@ -18,14 +19,15 @@ public:
                   VkQueue graphicsQueue,
                   VkFormat colorFormat,
                   VkFormat depthFormat,
-                  VkDescriptorSetLayout descriptorSetLayout)
+                  VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSetLayout litDescriptorSetLayout)
         : _physicalDevice(physicalDevice),
           _device(device),
           _commandPool(commandPool),
           _graphicsQueue(graphicsQueue),
           _colorFormat(colorFormat),
           _depthFormat(depthFormat),
-          _descriptorSetLayout(descriptorSetLayout) {}
+          _descriptorSetLayout(descriptorSetLayout),
+          _litDescriptorSetLayout(litDescriptorSetLayout) {}
 
     //erstellt RenderObject für beliebige Objekte ohne bestimmten Shader o.Ä.
     RenderObject createGenericObject(const char* modelPath,
@@ -51,6 +53,19 @@ public:
     RenderObject createMirror(const glm::mat4& modelMatrix, VkRenderPass renderPass, PipelineType pipelineType);
 
 
+    RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
+
+    LightSourceObject createLightSource(const glm::vec3& position,
+                                       const glm::vec3& color,
+                                       float intensity,
+                                       float radius,
+                                       VkRenderPass renderPass);
+    
+    RenderObject createLitObject(const char* modelPath,
+                                const char* texturePath,
+                                const glm::mat4& modelMatrix,
+                                VkRenderPass renderPass);
+
 private:
     LoadObj _loader;
     InitBuffer _buff;
@@ -61,4 +76,5 @@ private:
     VkFormat _colorFormat;
     VkFormat _depthFormat;
     VkDescriptorSetLayout _descriptorSetLayout;
+    VkDescriptorSetLayout _litDescriptorSetLayout;
 };

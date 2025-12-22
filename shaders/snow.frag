@@ -1,0 +1,19 @@
+//snow.frag
+#version 450
+
+layout(set = 0, binding = 2) uniform sampler2D tex;
+
+layout(location = 0) in vec2 texCoord;
+
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    vec4 texColor = texture(tex, texCoord);
+    
+    //Für transparente Stellen
+    if (texColor.a < 0.1) {
+        discard;
+    }
+
+    outColor = texColor;
+}

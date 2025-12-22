@@ -44,10 +44,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
 
-    // WICHTIG: Eigentum / Cleanup-Regel festlegen:
-    // - ObjectFactory returned RenderObject mit pointer auf pipeline und pointer auf Texture
-    // - Du musst sicherstellen, dass main bzw. Scene diese Ressourcen beim Programmende löscht.
-    // Alternativ: benutzte SmartPointer (unique_ptr) an den passenden Stellen.
+
 
     return obj;
 }
@@ -188,6 +185,21 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         fragShader = "shaders/testapp.frag.spv";
     }
 
+RenderObject ObjectFactory::createSnowflake(const char* texturePath, 
+                                           VkRenderPass renderPass,
+                                           VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout) {
+    // Einfaches Quad für Schneeflocke
+    std::vector<Vertex> vertices = {
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
+        {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
+        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
+        
+        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.1f,  0.1f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}}
+    };
+
+    // Pipeline für Schneeflocken (mit Instancing)
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,

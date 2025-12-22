@@ -8,6 +8,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "../Compute/Snow.hpp"
 
 
 
@@ -133,10 +134,23 @@ void Frame::updateDescriptorSet(Scene* scene) {
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    size_t objectCount = scene->getObjectCount();
-    //Für jedes Objekt
-    for (size_t i = 0; i < objectCount; ++i) {
+    // NUR normale Objekte (nicht Schnee!)
+    size_t descriptorSetIndex = 0;
+    
+    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
+        
+        // Schnee-Objekte überspringen - die werden separat behandelt
+        if (obj.isSnow || obj.isLit) {
+            continue;
+        }
+        
+        // Sicherheitscheck
+        if (descriptorSetIndex >= _descriptorSets.size()) {
+            std::cerr << "ERROR: Descriptor set index " << descriptorSetIndex 
+                      << " out of range (max: " << _descriptorSets.size() << ")\n";
+            break;
+        }
 
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -146,7 +160,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
         std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = _descriptorSets[i];
+        descriptorWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -154,7 +168,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = _descriptorSets[i];
+        descriptorWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -165,6 +179,8 @@ void Frame::updateDescriptorSet(Scene* scene) {
                                static_cast<uint32_t>(descriptorWrites.size()),
                                descriptorWrites.data(),
                                0, nullptr);
+        
+        descriptorSetIndex++;
     }
 }
 
@@ -200,6 +216,13 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     
     if (vkBeginCommandBuffer(_commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
+    }
+
+    VkRenderPass rp = scene->getRenderPass();
+    VkFramebuffer fb = _framebuffers->getFramebuffer(imageIndex);
+    
+    if (rp == VK_NULL_HANDLE || fb == VK_NULL_HANDLE) {
+        throw std::runtime_error("invalid renderpass or framebuffer!");
     }
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -262,6 +285,72 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         renderObject(mirrorBlend, blendIndex);
     }
 
+    // Draw all objects
+    size_t normalObjIdx = 0;
+    size_t snowObjIdx = 0;
+    size_t litObjIdx =0;
+    
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const auto& obj = scene->getObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
+            continue;
+        }
+
+        //pipeline
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+
+        // descriptorSet abhängig vom Objekt-typ binden
+        if (obj.isSnow) {
+            if (snowObjIdx >= _snowDescriptorSets.size()) {
+                std::cerr << "ERROR: Snow descriptor set index " << snowObjIdx << " out of range!\n";
+                continue;
+            }
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
+            snowObjIdx++;
+
+        } else if (obj.isLit) {
+            if (litObjIdx >= _litDescriptorSets.size()) {
+                std::cerr << "ERROR: Lit descriptor set index " << litObjIdx << " out of range!\n";
+                continue;
+            }
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_litDescriptorSets[litObjIdx], 0, nullptr);
+            litObjIdx++;
+
+        } else {
+            if (normalObjIdx >= _descriptorSets.size()) {
+                std::cerr << "ERROR: Normal descriptor set index " << normalObjIdx << " out of range!\n";
+                continue;
+            }
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
+            normalObjIdx++;
+        }
+
+        // Bind vertex buffer
+        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        // Push constants
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        // Draw with or without instancing
+        if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
+           
+            vkCmdDraw(_commandBuffer, obj.vertexCount, obj.instanceCount, 0, 0);
+        } else {
+            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+        }
+    }
+    
     vkCmdEndRenderPass(_commandBuffer);
 
     if (vkEndCommandBuffer(_commandBuffer) != VK_SUCCESS) {
@@ -344,5 +433,200 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
 
     if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFence) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
+    }
+}
+
+//Schnee(Command-Shader) braucht andere DescriptorSets
+void Frame::allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
+                                      VkDescriptorSetLayout descriptorSetLayout, 
+                                      size_t snowObjectCount) {
+    if (snowObjectCount == 0) return;
+    
+    _snowDescriptorSets.resize(snowObjectCount);
+
+    std::vector<VkDescriptorSetLayout> layouts(snowObjectCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(snowObjectCount);
+    allocInfo.pSetLayouts = layouts.data();
+
+    if (vkAllocateDescriptorSets(_device, &allocInfo, _snowDescriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate snow descriptor sets!");
+    }
+}
+
+void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
+                                   VkImageView imageView, VkSampler sampler) {
+    // UBO
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = _uniformBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(UniformBufferObject);
+
+    // Storage Buffer (Particles)
+    VkDescriptorBufferInfo storageInfo{};
+    storageInfo.buffer = particleBuffer;
+    storageInfo.offset = 0;
+    storageInfo.range = sizeof(Particle) *NUMBER_PARTICLES;
+
+    // Texture
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = imageView;
+    imageInfo.sampler = sampler;
+
+    std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
+    // Binding 0: UBO
+    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[0].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[0].dstBinding = 0;
+    descriptorWrites[0].dstArrayElement = 0;
+    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[0].descriptorCount = 1;
+    descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+    // Binding 1: Storage Buffer
+    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[1].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[1].dstBinding = 1;
+    descriptorWrites[1].dstArrayElement = 0;
+    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    descriptorWrites[1].descriptorCount = 1;
+    descriptorWrites[1].pBufferInfo = &storageInfo;
+
+    // Binding 2: Texture
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = _snowDescriptorSets[index];
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].dstArrayElement = 0;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pImageInfo = &imageInfo;
+
+    vkUpdateDescriptorSets(_device, 
+                          static_cast<uint32_t>(descriptorWrites.size()),
+                          descriptorWrites.data(), 0, nullptr);
+}
+
+
+void Frame::createLitUniformBuffer() {
+    VkDeviceSize bufferSize = sizeof(LitUniformBufferObject);
+
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = bufferSize;
+    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(_device, &bufferInfo, nullptr, &_litUniformBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create lit uniform buffer!");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(_device, _litUniformBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = _buff.findMemoryType(memRequirements.memoryTypeBits,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _physicalDevice);
+
+    if (vkAllocateMemory(_device, &allocInfo, nullptr, &_litUniformBufferMemory) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate lit uniform buffer memory!");
+    }
+
+    vkBindBufferMemory(_device, _litUniformBuffer, _litUniformBufferMemory, 0);
+
+    void* data = nullptr;
+    vkMapMemory(_device, _litUniformBufferMemory, 0, bufferSize, 0, &data);
+    _litUniformBufferMapped = static_cast<LitUniformBufferObject*>(data);
+}
+
+void Frame::allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
+                                     VkDescriptorSetLayout descriptorSetLayout, 
+                                     size_t objectCount) {
+    if (objectCount == 0) return;
+    
+    _litDescriptorSets.resize(objectCount);
+
+    std::vector<VkDescriptorSetLayout> layouts(objectCount, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(objectCount);
+    allocInfo.pSetLayouts = layouts.data();
+
+    if (vkAllocateDescriptorSets(_device, &allocInfo, _litDescriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate lit descriptor sets!");
+    }
+}
+
+void Frame::updateLitUniformBuffer(Camera* camera, Scene* scene) {
+    if (!_litUniformBufferMapped) return;
+
+    LitUniformBufferObject ubo{};
+    ubo.view = camera->getViewMatrix();
+    
+    VkExtent2D extent = _swapChain->getExtent();
+    ubo.proj = glm::perspective(
+        glm::radians(camera->getZoom()),
+        static_cast<float>(extent.width) / static_cast<float>(extent.height),
+        0.1f, 100.0f
+    );
+    ubo.proj[1][1] *= -1.0f;
+    
+    ubo.viewPos = camera->getPosition();
+    ubo.numLights = static_cast<int>(scene->getLightCount());
+    
+    // Kopiere Licht-Daten
+    const auto& lights = scene->getLights();
+    for (size_t i = 0; i < lights.size() && i < 4; ++i) {
+        ubo.lights[i].position = lights[i].position;
+        ubo.lights[i].color = lights[i].color;
+        ubo.lights[i].intensity = lights[i].intensity;
+        ubo.lights[i].radius = lights[i].radius;
+    }
+    
+    std::memcpy(_litUniformBufferMapped, &ubo, sizeof(ubo));
+}
+
+void Frame::updateLitDescriptorSet(Scene* scene) {
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = _litUniformBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(LitUniformBufferObject);
+
+    size_t litIndex = 0;
+    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
+        if (!scene->isLitObject(i)) continue;
+        
+        const auto& obj = scene->getObject(i);
+
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = obj.textureImageView;
+        imageInfo.sampler = obj.textureSampler;
+
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet = _litDescriptorSets[litIndex];
+        descriptorWrites[0].dstBinding = 0;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = _litDescriptorSets[litIndex];
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo = &imageInfo;
+
+        vkUpdateDescriptorSets(_device, 2, descriptorWrites.data(), 0, nullptr);
+        
+        litIndex++;
     }
 }

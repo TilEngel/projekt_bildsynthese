@@ -44,4 +44,12 @@ public:
     void destroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool);
 
     VkDescriptorSetLayout createStandardDescriptorSetLayout(VkDevice device);
+
+    // != snow::createDescriptorSetLayout (für ComputeShader)
+    //erstellt DSL für render-shader
+    VkDescriptorSetLayout createSnowDescriptorSetLayout(VkDevice device);
+    //Für beleuchtete Objekte
+    VkDescriptorSetLayout createLitDescriptorSetLayout(VkDevice device);
+
+    void destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
 };
