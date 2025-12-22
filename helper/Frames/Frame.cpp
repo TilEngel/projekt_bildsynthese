@@ -211,7 +211,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};
-    clearValues[1].depthStencil = {1.0f, 0};  // Depth=1, Stencil=0
+    clearValues[1].depthStencil = {1.0f, 0};
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -235,33 +235,31 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // ========== PASS 0: Normale Szene (ohne Spiegel-Objekte) ==========
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         if (scene->isMirrorObject(i)) continue;
-
         const auto& obj = scene->getObject(i);
         renderObject(obj, i);
     }
 
-    // ========== PASS 1: Spiegel-Markierung im Stencil Buffer ==========
-    size_t mirrorMarkIndex = scene->getMirrorMarkIndex();
-    if (mirrorMarkIndex != SIZE_MAX) {
-        const auto& mirrorMark = scene->getObject(mirrorMarkIndex);
-        renderObject(mirrorMark, mirrorMarkIndex);
+    // ========== PASS 1: Alle Spiegel-Markierungen im Stencil Buffer ==========
+    const auto& mirrorMarkIndices = scene->getMirrorMarkIndices();
+    for (size_t markIndex : mirrorMarkIndices) {
+        const auto& mirrorMark = scene->getObject(markIndex);
+        renderObject(mirrorMark, markIndex);
     }
 
     // ========== PASS 2: Gespiegelte Objekte rendern ==========
-    // WICHTIG: Hier wird der Stencil Reference Value gesetzt!
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
         const auto& reflected = scene->getReflectedObject(i);
         size_t descriptorIndex = scene->getReflectedDescriptorIndex(i);
         
-        // RENDER MIT STENCIL REFERENCE = 1
+        // Render mit Stencil Reference = 1
         renderObjectWithStencil(reflected, descriptorIndex, 1);
     }
 
-    // ========== PASS 3: Spiegel selbst (mit Transparenz) ==========
-    size_t mirrorBlendIndex = scene->getMirrorBlendIndex();
-    if (mirrorBlendIndex != SIZE_MAX) {
-        const auto& mirrorBlend = scene->getObject(mirrorBlendIndex);
-        renderObject(mirrorBlend, mirrorBlendIndex);
+    // ========== PASS 3: Alle Spiegel selbst (mit Transparenz) ==========
+    const auto& mirrorBlendIndices = scene->getMirrorBlendIndices();
+    for (size_t blendIndex : mirrorBlendIndices) {
+        const auto& mirrorBlend = scene->getObject(blendIndex);
+        renderObject(mirrorBlend, blendIndex);
     }
 
     vkCmdEndRenderPass(_commandBuffer);

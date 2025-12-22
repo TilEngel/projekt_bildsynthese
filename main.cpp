@@ -21,6 +21,7 @@
 #include "ObjectFactory.hpp"
 #include "helper/Rendering/RenderPass.hpp"
 #include "helper/Frames/Camera.hpp"
+#include "helper/MirrorSystem.hpp"
 
 int main() {
     InitInstance inst;
@@ -102,6 +103,7 @@ int main() {
         "textures/plastic_monobloc_chair.jpg",
         modelChair, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(chair);
+    size_t chairIndex = scene->getObjectCount() - 1;
 
     //Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
@@ -132,78 +134,32 @@ int main() {
     RenderObject ground = factory.createGround(modelGround, renderPass);
     scene->setRenderObject(ground);
 
-    // ========== SPIEGEL KONFIGURATION ==========
+    // ========== SPIEGEL-SYSTEM SETUP ==========
     
-    // Spiegel steht hinter dem Gnom (negative Z-Richtung vom Gnom aus)
-    glm::vec3 mirrorPos = glm::vec3(-2.0f, 1.5f, -3.0f);
+    MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
     
-    // Normale zeigt in POSITIVE Z-Richtung (zum Betrachter/Kamera)
-    // Das bedeutet: Der Spiegel reflektiert was VOR ihm ist (Gnom bei Z=0)
-    glm::vec3 mirrorNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+    // Spiegel 1: Hinter dem Gnom
+    MirrorConfig mirror1;
+    mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
+    mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f);  // Zeigt zum Betrachter
+    mirror1.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirrorSystem->addMirror(scene, mirror1);
     
-    glm::mat4 mirrorTransform = glm::mat4(1.0f);
-    mirrorTransform = glm::translate(mirrorTransform, mirrorPos);
-    mirrorTransform = glm::scale(mirrorTransform, glm::vec3(1.5f, 2.5f, 0.1f));
-
-    // PASS 1: Spiegel-Markierung (schreibt in Stencil)
-    RenderObject mirrorMark = factory.createMirror(
-        mirrorTransform, renderPass, PipelineType::MIRROR_MARK);
-    scene->setMirrorMarkObject(mirrorMark);
-
-    // ========== REFLEXIONSMATRIX BERECHNEN (KORRIGIERT) ==========
+    // Optional: Zweiter Spiegel an anderer Position
+    MirrorConfig mirror2;
+    mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
+    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f);  // Zeigt nach links
+    mirror2.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirrorSystem->addMirror(scene, mirror2);
     
-    // Ebenengleichung: n·x + d = 0
-    // Für einen Punkt P auf der Ebene: n·P + d = 0 => d = -n·P
-    float d = -glm::dot(mirrorNormal, mirrorPos);
+    // Objekte markieren, die gespiegelt werden sollen
+    mirrorSystem->addReflectableObject(gnomeIndex);
+    mirrorSystem->addReflectableObject(chairIndex);
+    scene->markObjectAsReflectable(gnomeIndex);
+    scene->markObjectAsReflectable(chairIndex);
     
-    // Reflexionsmatrix für Ebene mit Normale n und Distanz d
-    // R = I - 2*n*n^T für Ebene durch Ursprung
-    // Mit Translation: T(-2dn) * R * T(2dn)
-    
-    glm::mat4 reflectionMatrix = glm::mat4(1.0f);
-    
-    // Diagonale: 1 - 2*n_i*n_i
-    reflectionMatrix[0][0] = 1.0f - 2.0f * mirrorNormal.x * mirrorNormal.x;
-    reflectionMatrix[1][1] = 1.0f - 2.0f * mirrorNormal.y * mirrorNormal.y;
-    reflectionMatrix[2][2] = 1.0f - 2.0f * mirrorNormal.z * mirrorNormal.z;
-    
-    // Off-Diagonal: -2*n_i*n_j
-    reflectionMatrix[0][1] = -2.0f * mirrorNormal.x * mirrorNormal.y;
-    reflectionMatrix[0][2] = -2.0f * mirrorNormal.x * mirrorNormal.z;
-    reflectionMatrix[1][0] = -2.0f * mirrorNormal.y * mirrorNormal.x;
-    reflectionMatrix[1][2] = -2.0f * mirrorNormal.y * mirrorNormal.z;
-    reflectionMatrix[2][0] = -2.0f * mirrorNormal.z * mirrorNormal.x;
-    reflectionMatrix[2][1] = -2.0f * mirrorNormal.z * mirrorNormal.y;
-    
-    // Translation: -2*d*n
-    reflectionMatrix[3][0] = -2.0f * d * mirrorNormal.x;
-    reflectionMatrix[3][1] = -2.0f * d * mirrorNormal.y;
-    reflectionMatrix[3][2] = -2.0f * d * mirrorNormal.z;
-    reflectionMatrix[3][3] = 1.0f;
-
-    std::cout << "Mirror Position: (" << mirrorPos.x << ", " << mirrorPos.y << ", " << mirrorPos.z << ")" << std::endl;
-    std::cout << "Mirror Normal: (" << mirrorNormal.x << ", " << mirrorNormal.y << ", " << mirrorNormal.z << ")" << std::endl;
-    std::cout << "Plane distance d: " << d << std::endl;
-
-    // PASS 2: Gespiegelter Gartenzwerg
-    glm::mat4 reflectedGnomeMatrix = reflectionMatrix * modelGnome;
-    RenderObject reflectedGnome = factory.createGenericObject(
-        "./models/garden_gnome.obj",
-        "shaders/testapp.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/garden_gnome.jpg",
-        reflectedGnomeMatrix,
-        renderPass,
-        PipelineType::MIRROR_REFLECT
-    );
-    scene->addReflectedObject(reflectedGnome, gnomeIndex);
-
-    // PASS 3: Spiegel mit Transparenz
-    RenderObject mirrorBlend = factory.createMirror(
-        mirrorTransform, renderPass, PipelineType::MIRROR_BLEND);
-    scene->setMirrorBlendObject(mirrorBlend);
-
-    scene->setGnomeIndex(gnomeIndex);
+    // Reflexionen erstellen
+    mirrorSystem->createReflections(scene);
 
     // Object count
     size_t objectCount = scene->getObjectCount();
@@ -296,6 +252,7 @@ int main() {
     vkDeviceWaitIdle(device);
 
     // Cleanup
+    delete mirrorSystem;
     delete camera;
     delete scene;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

@@ -69,6 +69,9 @@ GraphicsPipeline(
     VkPipeline getPipeline() {
         return _graphicsPipeline;
     }
+    VkDevice getDevice() const { return _device; }
+    VkFormat getColorFormat() const { return _colorFormat; }
+    VkFormat getDepthFormat() const { return _depthFormat; }
 
 private:
 

@@ -185,16 +185,6 @@ void GraphicsPipeline::createPipeline() {
     viewport.viewportCount = 1;
     viewport.scissorCount = 1;
 
-    // --- Rasterizer ---
-    VkPipelineRasterizationStateCreateInfo raster{};
-    raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    raster.depthClampEnable = VK_FALSE;
-    raster.rasterizerDiscardEnable = VK_FALSE;
-    raster.polygonMode = VK_POLYGON_MODE_FILL;
-    raster.lineWidth = 1.0f;
-    raster.cullMode = VK_CULL_MODE_BACK_BIT;
-    raster.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
     // --- Multisampling ---
     VkPipelineMultisampleStateCreateInfo msaa{};
     msaa.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -295,14 +285,19 @@ void GraphicsPipeline::createPipeline() {
 
     // WICHTIG: Für gespiegelte Objekte Culling BEIBEHALTEN, aber frontFace umkehren!
     if (_pipelineType == PipelineType::MIRROR_REFLECT) {
-        // Spiegelung invertiert die Winding Order der Dreiecke
-        // Deshalb: Front-Face umkehren statt Cull-Mode zu ändern
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;  // BACK cullen (wie normal)
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;  // Aber Front ist jetzt CW!
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     } else {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     }
+
+    // WICHTIG: Spiegel verschwindet nicht mehr von hinten
+    if (_pipelineType == PipelineType::MIRROR_BLEND) {
+        rasterizer.cullMode = VK_CULL_MODE_NONE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    }
+    
 
     VkPipelineColorBlendStateCreateInfo blend{};
     blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -334,7 +329,7 @@ void GraphicsPipeline::createPipeline() {
     info.pVertexInputState = &vertexInput;
     info.pInputAssemblyState = &assembly;
     info.pViewportState = &viewport;
-    info.pRasterizationState = &raster;
+    info.pRasterizationState = &rasterizer;
     info.pMultisampleState = &msaa;
     info.pDepthStencilState = &depthStencil;
     info.pColorBlendState = &blend;

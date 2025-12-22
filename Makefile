@@ -56,6 +56,7 @@ SRC = \
     helper/Rendering/Framebuffers.cpp \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
+    helper/MirrorSystem.cpp\
     ObjectFactory.cpp 
 
 #source-paths zu build-Ordner-paths 

@@ -16,6 +16,11 @@ void main() {
     
     // Alpha für Transparenz
     float alpha = 0.25;
+
+    if (!gl_FrontFacing) {
+        outColor = vec4(1.0, 1.0, 1.0, 1.0);
+        return;
+    }
     
     outColor = vec4(finalColor, alpha);
 }
