@@ -1,6 +1,5 @@
 #include <vulkan/vulkan_core.h>
 #include <array>
-#include <stdexcept>
 
 
 class RenderPass{
@@ -18,14 +17,14 @@ class RenderPass{
         color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-        // --- DEPTH+STENCIL ATTACHMENT ---
+        // --- DEPTH ATTACHMENT ---
         VkAttachmentDescription depth{};
         depth.format = depthFormat;
         depth.samples = VK_SAMPLE_COUNT_1_BIT;
         depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;      // WICHTIG: CLEAR!
-        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // Oder STORE wenn debugging
+        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 

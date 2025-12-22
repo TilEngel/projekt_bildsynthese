@@ -185,136 +185,47 @@ void GraphicsPipeline::createPipeline() {
     viewport.viewportCount = 1;
     viewport.scissorCount = 1;
 
+    // --- Rasterizer ---
+    VkPipelineRasterizationStateCreateInfo raster{};
+    raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    raster.depthClampEnable = VK_FALSE;
+    raster.rasterizerDiscardEnable = VK_FALSE;
+    raster.polygonMode = VK_POLYGON_MODE_FILL;
+    raster.lineWidth = 1.0f;
+    raster.cullMode = VK_CULL_MODE_BACK_BIT;
+    raster.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+
     // --- Multisampling ---
     VkPipelineMultisampleStateCreateInfo msaa{};
     msaa.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     msaa.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-    // --- Depth-Stencil State basierend auf Pipeline-Typ ---
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    
-    switch (_pipelineType) {
-        case PipelineType::MIRROR_MARK:
-            // Pass 1: Nur Stencil schreiben, keine Farbe/Depth
-            depthStencil.depthTestEnable = VK_FALSE;
-            depthStencil.depthWriteEnable = VK_FALSE;
-            depthStencil.stencilTestEnable = VK_TRUE;
-            
-            depthStencil.front.compareOp = VK_COMPARE_OP_ALWAYS;
-            depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.passOp = VK_STENCIL_OP_REPLACE;
-            depthStencil.front.compareMask = 0xFF;
-            depthStencil.front.writeMask = 0xFF;
-            depthStencil.front.reference = 1;
-            
-            depthStencil.back = depthStencil.front;
-            break;
-            
-        case PipelineType::MIRROR_REFLECT:
-            // Pass 2: Nur rendern wo Stencil == 1
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-            depthStencil.stencilTestEnable = VK_TRUE;
-            
-            depthStencil.front.compareOp = VK_COMPARE_OP_EQUAL;
-            depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.passOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.compareMask = 0xFF;
-            depthStencil.front.writeMask = 0x00;
-            depthStencil.front.reference = 0;  // ÄNDERN: Wird dynamisch gesetzt!
-            
-            depthStencil.back = depthStencil.front;
-            break;
+    // --- Depth-Stencil ---
+    VkPipelineDepthStencilStateCreateInfo depth{};
+    depth.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth.depthTestEnable = VK_TRUE;
+    depth.depthWriteEnable = VK_TRUE;
+    depth.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;// <= für Skybox
 
+    depth.stencilTestEnable = VK_FALSE;
 
-        case PipelineType::MIRROR_BLEND:
-            // Pass 3: Spiegel mit Transparenz
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-            depthStencil.stencilTestEnable = VK_FALSE;
-            break;
-            
-        default:  // STANDARD
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-            depthStencil.stencilTestEnable = VK_FALSE;
-            break;
-    }
-
-    // --- Color Blend State ---
+    // --- Color Blend ---
     VkPipelineColorBlendAttachmentState blendAttachment{};
-    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                     VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    
-    if (_pipelineType == PipelineType::MIRROR_MARK) {
-        // Keine Farbe schreiben beim Stencil-Marking
-        blendAttachment.colorWriteMask = 0;
-        blendAttachment.blendEnable = VK_FALSE;
-    } else if (_pipelineType == PipelineType::MIRROR_BLEND) {
-        // Alpha Blending für transparenten Spiegel
-        blendAttachment.blendEnable = VK_TRUE;
-        blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-        blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-        blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-        blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-    } else {
-        blendAttachment.blendEnable = VK_FALSE;
-    }
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &blendAttachment;
-
-    // --- Rasterizer ---
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-
-    // WICHTIG: Für gespiegelte Objekte Culling BEIBEHALTEN, aber frontFace umkehren!
-    if (_pipelineType == PipelineType::MIRROR_REFLECT) {
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    } else {
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    }
-
-    // WICHTIG: Spiegel verschwindet nicht mehr von hinten
-    if (_pipelineType == PipelineType::MIRROR_BLEND) {
-        rasterizer.cullMode = VK_CULL_MODE_NONE;
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    }
-    
+    blendAttachment.colorWriteMask =
+        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    blendAttachment.blendEnable = VK_FALSE;
 
     VkPipelineColorBlendStateCreateInfo blend{};
     blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     blend.attachmentCount = 1;
     blend.pAttachments = &blendAttachment;
 
-
-        // --- Dynamic State ---
+    // --- Dynamic State ---
     std::vector<VkDynamicState> dynamicStates{
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
-
-    // WICHTIG: Für MIRROR_REFLECT Pipeline Stencil Reference dynamisch machen!
-    if (_pipelineType == PipelineType::MIRROR_REFLECT) {
-        dynamicStates.push_back(VK_DYNAMIC_STATE_STENCIL_REFERENCE);
-    }
 
     VkPipelineDynamicStateCreateInfo dynamic{};
     dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -329,9 +240,9 @@ void GraphicsPipeline::createPipeline() {
     info.pVertexInputState = &vertexInput;
     info.pInputAssemblyState = &assembly;
     info.pViewportState = &viewport;
-    info.pRasterizationState = &rasterizer;
+    info.pRasterizationState = &raster;
     info.pMultisampleState = &msaa;
-    info.pDepthStencilState = &depthStencil;
+    info.pDepthStencilState = &depth;
     info.pColorBlendState = &blend;
     info.pDynamicState = &dynamic;
     info.layout = _pipelineLayout;

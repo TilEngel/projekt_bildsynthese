@@ -56,7 +56,6 @@ SRC = \
     helper/Rendering/Framebuffers.cpp \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
-    helper/MirrorSystem.cpp\
     helper/Compute/Snow.cpp\
     ObjectFactory.cpp 
 
@@ -69,7 +68,7 @@ TARGET = projekt
 # -----------------------------
 .PHONY: all clean run
 all: $(TARGET)
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv shaders/mirror.frag.spv    
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 # build Ordner erstellen
