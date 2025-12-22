@@ -94,6 +94,5 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) shaders/*.spv rm -rf $(BULID_DIR)
-	find . -type f -name "*.o" -delete
+	rm -f $(TARGET) shaders/*.spv rm -rf $(BUILD_DIR)
 
