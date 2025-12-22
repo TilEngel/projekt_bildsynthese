@@ -14,7 +14,6 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include "Rendering/Surface.hpp"
-#include <array>
 
 
 class InitInstance {

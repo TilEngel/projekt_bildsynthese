@@ -95,5 +95,5 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) shaders/*.spv rm -rf $(BULID_DIR)
+	rm -f $(TARGET) shaders/*.spv rm -rf $(BUILD_DIR)
 
