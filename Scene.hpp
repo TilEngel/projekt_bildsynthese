@@ -9,9 +9,9 @@
 // Licht-Daten für Shader
 struct PointLight {
     alignas(16) glm::vec3 position;
-    alignas(16) glm::vec3 color;        // RGB Farbe
-    alignas(4)  float intensity;         // Helligkeit
-    alignas(4)  float radius;            // Reichweite
+    alignas(16) glm::vec3 color;     
+    alignas(4)  float intensity;  
+    alignas(4)  float radius;       
 };
 
 // Uniform Buffer Object für beleuchtete Objekte
@@ -19,7 +19,7 @@ struct LitUniformBufferObject {
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
     alignas(16) glm::vec3 viewPos;      // Kamera-Position für Specular
-    alignas(4)  int numLights;          // Anzahl aktiver Lichter
+    alignas(4)  int numLights;          // Anzahl Lichter
     PointLight lights[4];                // Max. 4 Punktlichter
 };
 
@@ -33,16 +33,16 @@ struct RenderObject {
     VkBuffer instanceBuffer = VK_NULL_HANDLE;
     uint32_t instanceCount = 1;
     bool isSnow = false;
-    bool isLit = false;  // NEU: Objekt wird beleuchtet
+    bool isLit = false;  
 };
 
-// Lichtquellen-Objekt (visualisiert das Licht)
+// Lichtquellen-Objekt
 struct LightSourceObject {
     glm::vec3 position;
     glm::vec3 color;
     float intensity;
     float radius;
-    RenderObject renderObject;  // Visuelles Objekt (z.B. Kugel)
+    RenderObject renderObject; 
 };
 
 class Scene {

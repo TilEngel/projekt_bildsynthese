@@ -18,14 +18,15 @@ public:
                   VkQueue graphicsQueue,
                   VkFormat colorFormat,
                   VkFormat depthFormat,
-                  VkDescriptorSetLayout descriptorSetLayout)
+                  VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSetLayout litDescriptorSetLayout)
         : _physicalDevice(physicalDevice),
           _device(device),
           _commandPool(commandPool),
           _graphicsQueue(graphicsQueue),
           _colorFormat(colorFormat),
           _depthFormat(depthFormat),
-          _descriptorSetLayout(descriptorSetLayout) {}
+          _descriptorSetLayout(descriptorSetLayout),
+          _litDescriptorSetLayout(litDescriptorSetLayout) {}
 
     //erstellt RenderObject für beliebige Objekte ohne bestimmten Shader o.Ä.
     RenderObject createGenericObject(const char* modelPath,
@@ -58,8 +59,7 @@ public:
     RenderObject createLitObject(const char* modelPath,
                                 const char* texturePath,
                                 const glm::mat4& modelMatrix,
-                                VkRenderPass renderPass,
-                                VkDescriptorSetLayout litDescriptorSetLayout);
+                                VkRenderPass renderPass);
 
 private:
     LoadObj _loader;
@@ -71,4 +71,5 @@ private:
     VkFormat _colorFormat;
     VkFormat _depthFormat;
     VkDescriptorSetLayout _descriptorSetLayout;
+    VkDescriptorSetLayout _litDescriptorSetLayout;
 };

@@ -94,7 +94,7 @@ int main() {
     // Objekte erstellen
     ObjectFactory factory(physicalDevice, device, commandPool, graphicsQueue,
                          swapChain->getImageFormat(), depthBuffer->getImageFormat(),
-                         descriptorSetLayout);
+                         descriptorSetLayout,litDescriptorSetLayout);
 
     // Skybox
     std::array<const char*, 6> skyboxFaces = {
@@ -110,21 +110,33 @@ int main() {
 
     //Licht
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(0.0f, 3.0f, 0.0f),  // Position
-        glm::vec3(1.0f, 0.9f, 0.7f),  // Warmes Licht
-        15.0f,                          // Intensity
-        200.0f,                         // Radius
+        glm::vec3(-2.3f, 3.0f, 0.2f),  // Position
+        glm::vec3(1.0f, 0.5f, 0.5f),  // Warmes Licht
+        5.0f,                          // Intensity
+        10.0f,                         // Radius
         renderPass
     );
     scene->addLightSource(light1);
     scene->setRenderObject(light1.renderObject);
+
+
+    //Licht2
+    LightSourceObject light2 = factory.createLightSource(
+        glm::vec3(-8.2f, 12.2f, -6.5f),  // Position
+        glm::vec3(0.7f, 0.7f, 0.7f),  // Warmes Licht
+        5.0f,                          // Intensity
+        100.0f,                         // Radius
+        renderPass
+    );
+    scene->addLightSource(light2);
+    scene->setRenderObject(light2.renderObject);
 
     // Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
     RenderObject chair = factory.createLitObject("./models/plastic_monobloc_chair.obj", 
-        "textures/plastic_monobloc_chair.jpg", modelChair, renderPass, litDescriptorSetLayout);
+        "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
     scene->setRenderObject(chair);
 
     // Fliegender Holländer
@@ -139,7 +151,7 @@ int main() {
     modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
     modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
     RenderObject gnome = factory.createLitObject("./models/garden_gnome.obj",
-        "textures/garden_gnome.jpg", modelGnome, renderPass,litDescriptorSetLayout);
+        "textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setRenderObject(gnome);
 
 
@@ -148,13 +160,24 @@ int main() {
     modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
     modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
     RenderObject umbrella = factory.createLitObject("./models/sonnenschirm.obj",
-        "textures/sonnenschirm.jpg", modelUmbrella, renderPass, litDescriptorSetLayout);
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
     scene->setRenderObject(umbrella);
+
+
+    glm::mat4 modelLamp = glm::mat4(1.0f);
+    modelLamp = glm::translate(modelLamp, glm::vec3(-10.0f, 0.0f, -10.0f));
+    modelLamp = glm::scale(modelLamp, glm::vec3(20.0f, 20.0f, 20.0f));
+    modelLamp = glm::rotate(modelLamp, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    RenderObject lamp = factory.createGenericObject("./models/desk_lamp.obj",
+        "shaders/test.vert.spv", "shaders/testapp.frag.spv",
+        "textures/desk_lamp.jpg", modelLamp, renderPass);
+    scene->setRenderObject(lamp);
 
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
-    RenderObject ground = factory.createGround(modelGround, renderPass);
+    RenderObject ground = factory.createLitObject("./models/wooden_bowl.obj",
+        "textures/wooden_bowl.jpg", modelGround, renderPass);
     scene->setRenderObject(ground);
 
     // Schneeflocken ZULETZT hinzufügen
@@ -257,7 +280,7 @@ int main() {
         modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
         modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
-        scene->updateObject(3, modelDutch);
+        scene->updateObject(4, modelDutch);
 
         // Compute Shader für Schnee ausführen
         snow->waitForCompute();
