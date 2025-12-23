@@ -122,28 +122,40 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
-    // Monobloc Gartenstuhl
+    //Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    RenderObject chair = factory.createLitObject("./models/plastic_monobloc_chair.obj", 
-        "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
+    RenderObject chair = factory.createGenericObject(
+        "./models/plastic_monobloc_chair.obj",
+        "shaders/testapp.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/plastic_monobloc_chair.jpg",
+        modelChair, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(chair);
     size_t chairIndex = scene->getObjectCount() - 1;
 
-    // Fliegender Holländer
+    //Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
-    RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", 
-        "shaders/test.vert.spv", "shaders/testapp.frag.spv", 
-        "textures/duck.jpg", modelDutch, renderPass, PipelineType::STANDARD);
+    RenderObject dutch = factory.createGenericObject(
+        "./models/flying_dutchman.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/duck.jpg",
+        modelDutch, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(dutch);
+    size_t dutchIndex = scene->getObjectCount() - 1;
 
-    // Gartenzwerg
+    //Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
     modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
     modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
-    RenderObject gnome = factory.createLitObject("./models/garden_gnome.obj",
-        "textures/garden_gnome.jpg", modelGnome, renderPass);
+    RenderObject gnome = factory.createGenericObject(
+        "./models/garden_gnome.obj",
+        "shaders/testapp.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/garden_gnome.jpg",
+        modelGnome, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(gnome);
     size_t gnomeIndex = scene->getObjectCount() - 1;
 
@@ -180,14 +192,14 @@ int main() {
     // Spiegel 1: Hinter dem Gnom
     MirrorConfig mirror1;
     mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
-    mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+    mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f); //zur Kamera zeigend
     mirror1.scale = glm::vec3(1.5f, 2.5f, 0.1f);
     mirrorSystem->addMirror(scene, mirror1);
     
     // Spiegel 2: Rechts
     MirrorConfig mirror2;
     mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
-    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f);
+    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f); //nach links zeigend
     mirror2.scale = glm::vec3(1.5f, 2.5f, 0.1f);
     mirrorSystem->addMirror(scene, mirror2);
     
@@ -213,7 +225,6 @@ int main() {
     size_t normalObjectCount = scene->getNormalObjectCount();
     size_t snowObjectCount = scene->getSnowObjectCount();
     size_t litObjectCount = scene->getLitObjectCount();
-
     std::cout << "Normal objects: " << normalObjectCount << std::endl;
     std::cout << "Snow objects: " << snowObjectCount << std::endl;
     std::cout << "Lit objects: " << litObjectCount << std::endl;
@@ -298,7 +309,7 @@ int main() {
         modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
         modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
-        scene->updateObject(4, modelDutch);
+        scene->updateObject(dutchIndex, modelDutch);
 
         // Compute Shader für Schnee ausführen
         snow->waitForCompute();
