@@ -1,4 +1,4 @@
-//main.cpp
+//main.cpp (Merged - Snow + Lighting + Mirrors)
 #include <iostream>
 #include <vector>
 #include <stdexcept>
@@ -22,44 +22,37 @@
 #include "helper/Rendering/RenderPass.hpp"
 #include "helper/Frames/Camera.hpp"
 #include "helper/Compute/Snow.hpp"
+#include "helper/MirrorSystem.hpp"
 
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
-    // Window erstellen
     Window* window = new Window();
-    //Kamera erstellen
-    Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),  // Startposition
-        glm::vec3(0.0f, 1.0f, 0.0f),   // World Up
-        -90.0f,                        // Yaw 
-        -10.0f                          // Pitch 
+    
+    Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        -90.0f,
+        -10.0f
     );
     window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    // Maus-Tracking Variablen
+    
     VkExtent2D windowExtent = window->getExtent();
     double lastX = windowExtent.width / 2.0;
     double lastY = windowExtent.height / 2.0;
     bool firstMouse = true;
 
-    // Instance + Extensions
     auto extensions = window->getRequiredExtensions();
     VkInstance instance = inst.createInstance(extensions);
 
-    // Surface
     Surface* surface = new Surface(window, instance);
 
-    // Physical Device
     uint32_t graphicsIndex, presentIndex;
     VkPhysicalDevice physicalDevice = inst.pickPhysicalDevice(
-        instance,
-        surface,
-        &graphicsIndex,
-        &presentIndex
+        instance, surface, &graphicsIndex, &presentIndex
     );
-    // Logical Device
+    
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
-   
-    // Queues
+    
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
 
@@ -68,21 +61,20 @@ int main() {
 
     VkQueue computeQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &computeQueue);
-    // Swapchain
+    
     SwapChain* swapChain = new SwapChain(
         surface, physicalDevice, device,
         presentQueue, graphicsIndex, presentIndex
     );
-    //Command pool
+    
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
-    // Depth Buffer
     DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
-    //RenderPass
+    
     RenderPass rp;
     VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
-    // Framebuffers mit diesem RenderPass erzeugen
+    
     Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
-    // Descriptor Set Layouts
+    
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
     VkDescriptorSetLayout snowDescriptorSetLayout = inst.createSnowDescriptorSetLayout(device);
     VkDescriptorSetLayout litDescriptorSetLayout = inst.createLitDescriptorSetLayout(device);
@@ -94,7 +86,7 @@ int main() {
     // Objekte erstellen
     ObjectFactory factory(physicalDevice, device, commandPool, graphicsQueue,
                          swapChain->getImageFormat(), depthBuffer->getImageFormat(),
-                         descriptorSetLayout,litDescriptorSetLayout);
+                         descriptorSetLayout, litDescriptorSetLayout);
 
     // Skybox
     std::array<const char*, 6> skyboxFaces = {
@@ -108,24 +100,23 @@ int main() {
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
 
-    //Licht
+    // Licht 1
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(-2.3f, 3.0f, 0.2f),  // Position
-        glm::vec3(1.0f, 0.5f, 0.5f),  // Warmes Licht
-        5.0f,                          // Intensity
-        10.0f,                         // Radius
+        glm::vec3(-2.3f, 3.0f, 0.2f),
+        glm::vec3(1.0f, 0.5f, 0.5f),
+        5.0f,
+        10.0f,
         renderPass
     );
     scene->addLightSource(light1);
     scene->setRenderObject(light1.renderObject);
 
-
-    //Licht2
+    // Licht 2
     LightSourceObject light2 = factory.createLightSource(
-        glm::vec3(-8.2f, 12.2f, -6.5f),  // Position
-        glm::vec3(0.7f, 0.7f, 0.7f),  // Warmes Licht
-        5.0f,                          // Intensity
-        100.0f,                         // Radius
+        glm::vec3(-8.2f, 12.2f, -6.5f),
+        glm::vec3(0.7f, 0.7f, 0.7f),
+        5.0f,
+        100.0f,
         renderPass
     );
     scene->addLightSource(light2);
@@ -138,12 +129,13 @@ int main() {
     RenderObject chair = factory.createLitObject("./models/plastic_monobloc_chair.obj", 
         "textures/plastic_monobloc_chair.jpg", modelChair, renderPass);
     scene->setRenderObject(chair);
+    size_t chairIndex = scene->getObjectCount() - 1;
 
     // Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
     RenderObject dutch = factory.createGenericObject("./models/flying_dutchman.obj", 
         "shaders/test.vert.spv", "shaders/testapp.frag.spv", 
-        "textures/duck.jpg", modelDutch, renderPass);
+        "textures/duck.jpg", modelDutch, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(dutch);
 
     // Gartenzwerg
@@ -153,8 +145,9 @@ int main() {
     RenderObject gnome = factory.createLitObject("./models/garden_gnome.obj",
         "textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setRenderObject(gnome);
+    size_t gnomeIndex = scene->getObjectCount() - 1;
 
-
+    // Sonnenschirm
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
     modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
     modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
@@ -163,14 +156,14 @@ int main() {
         "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
     scene->setRenderObject(umbrella);
 
-
+    // Lampe
     glm::mat4 modelLamp = glm::mat4(1.0f);
     modelLamp = glm::translate(modelLamp, glm::vec3(-10.0f, 0.0f, -10.0f));
     modelLamp = glm::scale(modelLamp, glm::vec3(20.0f, 20.0f, 20.0f));
     modelLamp = glm::rotate(modelLamp, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
     RenderObject lamp = factory.createGenericObject("./models/desk_lamp.obj",
         "shaders/test.vert.spv", "shaders/testapp.frag.spv",
-        "textures/desk_lamp.jpg", modelLamp, renderPass);
+        "textures/desk_lamp.jpg", modelLamp, renderPass, PipelineType::STANDARD);
     scene->setRenderObject(lamp);
 
     // Boden
@@ -179,6 +172,33 @@ int main() {
     RenderObject ground = factory.createLitObject("./models/wooden_bowl.obj",
         "textures/wooden_bowl.jpg", modelGround, renderPass);
     scene->setRenderObject(ground);
+
+    // ========== SPIEGEL-SYSTEM SETUP ==========
+    
+    MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
+    
+    // Spiegel 1: Hinter dem Gnom
+    MirrorConfig mirror1;
+    mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
+    mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+    mirror1.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirrorSystem->addMirror(scene, mirror1);
+    
+    // Spiegel 2: Rechts
+    MirrorConfig mirror2;
+    mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
+    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f);
+    mirror2.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirrorSystem->addMirror(scene, mirror2);
+    
+    // Objekte markieren, die gespiegelt werden sollen
+    mirrorSystem->addReflectableObject(gnomeIndex);
+    mirrorSystem->addReflectableObject(chairIndex);
+    scene->markObjectAsReflectable(gnomeIndex);
+    scene->markObjectAsReflectable(chairIndex);
+    
+    // Reflexionen erstellen
+    mirrorSystem->createReflections(scene);
 
     // Schneeflocken ZULETZT hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
@@ -196,7 +216,7 @@ int main() {
 
     std::cout << "Normal objects: " << normalObjectCount << std::endl;
     std::cout << "Snow objects: " << snowObjectCount << std::endl;
-    std::cout << "Light objects: " << litObjectCount << std::endl;
+    std::cout << "Lit objects: " << litObjectCount << std::endl;
     
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalObjectCount);
@@ -206,9 +226,9 @@ int main() {
     // Descriptor pool
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets+maxLitSets;
+    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets+ maxLitSets;
+    poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     poolSizes[2].descriptorCount = maxSnowSets;
 
@@ -223,14 +243,13 @@ int main() {
         throw std::runtime_error("failed to create descriptor pool");
     }
 
-    //frames in flight
+    // Frames in flight
     std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         framesInFlight[i] = new Frame(physicalDevice, device, swapChain, framebuffers,
                                      graphicsQueue, commandPool, descriptorPool,
                                      scene->getDescriptorSetLayout());
         
-        // Allocate descriptor sets
         framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, normalObjectCount);
         framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout, snowObjectCount);
         framesInFlight[i]->allocateLitDescriptorSets(descriptorPool, litDescriptorSetLayout, litObjectCount);
@@ -248,7 +267,6 @@ int main() {
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        // Kamera-Input
         double xpos, ypos;
         window->getCursorPos(&xpos, &ypos);
         if (firstMouse) {
@@ -271,8 +289,8 @@ int main() {
             firstMouse = true;
         }
 
-        // Schiff bewegen
-        dutchAngle += deltaTime * glm::radians(5.0f); 
+        // Schiff animation
+        dutchAngle += deltaTime * glm::radians(5.0f);
         float radius = 60.0f;
         float circleX = radius * cos(dutchAngle);
         float circleY = radius * sin(dutchAngle);
@@ -328,12 +346,20 @@ int main() {
     vkDeviceWaitIdle(device);
     
     // Cleanup
+    delete mirrorSystem;
     snow->destroy();
     delete snow;
+    delete camera;
+    delete scene;
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        delete framesInFlight[i];
+    }
+    inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
-    inst.destroyDescriptorSetLayout(device,snowDescriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device, litDescriptorSetLayout);
+    inst.destroyCommandPool(device, commandPool);
     delete framebuffers;
-    //delete pipeline;
     delete depthBuffer;
     delete swapChain;
     inst.destroyDevice(device);

@@ -1,8 +1,7 @@
-// ObjectFactory.cpp
+// ObjectFactory.cpp (Merged)
 #include "ObjectFactory.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Texture/CubeMap.hpp"
-
 #include "helper/Texture/Texture.hpp"
 
 RenderObject ObjectFactory::createGenericObject(const char* modelPath,
@@ -10,9 +9,9 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
                                          const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass)
+                                         VkRenderPass renderPass,
+                                         PipelineType type)
 {
-    //eigene Pipeline erstellen
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -20,19 +19,16 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         vertShaderPath, 
         fragShaderPath,
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        type
     );
 
-    //Model laden & Vertexbuffer erzeugen
     std::vector<Vertex> vertices;
     _loader.objLoader(modelPath, vertices);
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
 
-
-    //Textur laden
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
 
-    //build RenderObject
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
@@ -41,14 +37,10 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
 
-
-
     return obj;
 }
 
-//Erstellt den Boden. Weniger Parameter und theoretisch mehr Freiheit für besondere techniken (wird stand jetzt nur nicht ausgenutzt)
 RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass){
-    //eigene Pipeline erstellen
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -56,19 +48,17 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
         "shaders/test.vert.spv", 
         "shaders/testapp.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        PipelineType::STANDARD
     );
 
-    //Model laden & Vertexbuffer erzeugen
     std::vector<Vertex> vertices;
     _loader.objLoader("models/wooden_bowl.obj", vertices);
    
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
 
-    //Textur laden
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, "textures/wooden_bowl.jpg");
 
-    //build RenderObject
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
@@ -80,13 +70,9 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
     return obj;
 }
 
-
-
 RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
                                          const std::array<const char*, 6>& cubemapFaces) {
-    // Skybox ist ein Würfel
     std::vector<Vertex> vertices = {
-        // Positionen für einen Würfel (nur Position, keine Textur-Koordinaten nötig)
         {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
         {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
         {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
@@ -130,7 +116,6 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}}
     };
 
-    // Pipeline für Skybox
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -138,17 +123,16 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.vert.spv",
         "shaders/skybox.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        PipelineType::STANDARD
     );
 
-    // Vertex Buffer
     InitBuffer buff;
     VkBuffer vertexBuffer = buff.createVertexBuffer(_physicalDevice, _device,
                                                     _commandPool, _graphicsQueue, vertices);
 
-    // CubeMap Textur laden
     CubeMap* cubemap = new CubeMap(_physicalDevice, _device,
-                                                  _commandPool, _graphicsQueue, cubemapFaces);
+                                   _commandPool, _graphicsQueue, cubemapFaces);
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
@@ -156,15 +140,15 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
     obj.textureImageView = cubemap->getImageView();
     obj.textureSampler = cubemap->getSampler();
     obj.pipeline = pipeline;
-    obj.modelMatrix = glm::mat4(1.0f); // Keine Transformation nötig
+    obj.modelMatrix = glm::mat4(1.0f);
 
     return obj;
 }
 
 RenderObject ObjectFactory::createSnowflake(const char* texturePath, 
                                            VkRenderPass renderPass,
-                                           VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout) {
-    // Einfaches Quad für Schneeflocke
+                                           VkBuffer particleBuffer, 
+                                           VkDescriptorSetLayout snowDescriptorSetLayout) {
     std::vector<Vertex> vertices = {
         {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
         {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
@@ -175,7 +159,6 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}}
     };
 
-    // Pipeline für Schneeflocken (mit Instancing)
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -183,7 +166,8 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         "shaders/snow.vert.spv",
         "shaders/snow.frag.spv",
         renderPass,
-        snowDescriptorSetLayout
+        snowDescriptorSetLayout,
+        PipelineType::STANDARD
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -198,14 +182,13 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = glm::mat4(1.0f);
-    obj.instanceBuffer = particleBuffer;    //Particle Buffer
-    obj.instanceCount = NUMBER_PARTICLES;              //Anzahl Instanzen
-    obj.isSnow= true;
+    obj.instanceBuffer = particleBuffer;
+    obj.instanceCount = NUMBER_PARTICLES;
+    obj.isSnow = true;
 
     return obj;
 }
 
-//Lichtquelle
 LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
                                                 const glm::vec3& color,
                                                 float intensity,
@@ -217,12 +200,9 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     light.intensity = intensity;
     light.radius = radius;
     
-    // Erstelle kleine Kugel zur Visualisierung
     std::vector<Vertex> sphereVertices;
     _loader.objLoader("models/teapot.obj", sphereVertices);
     
-    
-    // Pipeline für Lichtquelle
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -230,13 +210,13 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
         "shaders/testapp.vert.spv",
         "shaders/testapp.frag.spv",
         renderPass,
-        _descriptorSetLayout
+        _descriptorSetLayout,
+        PipelineType::STANDARD
     );
     
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
                                                     _commandPool, _graphicsQueue, sphereVertices);
     
-    //Weiße Textur für Lichtquelle
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
                               "textures/white.png");
     
@@ -250,17 +230,15 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     light.renderObject.pipeline = pipeline;
     light.renderObject.modelMatrix = modelMatrix;
     light.renderObject.instanceCount = 1;
-    light.renderObject.isLit = false;  // Lichtquelle selbst ist nicht beleuchtet
+    light.renderObject.isLit = false;
     
     return light;
 }
 
-//Objekte die Beleuchtet werden
 RenderObject ObjectFactory::createLitObject(const char* modelPath,
                                           const char* texturePath,
                                           const glm::mat4& modelMatrix,
                                           VkRenderPass renderPass) {
-    // Pipeline mit Lighting-Layout
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -268,7 +246,8 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         "shaders/lit.vert.spv",
         "shaders/lit.frag.spv",
         renderPass,
-        _litDescriptorSetLayout
+        _litDescriptorSetLayout,
+        PipelineType::STANDARD
     );
     
     std::vector<Vertex> vertices;
@@ -287,5 +266,54 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
     obj.modelMatrix = modelMatrix;
     obj.isLit = true;
     
+    return obj;
+}
+
+RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass,
+                                         PipelineType pipelineType) {
+    std::vector<Vertex> vertices = {
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        
+        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}}
+    };
+
+    const char* fragShader;
+    if (pipelineType == PipelineType::MIRROR_BLEND) {
+        fragShader = "shaders/mirror.frag.spv";
+    } else {
+        fragShader = "shaders/testapp.frag.spv";
+    }
+
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/testapp.vert.spv",
+        fragShader,
+        renderPass,
+        _descriptorSetLayout,
+        pipelineType
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(
+        _physicalDevice, _device, _commandPool, _graphicsQueue, vertices
+    );
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, 
+                               _graphicsQueue, "textures/mirror.jpg");
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+
     return obj;
 }

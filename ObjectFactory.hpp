@@ -1,4 +1,4 @@
-// ObjectFactory.hpp
+// ObjectFactory.hpp (Merged)
 #pragma once
 
 #include <string>
@@ -10,7 +10,6 @@
 #include "helper/Compute/Snow.hpp"
 #include <array>
 
-// Benötigte Vulkan-Handles / Helper-Referenzen werden per Konstruktor übergeben
 class ObjectFactory {
 public:
     ObjectFactory(VkPhysicalDevice physicalDevice,
@@ -19,7 +18,8 @@ public:
                   VkQueue graphicsQueue,
                   VkFormat colorFormat,
                   VkFormat depthFormat,
-                  VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSetLayout litDescriptorSetLayout)
+                  VkDescriptorSetLayout descriptorSetLayout, 
+                  VkDescriptorSetLayout litDescriptorSetLayout)
         : _physicalDevice(physicalDevice),
           _device(device),
           _commandPool(commandPool),
@@ -29,27 +29,20 @@ public:
           _descriptorSetLayout(descriptorSetLayout),
           _litDescriptorSetLayout(litDescriptorSetLayout) {}
 
-    //erstellt RenderObject für beliebige Objekte ohne bestimmten Shader o.Ä.
     RenderObject createGenericObject(const char* modelPath,
                               const char* vertShaderPath,
                               const char* fragShaderPath,
                               const char* texturePath,
                               const glm::mat4& modelMatrix,
-                            VkRenderPass renderPass);
+                              VkRenderPass renderPass,
+                              PipelineType type);
 
-    //erstellt RenderObject für Flying Dutchman
-    RenderObject createFlyingDutchman(const char* modelPath,
-                              const char* vertShaderPath,
-                              const char* fragShaderPath,
-                              const char* texturePath,
-                              const glm::mat4& modelMatrix,
-                              VkRenderPass renderPass);
-
-    RenderObject createGround(const glm::mat4& modelMatrix,VkRenderPass renderPass);
+    RenderObject createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
     RenderObject createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
 
-    RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
+    RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, 
+                                VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
 
     LightSourceObject createLightSource(const glm::vec3& position,
                                        const glm::vec3& color,
@@ -61,6 +54,10 @@ public:
                                 const char* texturePath,
                                 const glm::mat4& modelMatrix,
                                 VkRenderPass renderPass);
+
+    RenderObject createMirror(const glm::mat4& modelMatrix, 
+                             VkRenderPass renderPass, 
+                             PipelineType pipelineType);
 
 private:
     LoadObj _loader;

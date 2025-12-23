@@ -1,3 +1,4 @@
+// Scene.hpp (Merged - Snow + Lighting + Mirrors)
 #pragma once
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -6,6 +7,7 @@
 #include "helper/Rendering/GraphicsPipeline.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
+#include <unordered_set>
 
 // Licht-Daten für Shader
 struct PointLight {
@@ -68,7 +70,6 @@ public:
     void updateLightPosition(size_t index, const glm::vec3& newPos) {
         if (index < _lights.size()) {
             _lights[index].position = newPos;
-            // Update auch das visuelle Objekt
             glm::mat4 model = glm::translate(glm::mat4(1.0f), newPos);
             _lights[index].renderObject.modelMatrix = model;
         }
@@ -85,6 +86,7 @@ public:
     size_t getLitObjectCount() const { return _litObjectIndices.size(); }
     
     const RenderObject& getObject(size_t index) const { return _objects[index]; }
+    RenderObject& getObjectMutable(size_t idx) { return _objects[idx]; }
     
     bool isSnowObject(size_t index) const {
         return std::find(_snowObjectIndices.begin(), _snowObjectIndices.end(), index) 
@@ -125,10 +127,80 @@ public:
         return _descriptorSetLayout;
     }
 
+    // Mirror-spezifische Methoden
+    void setMirrorMarkObject(const RenderObject& obj) {
+        _mirrorMarkIndices.push_back(_objects.size());
+        _objects.push_back(obj);
+    }
+
+    void setMirrorBlendObject(const RenderObject& obj) {
+        _mirrorBlendIndices.push_back(_objects.size());
+        _objects.push_back(obj);
+    }
+
+    void addReflectedObject(const RenderObject& obj, size_t originalIndex) {
+        _reflectedObjects.push_back(obj);
+        _reflectedDescriptorIndices.push_back(originalIndex);
+    }
+
+    const std::vector<size_t>& getMirrorMarkIndices() const { 
+        return _mirrorMarkIndices; 
+    }
+
+    const std::vector<size_t>& getMirrorBlendIndices() const { 
+        return _mirrorBlendIndices; 
+    }
+
+    size_t getMirrorMarkIndex() const { 
+        return _mirrorMarkIndices.empty() ? SIZE_MAX : _mirrorMarkIndices[0]; 
+    }
+
+    size_t getMirrorBlendIndex() const { 
+        return _mirrorBlendIndices.empty() ? SIZE_MAX : _mirrorBlendIndices[0]; 
+    }
+    
+    size_t getReflectedObjectCount() const { 
+        return _reflectedObjects.size(); 
+    }
+
+    const RenderObject& getReflectedObject(size_t idx) const { 
+        return _reflectedObjects[idx]; 
+    }
+
+    size_t getReflectedDescriptorIndex(size_t idx) const {
+        return _reflectedDescriptorIndices[idx];
+    }
+
+    bool isMirrorObject(size_t idx) const {
+        for (size_t markIdx : _mirrorMarkIndices) {
+            if (idx == markIdx) return true;
+        }
+        for (size_t blendIdx : _mirrorBlendIndices) {
+            if (idx == blendIdx) return true;
+        }
+        return false;
+    }
+
+    bool isReflectedObject(size_t idx) const {
+        return _reflectableObjectIndices.find(idx) != _reflectableObjectIndices.end();
+    }
+
+    void markObjectAsReflectable(size_t idx) {
+        _reflectableObjectIndices.insert(idx);
+    }
+
 private:
     std::vector<RenderObject> _objects;
     std::vector<LightSourceObject> _lights;
     std::vector<size_t> _snowObjectIndices;
     std::vector<size_t> _litObjectIndices;
+    
+    // Mirror data
+    std::vector<RenderObject> _reflectedObjects;
+    std::vector<size_t> _reflectedDescriptorIndices;
+    std::vector<size_t> _mirrorMarkIndices;
+    std::vector<size_t> _mirrorBlendIndices;
+    std::unordered_set<size_t> _reflectableObjectIndices;
+    
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

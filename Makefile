@@ -57,6 +57,7 @@ SRC = \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
     helper/Compute/Snow.cpp\
+    helper/MirrorSystem.cpp\
     ObjectFactory.cpp 
 
 #source-paths zu build-Ordner-paths 
@@ -68,7 +69,7 @@ TARGET = projekt
 # -----------------------------
 .PHONY: all clean run
 all: $(TARGET)
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv shaders/mirror.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 # build Ordner erstellen
@@ -84,6 +85,7 @@ $(BUILD_DIR)/%.o: %.cpp
 
 %.frag.spv: %.frag
 	glslangValidator -V $< -o $@
+	
 %.comp.spv: %.comp
 	glslangValidator -V $< -o $@
 # ------------------------------------------------------------
@@ -96,4 +98,3 @@ run: $(TARGET)
 
 clean:
 	rm -f $(TARGET) shaders/*.spv rm -rf $(BUILD_DIR)
-
