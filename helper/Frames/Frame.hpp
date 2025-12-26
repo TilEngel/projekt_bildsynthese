@@ -15,7 +15,7 @@
 class Frame {
 public:
     Frame(VkPhysicalDevice physicalDevice, VkDevice device,
-        SwapChain* swapChain, DeferredFramebuffers* framebuffers, VkQueue graphicsQueue,
+        SwapChain* swapChain,Framebuffers* framebuffers, VkQueue graphicsQueue,
         VkCommandPool commandPool, VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
     : _physicalDevice(physicalDevice)
     , _device(device)
@@ -33,7 +33,7 @@ public:
         cleanup();
     }
 
-    bool render(Scene* scene, Camera* camera, bool useDeffered = false)  {
+    bool render(Scene* scene, Camera* camera, bool useDeffered = true)  {
         // wait for fence
         waitForFence();
 
@@ -115,7 +115,7 @@ private:
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
     VkDevice _device = VK_NULL_HANDLE;
     SwapChain* _swapChain = nullptr;
-    DeferredFramebuffers* _framebuffers = nullptr;
+    Framebuffers* _framebuffers = nullptr;
     VkQueue _graphicsQueue = VK_NULL_HANDLE;
     std::vector<VkDescriptorSet> _snowDescriptorSets;
 

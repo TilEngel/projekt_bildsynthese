@@ -2,40 +2,60 @@
 #include <stdexcept>
 #include <array>
 
-void Framebuffers::create() {
+Framebuffers::Framebuffers(VkDevice device, 
+                                         SwapChain* swapChain, 
+                                         DepthBuffer* depthBuffer,
+                                         GBuffer* gBuffer,
+                                         VkRenderPass renderPass)
+    : _device(device)
+    , _swapChain(swapChain)
+    , _depthBuffer(depthBuffer)
+    , _gBuffer(gBuffer)
+    , _renderPass(renderPass) {
+    createFramebuffers();
+}
 
-    const auto& swapViews = _swapChain->getImageViews();
-    VkExtent2D extent = _swapChain->getExtent();
-    VkImageView depthView = _depthBuffer->getImageView();
+Framebuffers::~Framebuffers() {
+    destroyFramebuffers();
+}
 
-    _framebuffers.resize(swapViews.size());
+void Framebuffers::recreate() {
+    destroyFramebuffers();
+    createFramebuffers();
+}
 
-    for (size_t i = 0; i < swapViews.size(); i++) {
-
-        std::array<VkImageView, 2> attachments = {
-            swapViews[i],   // color attachment
-            depthView       // depth attachment
+void Framebuffers::createFramebuffers() {
+    auto imageViews = _swapChain->getImageViews();
+    _framebuffers.resize(imageViews.size());
+    
+    for (size_t i = 0; i < imageViews.size(); i++) {
+        std::array<VkImageView, 5> attachments = {
+            imageViews[i],                      // Swapchain
+            _depthBuffer->getImageView(),       // Depth
+            _gBuffer->getAlbedoImageView(),     // Albedo
+            _gBuffer->getNormalImageView(),     // Normal
+            _gBuffer->getPositionImageView()    // Position
         };
-
-        VkFramebufferCreateInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        info.renderPass = _renderPass;
-        info.attachmentCount = attachments.size();
-        info.pAttachments = attachments.data();
-        info.width = extent.width;
-        info.height = extent.height;
-        info.layers = 1;
-
-        if (vkCreateFramebuffer(_device, &info, nullptr, &_framebuffers[i]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create framebuffer!");
+        
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = _renderPass;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
+        framebufferInfo.width = _swapChain->getExtent().width;
+        framebufferInfo.height = _swapChain->getExtent().height;
+        framebufferInfo.layers = 1;
+        
+        if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &_framebuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create deferred framebuffer!");
         }
     }
 }
 
-void Framebuffers::cleanup() {
-    for (auto fb : _framebuffers) {
-        if (fb != VK_NULL_HANDLE) {
-            vkDestroyFramebuffer(_device, fb, nullptr);
+void Framebuffers::destroyFramebuffers() {
+    for (auto framebuffer : _framebuffers) {
+        if (framebuffer != VK_NULL_HANDLE) {
+            vkDestroyFramebuffer(_device, framebuffer, nullptr);
         }
     }
     _framebuffers.clear();

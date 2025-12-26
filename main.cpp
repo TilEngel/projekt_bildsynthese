@@ -89,7 +89,7 @@ int main() {
 
     //Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
     // Deferred Framebuffers
-    DeferredFramebuffers* deferredFramebuffers = new DeferredFramebuffers(
+    Framebuffers* deferredFramebuffers = new Framebuffers(
         device, swapChain, depthBuffer, gBuffer, renderPass
     );
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
@@ -305,7 +305,6 @@ int main() {
     float lastTime = static_cast<float>(glfwGetTime());
     float dutchAngle = 0.0f;
     uint32_t currentFrame = 0;
-    bool useDeferredRendering = true;  // Toggle für Deferred/Forward
     std::cout<<"Start Rendering\n";
     while (!window->shouldClose()) {
         window->pollEvents();
@@ -335,19 +334,7 @@ int main() {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
         }
-        // Toggle Deferred/Forward mit 'L'
-        static bool lKeyWasPressed = false;
-        if (window->getKey(GLFW_KEY_L) == GLFW_PRESS) {
-            if (!lKeyWasPressed) {
-                useDeferredRendering = !useDeferredRendering;
-                std::cout << "Switched to " << (useDeferredRendering ? "Deferred" : "Forward") 
-                        << " Rendering" << std::endl;
-                lKeyWasPressed = true;
-            }
-        } else {
-            lKeyWasPressed = false;
-        }
-
+        
         // Schiff animation
         dutchAngle += deltaTime * glm::radians(5.0f);
         float radius = 60.0f;
@@ -393,7 +380,7 @@ int main() {
         }
 
         // Render
-        bool recreate = framesInFlight[currentFrame]->render(scene, camera,useDeferredRendering);
+        bool recreate = framesInFlight[currentFrame]->render(scene, camera);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();

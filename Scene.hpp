@@ -37,7 +37,7 @@ struct RenderObject {
     uint32_t instanceCount = 1;
     bool isSnow = false;
     bool isLit = false;  
-    bool isDeferred = false;
+    bool isDeferred = true;
 };
 
 // Lichtquellen-Objekt

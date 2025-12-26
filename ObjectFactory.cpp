@@ -16,8 +16,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         _device,
         _colorFormat,
         _depthFormat,
-        vertShaderPath, 
-        fragShaderPath,
+        "shaders/gBuffer.vert.spv", 
+        "shaders/gBuffer.frag.spv",
         renderPass,
         _descriptorSetLayout,
         0,
@@ -37,6 +37,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.isDeferred = true;
 
     return obj;
 }
@@ -66,6 +67,7 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.isDeferred =true;
 
     return obj;
 }
@@ -242,8 +244,8 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         _device,
         _colorFormat,
         _depthFormat,
-        "shaders/lit.vert.spv",
-        "shaders/lit.frag.spv",
+        "shaders/deferred_lighting.vert.spv",
+        "shaders/deferred_lighting.frag.spv",
         renderPass,
         _litDescriptorSetLayout,
         0,
