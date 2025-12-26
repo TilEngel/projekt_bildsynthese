@@ -33,7 +33,8 @@ GraphicsPipeline(
     const char* fragmentShaderPath,
     VkRenderPass renderPass,
     VkDescriptorSetLayout descriptorSetLayout,
-    PipelineType type)
+    uint32_t subpass=0,
+    PipelineType type= PipelineType::STANDARD)
     : _device(device)
     , _colorFormat(colorFormat)
     , _depthFormat(depthFormat)
@@ -41,6 +42,7 @@ GraphicsPipeline(
     , _fragmentShaderPath(fragmentShaderPath)
     , _renderPass(renderPass)
     , _descriptorSetLayout(descriptorSetLayout)
+    , _subpass(subpass)
     , _pipelineType(type)
 {
     createPipelineLayout();
@@ -73,6 +75,7 @@ GraphicsPipeline(
     VkFormat getColorFormat() const { return _colorFormat; }
     VkFormat getDepthFormat() const { return _depthFormat; }
 
+    
 private:
 
     VkDevice _device = VK_NULL_HANDLE;
@@ -80,6 +83,7 @@ private:
     VkFormat _colorFormat;
     VkFormat _depthFormat;
     PipelineType _pipelineType;
+    uint32_t _subpass;
 
     VkRenderPass _renderPass = VK_NULL_HANDLE;
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;

@@ -59,6 +59,12 @@ public:
                              VkRenderPass renderPass, 
                              PipelineType pipelineType);
 
+    RenderObject createDeferredObject(const char* modelPath,
+                                 const char* texturePath,
+                                 const glm::mat4& modelMatrix,
+                                 VkRenderPass renderPass,
+                                 VkDescriptorSetLayout deferredDescriptorSetLayout);
+
 private:
     LoadObj _loader;
     InitBuffer _buff;

@@ -23,6 +23,11 @@
 #include "helper/Frames/Camera.hpp"
 #include "helper/Compute/Snow.hpp"
 #include "helper/MirrorSystem.hpp"
+#include "helper/Rendering/GBuffer.hpp"
+#include "helper/Rendering/DeferredFramebuffers.hpp"
+#include "helper/Rendering/LightingPipeline.hpp"
+
+//Ziel: Alle Objekte deferred rendern und alles interne auf deferred auslegen
 
 int main() {
     InitInstance inst;
@@ -53,12 +58,11 @@ int main() {
     
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
     
+    //Queues
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
-
     VkQueue presentQueue;
     vkGetDeviceQueue(device, presentIndex, 0, &presentQueue);
-
     VkQueue computeQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &computeQueue);
     
@@ -70,16 +74,32 @@ int main() {
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
     DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
     
+    GBuffer* gBuffer = new GBuffer(physicalDevice,device, swapChain->getExtent());
+
     RenderPass rp;
-    VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
-    
-    Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
-    
+//    VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
+    VkRenderPass renderPass = rp.createDeferredRenderPass(
+        device,
+        swapChain->getImageFormat(),
+        depthBuffer->getImageFormat(),
+        gBuffer->getAlbedoFormat(),
+        gBuffer->getNormalFormat(),
+        gBuffer->getPositionFormat()
+    );
+
+    //Framebuffers* framebuffers = new Framebuffers(device, swapChain, depthBuffer, renderPass);
+    // Deferred Framebuffers
+    DeferredFramebuffers* deferredFramebuffers = new DeferredFramebuffers(
+        device, swapChain, depthBuffer, gBuffer, renderPass
+    );
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
     VkDescriptorSetLayout snowDescriptorSetLayout = inst.createSnowDescriptorSetLayout(device);
     VkDescriptorSetLayout litDescriptorSetLayout = inst.createLitDescriptorSetLayout(device);
-    scene->setDescriptorSetLayout(descriptorSetLayout);
+    VkDescriptorSetLayout deferredDescriptorSetLayout = inst.createDeferredDescriptorSetLayout(device);
+    VkDescriptorSetLayout deferredLightingDescriptorSetLayout = inst.createDeferredLightingDescriptorSetLayout(device);
 
+    scene->setDescriptorSetLayout(descriptorSetLayout);
+    //scene->setRenderPass(renderPass);
     // Schneeflocken-Simulation erstellen
     Snow* snow = new Snow(physicalDevice, device, graphicsIndex);
 
@@ -122,16 +142,14 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
-    //Monobloc Gartenstuhl
+    //Monobloc Gartenstuhl (deferred)
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    RenderObject chair = factory.createGenericObject(
+    RenderObject chair = factory.createDeferredObject(
         "./models/plastic_monobloc_chair.obj",
-        "shaders/testapp.vert.spv",
-        "shaders/testapp.frag.spv",
         "textures/plastic_monobloc_chair.jpg",
-        modelChair, renderPass, PipelineType::STANDARD);
+        modelChair, renderPass,deferredDescriptorSetLayout);
     scene->setRenderObject(chair);
     size_t chairIndex = scene->getObjectCount() - 1;
 
@@ -208,10 +226,10 @@ int main() {
     mirrorSystem->addReflectableObject(chairIndex);
     scene->markObjectAsReflectable(gnomeIndex);
     scene->markObjectAsReflectable(chairIndex);
-    
+    std::cout<<"createReflections\n";
     // Reflexionen erstellen
-    mirrorSystem->createReflections(scene);
-
+    //mirrorSystem->createReflections(scene);
+    std::cout<<"Snow\n";
     // Schneeflocken ZULETZT hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
         "textures/snowflake.png",
@@ -225,52 +243,70 @@ int main() {
     size_t normalObjectCount = scene->getNormalObjectCount();
     size_t snowObjectCount = scene->getSnowObjectCount();
     size_t litObjectCount = scene->getLitObjectCount();
+    size_t deferredObjectCount = scene->getDeferredObjectCount();
     std::cout << "Normal objects: " << normalObjectCount << std::endl;
     std::cout << "Snow objects: " << snowObjectCount << std::endl;
     std::cout << "Lit objects: " << litObjectCount << std::endl;
-    
+    std::cout << "Deferred objects: " << deferredObjectCount << std::endl;
+
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalObjectCount);
     uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowObjectCount);
     uint32_t maxLitSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * litObjectCount);
+    uint32_t maxDeferredSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * deferredObjectCount);
+    uint32_t maxDeferredLightingSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     // Descriptor pool
-    std::array<VkDescriptorPoolSize, 3> poolSizes{};
+    std::array<VkDescriptorPoolSize, 4> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
+    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets + maxDeferredSets + maxDeferredLightingSets;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
+    poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets + maxDeferredSets;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     poolSizes[2].descriptorCount = maxSnowSets;
+    poolSizes[3].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    poolSizes[3].descriptorCount = maxDeferredLightingSets * 3;  // 3 input attachments
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = maxNormalSets + maxSnowSets + maxLitSets;
+    poolInfo.maxSets = maxNormalSets + maxSnowSets + maxLitSets+maxDeferredSets+maxDeferredLightingSets;
 
     VkDescriptorPool descriptorPool;
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool");
     }
-
+    std::cout<<"Creating Pipeline\n";
+    // Lighting Pipeline erstellen
+    VkPipeline lightingPipeline;
+    VkPipelineLayout lightingPipelineLayout;
+    LightingPipeline::createLightingPipeline(device, swapChain->getImageFormat(),
+                                            renderPass, deferredLightingDescriptorSetLayout,
+                                            lightingPipeline, lightingPipelineLayout);
+    std::cout<<"FramesInFlight\n";
     // Frames in flight
     std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-        framesInFlight[i] = new Frame(physicalDevice, device, swapChain, framebuffers,
+        framesInFlight[i] = new Frame(physicalDevice, device, swapChain, deferredFramebuffers,
                                      graphicsQueue, commandPool, descriptorPool,
                                      scene->getDescriptorSetLayout());
         
         framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, normalObjectCount);
         framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout, snowObjectCount);
         framesInFlight[i]->allocateLitDescriptorSets(descriptorPool, litDescriptorSetLayout, litObjectCount);
+        framesInFlight[i]->allocateDeferredDescriptorSets(descriptorPool, deferredDescriptorSetLayout, deferredObjectCount);
+        framesInFlight[i]->allocateDeferredLightingDescriptorSet(descriptorPool, deferredLightingDescriptorSetLayout,  gBuffer);
+        // Set lighting pipeline
+    framesInFlight[i]->setLightingPipeline(lightingPipeline, lightingPipelineLayout);
     }
 
     // Render loop
     float lastTime = static_cast<float>(glfwGetTime());
     float dutchAngle = 0.0f;
     uint32_t currentFrame = 0;
-    
+    bool useDeferredRendering = true;  // Toggle für Deferred/Forward
+    std::cout<<"Start Rendering\n";
     while (!window->shouldClose()) {
         window->pollEvents();
 
@@ -298,6 +334,18 @@ int main() {
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
+        }
+        // Toggle Deferred/Forward mit 'L'
+        static bool lKeyWasPressed = false;
+        if (window->getKey(GLFW_KEY_L) == GLFW_PRESS) {
+            if (!lKeyWasPressed) {
+                useDeferredRendering = !useDeferredRendering;
+                std::cout << "Switched to " << (useDeferredRendering ? "Deferred" : "Forward") 
+                        << " Rendering" << std::endl;
+                lKeyWasPressed = true;
+            }
+        } else {
+            lKeyWasPressed = false;
         }
 
         // Schiff animation
@@ -327,6 +375,7 @@ int main() {
         framesInFlight[currentFrame]->updateLitUniformBuffer(camera, scene);
         framesInFlight[currentFrame]->updateDescriptorSet(scene);
         framesInFlight[currentFrame]->updateLitDescriptorSet(scene);
+        framesInFlight[currentFrame]->updateDeferredDescriptorSet(scene);
                 
         // Update snow descriptor sets
         size_t snowIdx = 0;
@@ -344,12 +393,13 @@ int main() {
         }
 
         // Render
-        bool recreate = framesInFlight[currentFrame]->render(scene, camera);
+        bool recreate = framesInFlight[currentFrame]->render(scene, camera,useDeferredRendering);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();
             depthBuffer->recreate(swapChain->getExtent());
-            framebuffers->recreate();
+            gBuffer->recreate(swapChain->getExtent());
+            deferredFramebuffers->recreate();
         }
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
@@ -357,6 +407,8 @@ int main() {
     vkDeviceWaitIdle(device);
     
     // Cleanup
+    vkDestroyPipeline(device, lightingPipeline, nullptr);
+    vkDestroyPipelineLayout(device, lightingPipelineLayout, nullptr);
     delete mirrorSystem;
     snow->destroy();
     delete snow;
@@ -369,8 +421,10 @@ int main() {
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, litDescriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device, deferredDescriptorSetLayout);
+    inst.destroyDescriptorSetLayout(device, deferredLightingDescriptorSetLayout);
     inst.destroyCommandPool(device, commandPool);
-    delete framebuffers;
+    delete deferredFramebuffers;
     delete depthBuffer;
     delete swapChain;
     inst.destroyDevice(device);

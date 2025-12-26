@@ -50,5 +50,8 @@ public:
     //Für beleuchtete Objekte
     VkDescriptorSetLayout createLitDescriptorSetLayout(VkDevice device);
 
+    VkDescriptorSetLayout createDeferredDescriptorSetLayout(VkDevice device);
+    VkDescriptorSetLayout createDeferredLightingDescriptorSetLayout(VkDevice device);
+
     void destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
 };

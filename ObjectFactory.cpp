@@ -20,6 +20,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         fragShaderPath,
         renderPass,
         _descriptorSetLayout,
+        0,
         type
     );
 
@@ -48,8 +49,7 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
         "shaders/test.vert.spv", 
         "shaders/testapp.frag.spv",
         renderPass,
-        _descriptorSetLayout,
-        PipelineType::STANDARD
+        _descriptorSetLayout
     );
 
     std::vector<Vertex> vertices;
@@ -123,8 +123,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.vert.spv",
         "shaders/skybox.frag.spv",
         renderPass,
-        _descriptorSetLayout,
-        PipelineType::STANDARD
+        _descriptorSetLayout
     );
 
     InitBuffer buff;
@@ -166,8 +165,7 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         "shaders/snow.vert.spv",
         "shaders/snow.frag.spv",
         renderPass,
-        snowDescriptorSetLayout,
-        PipelineType::STANDARD
+        snowDescriptorSetLayout
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -211,6 +209,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
+        0,
         PipelineType::STANDARD
     );
     
@@ -247,6 +246,7 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         "shaders/lit.frag.spv",
         renderPass,
         _litDescriptorSetLayout,
+        0,
         PipelineType::STANDARD
     );
     
@@ -297,6 +297,7 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         fragShader,
         renderPass,
         _descriptorSetLayout,
+        0,
         pipelineType
     );
 
@@ -315,5 +316,41 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
 
+    return obj;
+}
+
+RenderObject ObjectFactory::createDeferredObject(const char* modelPath,
+                                               const char* texturePath,
+                                               const glm::mat4& modelMatrix,
+                                               VkRenderPass renderPass,
+                                               VkDescriptorSetLayout deferredDescriptorSetLayout) {
+    // Pipeline für G-Buffer Pass (Subpass 0)
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/gbuffer.vert.spv",
+        "shaders/gbuffer.frag.spv",
+        renderPass,
+        deferredDescriptorSetLayout,
+        0  // Subpass 0
+    );
+    
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+    
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+    
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.isDeferred = true;
+    
     return obj;
 }

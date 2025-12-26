@@ -8,12 +8,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
+#include "../Rendering/DeferredFramebuffers.hpp"
+#include "../Rendering/GBuffer.hpp"
 #include "../initBuffer.hpp"
 
 class Frame {
 public:
     Frame(VkPhysicalDevice physicalDevice, VkDevice device,
-        SwapChain* swapChain, Framebuffers* framebuffers, VkQueue graphicsQueue,
+        SwapChain* swapChain, DeferredFramebuffers* framebuffers, VkQueue graphicsQueue,
         VkCommandPool commandPool, VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
     : _physicalDevice(physicalDevice)
     , _device(device)
@@ -22,6 +24,7 @@ public:
     , _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
         createLitUniformBuffer();
+        createDeferredLightingUniformBuffer();
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
@@ -30,7 +33,7 @@ public:
         cleanup();
     }
 
-    bool render(Scene* scene, Camera* camera)  {
+    bool render(Scene* scene, Camera* camera, bool useDeffered = false)  {
         // wait for fence
         waitForFence();
 
@@ -44,9 +47,12 @@ public:
 
         // update uniform buffer
         updateUniformBuffer(camera);
+        if(useDeffered){
+            updateDeferredLightingUniformBuffer(camera,scene);
+        }
 
         // record command buffer
-        recordCommandBuffer(scene, imageIndex);
+        recordCommandBuffer(scene, imageIndex,useDeffered);
         
         // submit command buffer
         submitCommandBuffer(imageIndex);
@@ -89,12 +95,27 @@ public:
     void updateLitUniformBuffer(Camera* camera, Scene* scene);
     void updateLitDescriptorSet(Scene* scene);
 
+    //Deferred shading
+    void createDeferredLightingUniformBuffer();
+    void allocateDeferredDescriptorSets(VkDescriptorPool descriptorPool, 
+                                       VkDescriptorSetLayout layout, size_t count);
+    void allocateDeferredLightingDescriptorSet(VkDescriptorPool descriptorPool,
+                                              VkDescriptorSetLayout layout,
+                                              GBuffer* gBuffer);
+    void updateDeferredDescriptorSet(Scene* scene);
+    void updateDeferredLightingUniformBuffer(Camera* camera, Scene* scene);
+    void setLightingPipeline(VkPipeline pipeline, VkPipelineLayout layout) {
+        _lightingPipeline = pipeline;
+        _lightingPipelineLayout = layout;
+    }
+    
+
 private:
     InitBuffer _buff;
     VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
     VkDevice _device = VK_NULL_HANDLE;
     SwapChain* _swapChain = nullptr;
-    Framebuffers* _framebuffers = nullptr;
+    DeferredFramebuffers* _framebuffers = nullptr;
     VkQueue _graphicsQueue = VK_NULL_HANDLE;
     std::vector<VkDescriptorSet> _snowDescriptorSets;
 
@@ -115,6 +136,16 @@ private:
     LitUniformBufferObject* _litUniformBufferMapped = nullptr;
     
     std::vector<VkDescriptorSet> _litDescriptorSets;
+
+    std::vector<VkDescriptorSet> _deferredDescriptorSets;
+    VkDescriptorSet _deferredLightingDescriptorSet = VK_NULL_HANDLE;
+    
+    // Lighting UBO (für Deferred)
+    VkBuffer _deferredLightingUniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory _deferredLightingUniformBufferMemory = VK_NULL_HANDLE;
+    LitUniformBufferObject* _deferredLightingUniformBufferMapped = nullptr;
+    VkPipeline _lightingPipeline = VK_NULL_HANDLE;
+    VkPipelineLayout _lightingPipelineLayout = VK_NULL_HANDLE;
 
     // create a buffer for UniformBufferObject
     // - create the buffer object
@@ -172,7 +203,7 @@ private:
     //   - get vertex count by calling scene->getVertexCount()
     // - end render pass
     // - end recording (call vkEndCommandBuffer)
-    void recordCommandBuffer(Scene* scene, uint32_t imageIndex);
+    void recordCommandBuffer(Scene* scene, uint32_t imageIndex, bool useDeferred = false);
 
     // submit the command buffer to the graphics queue
     // - reset _inFlightFence before using it as fence

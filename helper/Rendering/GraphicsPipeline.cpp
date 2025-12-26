@@ -336,7 +336,7 @@ void GraphicsPipeline::createPipeline() {
     info.pDynamicState = &dynamic;
     info.layout = _pipelineLayout;
     info.renderPass = _renderPass;
-    info.subpass = 0;
+    info.subpass = _subpass;
 
     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &_graphicsPipeline)
         != VK_SUCCESS)
@@ -345,6 +345,9 @@ void GraphicsPipeline::createPipeline() {
     vkDestroyShaderModule(_device, vertModule, nullptr);
     vkDestroyShaderModule(_device, fragModule, nullptr);
 }
+
+
+
 
 // ------------------------------------------------------
 // Cleanup

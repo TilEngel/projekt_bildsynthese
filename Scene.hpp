@@ -37,6 +37,7 @@ struct RenderObject {
     uint32_t instanceCount = 1;
     bool isSnow = false;
     bool isLit = false;  
+    bool isDeferred = false;
 };
 
 // Lichtquellen-Objekt
@@ -56,6 +57,9 @@ public:
         }
         if (obj.isLit) {
             _litObjectIndices.push_back(_objects.size());
+        }
+        if (obj.isDeferred) {
+            _deferredObjectIndices.push_back(_objects.size());
         }
         _objects.push_back(obj);
     }
@@ -80,8 +84,9 @@ public:
     
     size_t getObjectCount() const { return _objects.size(); }
     size_t getSnowObjectCount() const { return _snowObjectIndices.size(); }
+    size_t getDeferredObjectCount() const { return _deferredObjectIndices.size(); }
     size_t getNormalObjectCount() const { 
-        return _objects.size() - _snowObjectIndices.size() - _litObjectIndices.size(); 
+        return _objects.size() - _snowObjectIndices.size()  - _litObjectIndices.size() - _deferredObjectIndices.size(); 
     }
     size_t getLitObjectCount() const { return _litObjectIndices.size(); }
     
@@ -96,6 +101,9 @@ public:
     bool isLitObject(size_t index) const {
         return std::find(_litObjectIndices.begin(), _litObjectIndices.end(), index) 
                != _litObjectIndices.end();
+    }
+    bool isDeferredObject(size_t index) const{
+        return std::find(_deferredObjectIndices.begin(), _deferredObjectIndices.end(), index) != _deferredObjectIndices.end();
     }
     
     void updateObject(size_t idx, const glm::mat4& newModel) {
@@ -194,6 +202,7 @@ private:
     std::vector<LightSourceObject> _lights;
     std::vector<size_t> _snowObjectIndices;
     std::vector<size_t> _litObjectIndices;
+    std::vector<size_t> _deferredObjectIndices;
     
     // Mirror data
     std::vector<RenderObject> _reflectedObjects;
