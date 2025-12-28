@@ -190,62 +190,66 @@ void GraphicsPipeline::createPipeline() {
     msaa.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     msaa.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-    // --- Depth-Stencil State basierend auf Pipeline-Typ ---
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    
-    switch (_pipelineType) {
-        case PipelineType::MIRROR_MARK:
-            // Pass 1: Nur Stencil schreiben, keine Farbe/Depth
-            depthStencil.depthTestEnable = VK_FALSE;
-            depthStencil.depthWriteEnable = VK_FALSE;
-            depthStencil.stencilTestEnable = VK_TRUE;
-            
-            depthStencil.front.compareOp = VK_COMPARE_OP_ALWAYS;
-            depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.passOp = VK_STENCIL_OP_REPLACE;
-            depthStencil.front.compareMask = 0xFF;
-            depthStencil.front.writeMask = 0xFF;
-            depthStencil.front.reference = 1;
-            
-            depthStencil.back = depthStencil.front;
-            break;
-            
-        case PipelineType::MIRROR_REFLECT:
-            // Pass 2: Nur rendern wo Stencil == 1
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-            depthStencil.stencilTestEnable = VK_TRUE;
-            
-            depthStencil.front.compareOp = VK_COMPARE_OP_EQUAL;
-            depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.passOp = VK_STENCIL_OP_KEEP;
-            depthStencil.front.compareMask = 0xFF;
-            depthStencil.front.writeMask = 0x00;
-            depthStencil.front.reference = 0;  // ÄNDERN: Wird dynamisch gesetzt!
-            
-            depthStencil.back = depthStencil.front;
-            break;
+// In GraphicsPipeline.cpp - nur der relevante Teil der createPipeline() Methode
 
+// --- Depth-Stencil State basierend auf Pipeline-Typ ---
+VkPipelineDepthStencilStateCreateInfo depthStencil{};
+depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
-        case PipelineType::MIRROR_BLEND:
-            // Pass 3: Spiegel mit Transparenz
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-            depthStencil.stencilTestEnable = VK_FALSE;
-            break;
-            
-        default:  // STANDARD
-            depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-            depthStencil.stencilTestEnable = VK_FALSE;
-            break;
-    }
+switch (_pipelineType) {
+    case PipelineType::MIRROR_MARK:
+        // Pass 1: Nur Stencil schreiben, keine Farbe/Depth
+        depthStencil.depthTestEnable = VK_TRUE;      // Depth-Test AN
+        depthStencil.depthWriteEnable = VK_FALSE;    // Aber nicht schreiben
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+        depthStencil.stencilTestEnable = VK_TRUE;
+        
+        // Stencil wird auf 1 gesetzt wo der Spiegel ist
+        depthStencil.front.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
+        depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencil.front.passOp = VK_STENCIL_OP_REPLACE;
+        depthStencil.front.compareMask = 0xFF;
+        depthStencil.front.writeMask = 0xFF;
+        depthStencil.front.reference = 1;
+        
+        depthStencil.back = depthStencil.front;
+        break;
+        
+    case PipelineType::MIRROR_REFLECT:
+        // Pass 2: Gespiegelte Objekte - nur rendern wo Stencil == 1
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStencil.stencilTestEnable = VK_TRUE;
+        
+        // Nur rendern wo Stencil == 1 (wo der Spiegel markiert ist)
+        depthStencil.front.compareOp = VK_COMPARE_OP_EQUAL;
+        depthStencil.front.failOp = VK_STENCIL_OP_KEEP;
+        depthStencil.front.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencil.front.passOp = VK_STENCIL_OP_KEEP;
+        depthStencil.front.compareMask = 0xFF;
+        depthStencil.front.writeMask = 0x00;  // Stencil nicht modifizieren
+        depthStencil.front.reference = 1;     // Vergleich mit 1
+        
+        depthStencil.back = depthStencil.front;
+        break;
+
+    case PipelineType::MIRROR_BLEND:
+        // Pass 3: Transparenter Spiegel
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_FALSE;  // WICHTIG: Kein Depth schreiben!
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+        depthStencil.stencilTestEnable = VK_FALSE;
+        break;
+        
+    default:  // STANDARD
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+        depthStencil.stencilTestEnable = VK_FALSE;
+        break;
+}
 
     // --- Color Blend State ---
     VkPipelineColorBlendAttachmentState blendAttachment{};

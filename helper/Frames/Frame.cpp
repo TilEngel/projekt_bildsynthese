@@ -208,7 +208,6 @@ void Frame::updateUniformBuffer(Camera* camera) {
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
 
-
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkResetCommandBuffer(_commandBuffer, 0);
 
@@ -237,7 +236,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
-    clearValues[1].depthStencil = { 1.0f, 0 };
+    clearValues[1].depthStencil = { 1.0f, 0 };  // Stencil wird auf 0 gecleart
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -258,29 +257,37 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-    // Draw all objects
     size_t normalObjIdx = 0;
     size_t snowObjIdx = 0;
-    size_t litObjIdx =0;
+    size_t litObjIdx = 0;
+
+    // ========================================
+    // PASS 1: Normale Szene (OHNE Spiegel) rendern
+    // ========================================
+    const auto& mirrorMarkIndices = scene->getMirrorMarkIndices();
+    const auto& mirrorBlendIndices = scene->getMirrorBlendIndices();
     
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
         
+        // ALLE Spiegel-Objekte überspringen (werden später gerendert)
+        if (scene->isMirrorObject(i)) {
+            if (!obj.isSnow && !obj.isLit) normalObjIdx++;
+            continue;
+        }
+        
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-            std::cerr << "Skipping object " << i << ": invalid vertex data\n";
             continue;
         }
 
-        //pipeline
         VkPipeline pipelineHandle = obj.pipeline->getPipeline();
         vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-
         VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
 
-        // descriptorSet abhängig vom Objekt-typ binden
+        // Descriptor Set binden
         if (obj.isSnow) {
             if (snowObjIdx >= _snowDescriptorSets.size()) {
-                std::cerr << "ERROR: Snow descriptor set index " << snowObjIdx << " out of range!\n";
+                std::cerr << "ERROR: Snow descriptor set index out of range!\n";
                 continue;
             }
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -289,7 +296,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
         } else if (obj.isLit) {
             if (litObjIdx >= _litDescriptorSets.size()) {
-                std::cerr << "ERROR: Lit descriptor set index " << litObjIdx << " out of range!\n";
+                std::cerr << "ERROR: Lit descriptor set index out of range!\n";
                 continue;
             }
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -298,7 +305,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
         } else {
             if (normalObjIdx >= _descriptorSets.size()) {
-                std::cerr << "ERROR: Normal descriptor set index " << normalObjIdx << " out of range!\n";
+                std::cerr << "ERROR: Normal descriptor set index out of range!\n";
                 continue;
             }
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -306,22 +313,198 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
             normalObjIdx++;
         }
 
-        // Bind vertex buffer
         VkBuffer vertexBuffers[] = { obj.vertexBuffer };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        // Push constants
         vkCmdPushConstants(_commandBuffer, pipelineLayout, 
                           VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
 
-        // Draw with or without instancing
         if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
-           
             vkCmdDraw(_commandBuffer, obj.vertexCount, obj.instanceCount, 0, 0);
         } else {
             vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
         }
+    }
+
+    // ========================================
+    // PASS 2: Spiegel-Markierung (Stencil Buffer schreiben)
+    // Rendert Spiegel-Geometrie, schreibt nur in Stencil, keine Farbe
+    // ========================================
+    normalObjIdx = 0;
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        if (!scene->isMirrorObject(i) || scene->isLitObject(i) || scene->isSnowObject(i)) {
+            if (!scene->isMirrorObject(i) && !scene->isLitObject(i) && !scene->isSnowObject(i)) {
+                normalObjIdx++;
+            }
+            continue;
+        }
+        
+        // Nur Mirror-Mark Objekte in diesem Pass
+        bool isMirrorMark = false;
+        for (size_t markIdx : mirrorMarkIndices) {
+            if (i == markIdx) {
+                isMirrorMark = true;
+                break;
+            }
+        }
+        
+        if (!isMirrorMark) {
+            normalObjIdx++;
+            continue;
+        }
+        
+        const auto& obj = scene->getObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            normalObjIdx++;
+            continue;
+        }
+
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+
+        if (normalObjIdx >= _descriptorSets.size()) {
+            std::cerr << "ERROR: Mirror mark descriptor set index out of range!\n";
+            normalObjIdx++;
+            continue;
+        }
+        
+        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                               pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
+        normalObjIdx++;
+
+        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    }
+
+    // ========================================
+    // PASS 3: Gespiegelte Objekte rendern (nur wo Stencil == 1)
+    // Diese werden "hinter" der Spiegelebene gerendert
+    // ========================================
+    for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
+        const auto& reflObj = scene->getReflectedObject(i);
+        
+        if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
+            continue;
+        }
+
+        VkPipeline pipelineHandle = reflObj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+        VkPipelineLayout pipelineLayout = reflObj.pipeline->getPipelineLayout();
+
+        // WICHTIG: Stencil Reference auf 1 setzen
+        // Nur rendern wo der Spiegel ist (Stencil == 1)
+        vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
+
+        // Descriptor Set vom Original-Objekt verwenden
+        size_t originalIdx = scene->getReflectedDescriptorIndex(i);
+        const auto& originalObj = scene->getObject(originalIdx);
+        
+        if (originalObj.isSnow) {
+            size_t snowIdx = 0;
+            for (size_t j = 0; j < originalIdx; j++) {
+                if (scene->isSnowObject(j)) snowIdx++;
+            }
+            if (snowIdx < _snowDescriptorSets.size()) {
+                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       pipelineLayout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
+            }
+        } else if (originalObj.isLit) {
+            size_t litIdx = 0;
+            for (size_t j = 0; j < originalIdx; j++) {
+                if (scene->isLitObject(j)) litIdx++;
+            }
+            if (litIdx < _litDescriptorSets.size()) {
+                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       pipelineLayout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
+            }
+        } else {
+            size_t normIdx = 0;
+            for (size_t j = 0; j < originalIdx; j++) {
+                if (!scene->isSnowObject(j) && !scene->isLitObject(j) && !scene->isMirrorObject(j)) {
+                    normIdx++;
+                }
+            }
+            if (normIdx < _descriptorSets.size()) {
+                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       pipelineLayout, 0, 1, &_descriptorSets[normIdx], 0, nullptr);
+            }
+        }
+
+        VkBuffer vertexBuffers[] = { reflObj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
+
+        vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
+    }
+
+    // ========================================
+    // PASS 4: Transparenten Spiegel rendern (MIRROR_BLEND)
+    // Dieser wird über die Reflexionen gerendert
+    // ========================================
+    normalObjIdx = 0;
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        if (!scene->isMirrorObject(i) || scene->isLitObject(i) || scene->isSnowObject(i)) {
+            if (!scene->isMirrorObject(i) && !scene->isLitObject(i) && !scene->isSnowObject(i)) {
+                normalObjIdx++;
+            }
+            continue;
+        }
+        
+        // Nur Mirror-Blend Objekte in diesem Pass
+        bool isMirrorBlend = false;
+        for (size_t blendIdx : mirrorBlendIndices) {
+            if (i == blendIdx) {
+                isMirrorBlend = true;
+                break;
+            }
+        }
+        
+        if (!isMirrorBlend) {
+            normalObjIdx++;
+            continue;
+        }
+        
+        const auto& obj = scene->getObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            normalObjIdx++;
+            continue;
+        }
+
+        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+
+        if (normalObjIdx >= _descriptorSets.size()) {
+            std::cerr << "ERROR: Mirror blend descriptor set index out of range!\n";
+            normalObjIdx++;
+            continue;
+        }
+        
+        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                               pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
+        normalObjIdx++;
+
+        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
     
     vkCmdEndRenderPass(_commandBuffer);
@@ -330,7 +513,6 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         throw std::runtime_error("failed to record command buffer!");
     }
 }
-
 void Frame::submitCommandBuffer(uint32_t imageIndex) {
     
     VkSubmitInfo submitInfo{};

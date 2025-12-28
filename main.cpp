@@ -167,6 +167,7 @@ int main() {
     RenderObject umbrella = factory.createLitObject("./models/sonnenschirm.obj",
         "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
     scene->setRenderObject(umbrella);
+    size_t umbrellaIndex = scene->getObjectCount() - 1;
 
     // Lampe
     glm::mat4 modelLamp = glm::mat4(1.0f);
@@ -185,6 +186,15 @@ int main() {
         "textures/wooden_bowl.jpg", modelGround, renderPass);
     scene->setRenderObject(ground);
 
+    // Schneeflocken ZULETZT hinzufügen
+    RenderObject snowflakes = factory.createSnowflake(
+        "textures/snowflake.png",
+        renderPass,
+        snow->getCurrentBuffer(),
+        snowDescriptorSetLayout
+    );
+    scene->setRenderObject(snowflakes);
+
     // ========== SPIEGEL-SYSTEM SETUP ==========
     
     MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
@@ -200,28 +210,23 @@ int main() {
     MirrorConfig mirror2;
     mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
     mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f); //nach links zeigend
-    mirror2.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirror2.scale = glm::vec3(3.5f, 4.5f, 0.1f);
     mirrorSystem->addMirror(scene, mirror2);
     
     // Objekte markieren, die gespiegelt werden sollen
     mirrorSystem->addReflectableObject(gnomeIndex);
     mirrorSystem->addReflectableObject(chairIndex);
+    mirrorSystem->addReflectableObject(umbrellaIndex);
     scene->markObjectAsReflectable(gnomeIndex);
     scene->markObjectAsReflectable(chairIndex);
+    scene->markObjectAsReflectable(umbrellaIndex);
     
     // Reflexionen erstellen
     mirrorSystem->createReflections(scene);
 
-    // Schneeflocken ZULETZT hinzufügen
-    RenderObject snowflakes = factory.createSnowflake(
-        "textures/snowflake.png",
-        renderPass,
-        snow->getCurrentBuffer(),
-        snowDescriptorSetLayout
-    );
-    scene->setRenderObject(snowflakes);
 
-    // Object counts
+    // ========== OBJECT COUNTS ==========
+
     size_t normalObjectCount = scene->getNormalObjectCount();
     size_t snowObjectCount = scene->getSnowObjectCount();
     size_t litObjectCount = scene->getLitObjectCount();

@@ -27,13 +27,11 @@ uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties,
 // ------------------------------------------------------------
 void DepthBuffer::createDepthImage(VkExtent2D extent)
 {
-    // ---------------------------------------------
-    // 1. Find suitable depth format
-    // ---------------------------------------------
+    // WICHTIG: Formate MIT Stencil bevorzugen!
     const std::vector<VkFormat> candidates = {
-        VK_FORMAT_D32_SFLOAT,
-        VK_FORMAT_D32_SFLOAT_S8_UINT,
-        VK_FORMAT_D24_UNORM_S8_UINT
+        VK_FORMAT_D24_UNORM_S8_UINT,      // Bevorzugt: 24-bit depth + 8-bit stencil
+        VK_FORMAT_D32_SFLOAT_S8_UINT,     // Alternative mit 32-bit depth + stencil
+        VK_FORMAT_D32_SFLOAT               // Fallback ohne Stencil (für Mirror nicht ideal)
     };
 
     _depthImageFormat = VK_FORMAT_UNDEFINED;
@@ -46,6 +44,7 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
         {
             _depthImageFormat = f;
+            std::cout << "Selected depth format with stencil support" << std::endl;
             break;
         }
     }
@@ -54,10 +53,6 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
         throw std::runtime_error("No suitable depth format found!");
     }
 
-
-    // ---------------------------------------------
-    // 2. Create depth image
-    // ---------------------------------------------
     VkImageCreateInfo imgInfo{};
     imgInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imgInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -77,10 +72,6 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
         throw std::runtime_error("Failed to create depth image!");
     }
 
-
-    // ---------------------------------------------
-    // 3. Allocate depth image memory
-    // ---------------------------------------------
     VkMemoryRequirements memReq{};
     vkGetImageMemoryRequirements(_device, _depthImage, &memReq);
 
@@ -96,16 +87,9 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
         throw std::runtime_error("Failed to allocate depth image memory!");
     }
 
-    // ---------------------------------------------
-    // 4. Bind memory to image
-    // ---------------------------------------------
     vkBindImageMemory(_device, _depthImage, _depthImageMemory, 0);
 }
 
-
-// ------------------------------------------------------------
-// create view for depth image
-// ------------------------------------------------------------
 void DepthBuffer::createDepthImageView()
 {
     VkImageViewCreateInfo viewInfo{};
@@ -114,7 +98,15 @@ void DepthBuffer::createDepthImageView()
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = _depthImageFormat;
 
+    // WICHTIG: Aspect Mask muss Stencil enthalten wenn Format es hat
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    
+    // Prüfen ob Format Stencil hat
+    if (_depthImageFormat == VK_FORMAT_D24_UNORM_S8_UINT || 
+        _depthImageFormat == VK_FORMAT_D32_SFLOAT_S8_UINT) {
+        viewInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
+    
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -124,7 +116,6 @@ void DepthBuffer::createDepthImageView()
         throw std::runtime_error("Failed to create depth image view!");
     }
 }
-
 
 // ------------------------------------------------------------
 // destroy all depth buffer resources

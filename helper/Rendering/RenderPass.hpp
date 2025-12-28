@@ -1,10 +1,9 @@
 #include <vulkan/vulkan_core.h>
 #include <array>
-
+#include <stdexcept>
 
 class RenderPass{
     public:
-    // helper/CreateRenderPass.hpp (oder direkt in main.cpp)
     VkRenderPass createRenderPass(VkDevice device, VkFormat colorFormat, VkFormat depthFormat) {
         // --- COLOR ATTACHMENT ---
         VkAttachmentDescription color{};
@@ -17,14 +16,15 @@ class RenderPass{
         color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-        // --- DEPTH ATTACHMENT ---
+        // --- DEPTH + STENCIL ATTACHMENT ---
         VkAttachmentDescription depth{};
         depth.format = depthFormat;
         depth.samples = VK_SAMPLE_COUNT_1_BIT;
         depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        // WICHTIG: Stencil muss geladen und gespeichert werden!
+        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -45,10 +45,13 @@ class RenderPass{
         VkSubpassDependency dep{};
         dep.srcSubpass = VK_SUBPASS_EXTERNAL;
         dep.dstSubpass = 0;
-        dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
+                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
+                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dep.srcAccessMask = 0;
-        dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | 
+                           VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::array<VkAttachmentDescription, 2> attachments = { color, depth };
 
@@ -66,5 +69,4 @@ class RenderPass{
             throw std::runtime_error("Failed to create render pass!");
         return renderPass;
     }
-
 };
