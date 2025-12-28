@@ -19,7 +19,8 @@ public:
                   VkFormat colorFormat,
                   VkFormat depthFormat,
                   VkDescriptorSetLayout descriptorSetLayout, 
-                  VkDescriptorSetLayout litDescriptorSetLayout)
+                  VkDescriptorSetLayout litDescriptorSetLayout,
+                  VkDescriptorSetLayout deferredDescriptorSetLayout)
         : _physicalDevice(physicalDevice),
           _device(device),
           _commandPool(commandPool),
@@ -27,7 +28,8 @@ public:
           _colorFormat(colorFormat),
           _depthFormat(depthFormat),
           _descriptorSetLayout(descriptorSetLayout),
-          _litDescriptorSetLayout(litDescriptorSetLayout) {}
+          _litDescriptorSetLayout(litDescriptorSetLayout),
+          _deferredDescriptorSetLayout(deferredDescriptorSetLayout){}
 
     RenderObject createGenericObject(const char* modelPath,
                               const char* vertShaderPath,
@@ -64,7 +66,7 @@ public:
                                  const glm::mat4& modelMatrix,
                                  VkRenderPass renderPass,
                                  VkDescriptorSetLayout deferredDescriptorSetLayout);
-
+      
 private:
     LoadObj _loader;
     InitBuffer _buff;
@@ -76,4 +78,5 @@ private:
     VkFormat _depthFormat;
     VkDescriptorSetLayout _descriptorSetLayout;
     VkDescriptorSetLayout _litDescriptorSetLayout;
+    VkDescriptorSetLayout _deferredDescriptorSetLayout;
 };

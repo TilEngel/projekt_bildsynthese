@@ -4,44 +4,6 @@
 #include "helper/Texture/CubeMap.hpp"
 #include "helper/Texture/Texture.hpp"
 
-RenderObject ObjectFactory::createGenericObject(const char* modelPath,
-                                         const char* vertShaderPath,
-                                         const char* fragShaderPath,
-                                         const char* texturePath,
-                                         const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass,
-                                         PipelineType type)
-{
-    GraphicsPipeline* pipeline = new GraphicsPipeline(
-        _device,
-        _colorFormat,
-        _depthFormat,
-        "shaders/gBuffer.vert.spv", 
-        "shaders/gBuffer.frag.spv",
-        renderPass,
-        _descriptorSetLayout,
-        0,
-        type
-    );
-
-    std::vector<Vertex> vertices;
-    _loader.objLoader(modelPath, vertices);
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
-
-    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
-
-    RenderObject obj{};
-    obj.vertexBuffer = vertexBuffer;
-    obj.vertexCount = static_cast<uint32_t>(vertices.size());
-    obj.textureImageView = tex->getImageView();
-    obj.textureSampler = tex->getSampler();
-    obj.pipeline = pipeline;
-    obj.modelMatrix = modelMatrix;
-    obj.isDeferred = true;
-
-    return obj;
-}
-
 RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass){
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
@@ -236,6 +198,46 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     return light;
 }
 
+// createGenericObject - IMMER deferred
+RenderObject ObjectFactory::createGenericObject(const char* modelPath,
+                                         const char* vertShaderPath,
+                                         const char* fragShaderPath,
+                                         const char* texturePath,
+                                         const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass,
+                                         PipelineType type)
+{
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/gbuffer.vert.spv",  // Immer G-Buffer Shader
+        "shaders/gbuffer.frag.spv",
+        renderPass,
+        _deferredDescriptorSetLayout,
+        0,  // Subpass 0
+        type
+    );
+
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.isDeferred = true;  // Alle sind deferred!
+
+    return obj;
+}
+
+// createLitObject - AUCH deferred (keine separaten Lit-Objekte mehr!)
 RenderObject ObjectFactory::createLitObject(const char* modelPath,
                                           const char* texturePath,
                                           const glm::mat4& modelMatrix,
@@ -244,11 +246,11 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         _device,
         _colorFormat,
         _depthFormat,
-        "shaders/deferred_lighting.vert.spv",
-        "shaders/deferred_lighting.frag.spv",
+        "shaders/gbuffer.vert.spv",  // G-Buffer statt Lit-Shader
+        "shaders/gbuffer.frag.spv",
         renderPass,
-        _litDescriptorSetLayout,
-        0,
+        _deferredDescriptorSetLayout,  // WICHTIG: Deferred Layout verwenden!
+        0,  // Subpass 0
         PipelineType::STANDARD
     );
     
@@ -266,11 +268,13 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
-    obj.isLit = true;
+    obj.isLit = false;      // Nicht mehr als Lit markieren
+    obj.isDeferred = true;  // Stattdessen als Deferred
     
     return obj;
 }
 
+// createMirror - auch deferred
 RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
                                          VkRenderPass renderPass,
                                          PipelineType pipelineType) {
@@ -284,22 +288,19 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}}
     };
 
-    const char* fragShader;
-    if (pipelineType == PipelineType::MIRROR_BLEND) {
-        fragShader = "shaders/mirror.frag.spv";
-    } else {
-        fragShader = "shaders/testapp.frag.spv";
-    }
+    const char* fragShader = (pipelineType == PipelineType::MIRROR_BLEND) 
+                            ? "shaders/mirror.frag.spv" 
+                            : "shaders/gbuffer.frag.spv";
 
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
         _depthFormat,
-        "shaders/testapp.vert.spv",
+        "shaders/gbuffer.vert.spv",  // G-Buffer Vertex Shader
         fragShader,
         renderPass,
         _descriptorSetLayout,
-        0,
+        0,  // Subpass 0
         pipelineType
     );
 
@@ -317,6 +318,7 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.isDeferred = true;  // Auch Spiegel sind deferred
 
     return obj;
 }
@@ -334,7 +336,7 @@ RenderObject ObjectFactory::createDeferredObject(const char* modelPath,
         "shaders/gbuffer.vert.spv",
         "shaders/gbuffer.frag.spv",
         renderPass,
-        deferredDescriptorSetLayout,
+        _deferredDescriptorSetLayout,
         0  // Subpass 0
     );
     

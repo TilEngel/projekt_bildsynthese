@@ -1,7 +1,5 @@
 #version 450
-
 layout(location = 0) in vec2 inTexCoord;
-
 layout(location = 0) out vec4 outColor;
 
 // Input attachments (G-Buffer)
@@ -25,17 +23,24 @@ layout(set = 0, binding = 3) uniform LightingUBO {
 void main() {
     // Read from G-Buffer
     vec3 albedo = subpassLoad(inputAlbedo).rgb;
-    vec3 normal = subpassLoad(inputNormal).rgb * 2.0 - 1.0; // Decode from [0,1] to [-1,1]
+    vec3 normal = subpassLoad(inputNormal).rgb * 2.0 - 1.0;
     vec3 worldPos = subpassLoad(inputPosition).rgb;
+    
+    // Debug: Prüfe auf ungültige Werte
+    if (length(normal) < 0.01) {
+        normal = vec3(0.0, 1.0, 0.0); // Fallback
+    } else {
+        normal = normalize(normal);
+    }
     
     vec3 viewDir = normalize(ubo.viewPos - worldPos);
     
-    // Ambient
-    vec3 ambient = 0.1 * albedo;
+    // Ambient (heller für bessere Sichtbarkeit)
+    vec3 ambient = 0.3 * albedo;
     vec3 result = ambient;
     
     // Lighting
-    for (int i = 0; i < ubo.numLights; i++) {
+    for (int i = 0; i < min(ubo.numLights, 4); i++) {
         vec3 lightDir = normalize(ubo.lights[i].position - worldPos);
         float distance = length(ubo.lights[i].position - worldPos);
         
@@ -53,7 +58,7 @@ void main() {
         
         // Specular
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+        float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
         vec3 specular = spec * ubo.lights[i].color * 0.3 * attenuation;
         
         result += (diffuse + specular) * albedo;

@@ -128,29 +128,20 @@ void Frame::waitForFence() {
 
 
 void Frame::updateDescriptorSet(Scene* scene) {
-    // bufferInfo 
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = _uniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    // NUR normale Objekte (nicht Schnee!)
-    size_t descriptorSetIndex = 0;
-    
-    for (size_t i = 0; i < scene->getObjectCount(); ++i) {
-        const auto& obj = scene->getObject(i);
-        
-        // Schnee-Objekte überspringen - die werden separat behandelt
-        if (obj.isSnow || obj.isLit) {
-            continue;
-        }
-        
-        // Sicherheitscheck
-        if (descriptorSetIndex >= _descriptorSets.size()) {
-            std::cerr << "ERROR: Descriptor set index " << descriptorSetIndex 
-                      << " out of range (max: " << _descriptorSets.size() << ")\n";
+    // NUR Lichtquellen-RenderObjects!
+    size_t normalObjIdx = 0;
+    for (const auto& light : scene->getLights()) {
+        if (normalObjIdx >= _descriptorSets.size()) {
+            std::cerr << "ERROR: Too many lights for descriptor sets\n";
             break;
         }
+        
+        const auto& obj = light.renderObject;
 
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -160,27 +151,22 @@ void Frame::updateDescriptorSet(Scene* scene) {
         std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
+        descriptorWrites[0].dstSet = _descriptorSets[normalObjIdx];
         descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &bufferInfo;
 
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
+        descriptorWrites[1].dstSet = _descriptorSets[normalObjIdx];
         descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(_device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(),
-                               0, nullptr);
+        vkUpdateDescriptorSets(_device, 2, descriptorWrites.data(), 0, nullptr);
         
-        descriptorSetIndex++;
+        normalObjIdx++;
     }
 }
 
@@ -266,7 +252,19 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex, bool useDefer
         size_t deferredObjIdx = 0;
         
         for (size_t i = 0; i < scene->getObjectCount(); i++) {
-            if (!scene->isDeferredObject(i)) continue;
+            // Skip Schnee und Lichtquellen-RenderObjects
+            if (scene->isSnowObject(i)) continue;
+            
+            // Lichtquellen-RenderObjects überspringen (sie haben keine Beleuchtung)
+            bool isLightRenderObject = false;
+            for (const auto& light : scene->getLights()) {
+                // Vergleiche Vertex Buffer (primitiv aber funktioniert)
+                if (scene->getObject(i).vertexBuffer == light.renderObject.vertexBuffer) {
+                    isLightRenderObject = true;
+                    break;
+                }
+            }
+            if (isLightRenderObject) continue;
             
             const auto& obj = scene->getObject(i);
             
@@ -280,7 +278,8 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex, bool useDefer
             VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
             
             if (deferredObjIdx >= _deferredDescriptorSets.size()) {
-                std::cerr << "ERROR: Deferred descriptor set index out of range!\n";
+                std::cerr << "ERROR: Deferred descriptor set index " << deferredObjIdx 
+                         << " out of range (max: " << _deferredDescriptorSets.size() << ")\n";
                 continue;
             }
             
@@ -302,61 +301,69 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex, bool useDefer
         // === SUBPASS 1: Lighting Pass ===
         vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
         
-        // Bind Lighting Pipeline (Fullscreen Quad)
+        // Viewport/Scissor nochmal setzen (für manche Treiber wichtig)
+        vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
+        vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
+        
+        // Lighting Pipeline
         if (_lightingPipeline != VK_NULL_HANDLE) {
             vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _lightingPipeline);
             
-            VkPipelineLayout lightingLayout = _lightingPipelineLayout;
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                   lightingLayout, 0, 1, &_deferredLightingDescriptorSet, 0, nullptr);
+                                   _lightingPipelineLayout, 0, 1, 
+                                   &_deferredLightingDescriptorSet, 0, nullptr);
             
-            // Fullscreen Triangle (no vertex buffer needed)
+            // Fullscreen Triangle (3 vertices, kein Vertex Buffer)
             vkCmdDraw(_commandBuffer, 3, 1, 0, 0);
         }
         
-    } else {
-        // === Forward Rendering (wie bisher) ===
+        // Lichtquellen-Visualisierung (kleine Kugeln)
         size_t normalObjIdx = 0;
-        size_t snowObjIdx = 0;
-        size_t litObjIdx = 0;
-        
-        for (size_t i = 0; i < scene->getObjectCount(); i++) {
-            const auto& obj = scene->getObject(i);
+        for (const auto& light : scene->getLights()) {
+            const auto& obj = light.renderObject;
             
-            if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-                continue;
+            if (normalObjIdx >= _descriptorSets.size()) {
+                std::cerr << "ERROR: Not enough descriptor sets for light sources\n";
+                break;
             }
             
-            // Skip deferred objects in forward pass
-            if (obj.isDeferred) continue;
-
             VkPipeline pipelineHandle = obj.pipeline->getPipeline();
             vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
 
             VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+            
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
+            
+            VkBuffer vertexBuffers[] = { obj.vertexBuffer };
+            VkDeviceSize offsets[] = { 0 };
+            vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
-            if (obj.isSnow) {
-                if (snowObjIdx >= _snowDescriptorSets.size()) {
-                    continue;
-                }
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
-                snowObjIdx++;
-            } else if (obj.isLit) {
-                if (litObjIdx >= _litDescriptorSets.size()) {
-                    continue;
-                }
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_litDescriptorSets[litObjIdx], 0, nullptr);
-                litObjIdx++;
-            } else {
-                if (normalObjIdx >= _descriptorSets.size()) {
-                    continue;
-                }
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
-                normalObjIdx++;
+            vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                              VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+
+            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+            normalObjIdx++;
+        }
+        
+        // Schnee rendern
+        size_t snowObjIdx = 0;
+        for (size_t i = 0; i < scene->getObjectCount(); i++) {
+            if (!scene->isSnowObject(i)) continue;
+            
+            const auto& obj = scene->getObject(i);
+            
+            VkPipeline pipelineHandle = obj.pipeline->getPipeline();
+            vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+
+            VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
+            
+            if (snowObjIdx >= _snowDescriptorSets.size()) {
+                continue;
             }
+            
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
 
             VkBuffer vertexBuffers[] = { obj.vertexBuffer };
             VkDeviceSize offsets[] = { 0 };
@@ -367,28 +374,9 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex, bool useDefer
 
             if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
                 vkCmdDraw(_commandBuffer, obj.vertexCount, obj.instanceCount, 0, 0);
-            } else {
-                vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
             }
-        }
-        
-        // Lichtquellen
-        for(const auto& light : scene->getLights()){
-            const auto& obj = light.renderObject;
             
-            VkPipeline pipelineHandle = obj.pipeline->getPipeline();
-            vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-
-            VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
-            
-            VkBuffer vertexBuffers[] = { obj.vertexBuffer };
-            VkDeviceSize offsets[] = { 0 };
-            vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
-
-            vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                              VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
-
-            vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+            snowObjIdx++;
         }
     }
 

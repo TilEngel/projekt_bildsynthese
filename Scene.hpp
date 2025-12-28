@@ -88,7 +88,7 @@ public:
     size_t getNormalObjectCount() const { 
         return _objects.size() - _snowObjectIndices.size()  - _litObjectIndices.size() - _deferredObjectIndices.size(); 
     }
-    size_t getLitObjectCount() const { return _litObjectIndices.size(); }
+    size_t getLitObjectCount() const { return 0; }
     
     const RenderObject& getObject(size_t index) const { return _objects[index]; }
     RenderObject& getObjectMutable(size_t idx) { return _objects[idx]; }
@@ -99,8 +99,7 @@ public:
     }
     
     bool isLitObject(size_t index) const {
-        return std::find(_litObjectIndices.begin(), _litObjectIndices.end(), index) 
-               != _litObjectIndices.end();
+        return false;
     }
     bool isDeferredObject(size_t index) const{
         return std::find(_deferredObjectIndices.begin(), _deferredObjectIndices.end(), index) != _deferredObjectIndices.end();

@@ -106,8 +106,13 @@ int main() {
     // Objekte erstellen
     ObjectFactory factory(physicalDevice, device, commandPool, graphicsQueue,
                          swapChain->getImageFormat(), depthBuffer->getImageFormat(),
-                         descriptorSetLayout, litDescriptorSetLayout);
+                         descriptorSetLayout, litDescriptorSetLayout,deferredDescriptorSetLayout);
 
+
+    //factory.setDescriptorSetLayout(deferredDescriptorSetLayout);  
+    //Verwendetes DSL macht keinen Unterschied
+    //Texturen völlig durcheinander
+    //Von beleuchtung keine Spur
     // Skybox
     std::array<const char*, 6> skyboxFaces = {
         "textures/skybox/right.jpg",
@@ -120,6 +125,8 @@ int main() {
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
 
+
+    //factory.setDescriptorSetLayout(descriptorSetLayout);
     // Licht 1
     LightSourceObject light1 = factory.createLightSource(
         glm::vec3(-2.3f, 3.0f, 0.2f),
@@ -142,6 +149,7 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
+    //factory.setDescriptorSetLayout(deferredDescriptorSetLayout);
     //Monobloc Gartenstuhl (deferred)
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
@@ -242,21 +250,30 @@ int main() {
     // Object counts
     size_t normalObjectCount = scene->getNormalObjectCount();
     size_t snowObjectCount = scene->getSnowObjectCount();
-    size_t litObjectCount = scene->getLitObjectCount();
+    size_t litObjectCount =0;
     size_t deferredObjectCount = scene->getDeferredObjectCount();
+    // Lichtquellen zählen für normale Descriptor Sets
+    size_t lightRenderObjectCount = scene->getLightCount();
+    normalObjectCount = lightRenderObjectCount;  // Nur Lichtquellen als "normal"
     std::cout << "Normal objects: " << normalObjectCount << std::endl;
     std::cout << "Snow objects: " << snowObjectCount << std::endl;
     std::cout << "Lit objects: " << litObjectCount << std::endl;
     std::cout << "Deferred objects: " << deferredObjectCount << std::endl;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalObjectCount);
+    uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalObjectCount);       
     uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowObjectCount);
-    uint32_t maxLitSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * litObjectCount);
+    uint32_t maxLitSets = 0;
     uint32_t maxDeferredSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * deferredObjectCount);
     uint32_t maxDeferredLightingSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
-    // Descriptor pool
+    std::cout << "Allocating descriptor sets:\n";
+    std::cout << "  Normal: " << maxNormalSets << " (" << normalObjectCount << " objects)\n";
+    std::cout << "  Snow: " << maxSnowSets << " (" << snowObjectCount << " objects)\n";
+    std::cout << "  Lit: " << maxLitSets << " (" << litObjectCount << " objects)\n";
+    std::cout << "  Deferred: " << maxDeferredSets << " (" << deferredObjectCount << " objects)\n";
+    std::cout << "  Deferred Lighting: " << maxDeferredLightingSets << "\n";
+     // Descriptor pool
     std::array<VkDescriptorPoolSize, 4> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets + maxDeferredSets + maxDeferredLightingSets;
