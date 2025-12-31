@@ -44,6 +44,7 @@ endif
 
 SRC = \
     main.cpp \
+    ObjectFactory.cpp \
     helper/initInstance.cpp \
     helper/initBuffer.cpp \
     helper/ObjectLoading/loadObj.cpp \
@@ -57,8 +58,8 @@ SRC = \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
     helper/Compute/Snow.cpp\
-    helper/MirrorSystem.cpp\
-    ObjectFactory.cpp 
+    helper/MirrorSystem.cpp
+    
 
 #source-paths zu build-Ordner-paths 
 OBJ = $(SRC:%.cpp=$(BUILD_DIR)/%.o)
@@ -69,7 +70,7 @@ TARGET = projekt
 # -----------------------------
 .PHONY: all clean run
 all: $(TARGET)
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv shaders/mirror.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv shaders/mirror.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv shaders/depth_only.frag.spv shaders/depth_only.vert.spv shaders/gbuffer.frag.spv shaders/gbuffer.vert.spv shaders/lighting.frag.spv shaders/lighting.vert.spv
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 # build Ordner erstellen
@@ -97,4 +98,7 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) shaders/*.spv rm -rf $(BUILD_DIR)
+	rm -f $(TARGET)
+	rm -f shaders/*.spv
+	rm -rf $(BUILD_DIR)
+

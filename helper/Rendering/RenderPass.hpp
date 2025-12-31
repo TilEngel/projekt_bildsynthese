@@ -1,72 +1,149 @@
+#pragma once
 #include <vulkan/vulkan_core.h>
 #include <array>
 #include <stdexcept>
 
-class RenderPass{
-    public:
+class RenderPass {
+public:
     VkRenderPass createRenderPass(VkDevice device, VkFormat colorFormat, VkFormat depthFormat) {
-        // --- COLOR ATTACHMENT ---
-        VkAttachmentDescription color{};
-        color.format = colorFormat;
-        color.samples = VK_SAMPLE_COUNT_1_BIT;
-        color.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        // Attachment indices
+        enum {
+            kAttachment_BACK = 0,
+            kAttachment_DEPTH = 1,
+            kAttachment_GBUFFER = 2,
+        };
 
-        // --- DEPTH + STENCIL ATTACHMENT ---
-        VkAttachmentDescription depth{};
-        depth.format = depthFormat;
-        depth.samples = VK_SAMPLE_COUNT_1_BIT;
-        depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        // WICHTIG: Stencil muss geladen und gespeichert werden!
-        depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        enum {
+            kSubpass_DEPTH = 0,
+            kSubpass_GBUFFER = 1,
+            kSubpass_LIGHTING = 2,
+        };
 
-        VkAttachmentReference colorRef{};
-        colorRef.attachment = 0;
-        colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // --- ATTACHMENTS ---
+        std::array<VkAttachmentDescription, 3> attachments{};
 
+        // Back buffer (final output)
+        attachments[kAttachment_BACK].format = colorFormat;
+        attachments[kAttachment_BACK].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_BACK].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[kAttachment_BACK].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_BACK].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[kAttachment_BACK].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[kAttachment_BACK].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        // Depth buffer (with stencil for mirrors)
+        attachments[kAttachment_DEPTH].format = depthFormat;
+        attachments[kAttachment_DEPTH].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[kAttachment_DEPTH].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachments[kAttachment_DEPTH].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[kAttachment_DEPTH].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachments[kAttachment_DEPTH].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[kAttachment_DEPTH].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        // G-Buffer (position, normal, albedo packed in RGBA32)
+        attachments[kAttachment_GBUFFER].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attachments[kAttachment_GBUFFER].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[kAttachment_GBUFFER].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_GBUFFER].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[kAttachment_GBUFFER].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_GBUFFER].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[kAttachment_GBUFFER].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[kAttachment_GBUFFER].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        // --- ATTACHMENT REFERENCES ---
+        
+        // Depth attachment reference (used in depth prepass and g-buffer pass)
         VkAttachmentReference depthRef{};
-        depthRef.attachment = 1;
+        depthRef.attachment = kAttachment_DEPTH;
         depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        VkSubpassDescription subpass{};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorRef;
-        subpass.pDepthStencilAttachment = &depthRef;
+        // G-Buffer output reference
+        VkAttachmentReference gBufferRef{};
+        gBufferRef.attachment = kAttachment_GBUFFER;
+        gBufferRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        VkSubpassDependency dep{};
-        dep.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dep.dstSubpass = 0;
-        dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
-                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | 
-                          VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dep.srcAccessMask = 0;
-        dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | 
-                           VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        // Lighting input references
+        std::array<VkAttachmentReference, 2> lightingInputs{};
+        lightingInputs[0].attachment = kAttachment_GBUFFER;
+        lightingInputs[0].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        lightingInputs[1].attachment = kAttachment_DEPTH;
+        lightingInputs[1].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
-        std::array<VkAttachmentDescription, 2> attachments = { color, depth };
+        // Back buffer output reference
+        VkAttachmentReference backBufferRef{};
+        backBufferRef.attachment = kAttachment_BACK;
+        backBufferRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        VkRenderPassCreateInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        info.attachmentCount = static_cast<uint32_t>(attachments.size());
-        info.pAttachments = attachments.data();
-        info.subpassCount = 1;
-        info.pSubpasses = &subpass;
-        info.dependencyCount = 1;
-        info.pDependencies = &dep;
+        // --- SUBPASSES ---
+        std::array<VkSubpassDescription, 3> subpasses{};
+
+        // Subpass 0: Depth Prepass
+        subpasses[kSubpass_DEPTH].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpasses[kSubpass_DEPTH].colorAttachmentCount = 0;
+        subpasses[kSubpass_DEPTH].pColorAttachments = nullptr;
+        subpasses[kSubpass_DEPTH].pDepthStencilAttachment = &depthRef;
+
+        // Subpass 1: G-Buffer Generation
+        subpasses[kSubpass_GBUFFER].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpasses[kSubpass_GBUFFER].colorAttachmentCount = 1;
+        subpasses[kSubpass_GBUFFER].pColorAttachments = &gBufferRef;
+        subpasses[kSubpass_GBUFFER].pDepthStencilAttachment = &depthRef;
+
+        // Subpass 2: Lighting Pass
+        subpasses[kSubpass_LIGHTING].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpasses[kSubpass_LIGHTING].inputAttachmentCount = static_cast<uint32_t>(lightingInputs.size());
+        subpasses[kSubpass_LIGHTING].pInputAttachments = lightingInputs.data();
+        subpasses[kSubpass_LIGHTING].colorAttachmentCount = 1;
+        subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
+        subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = nullptr;
+
+        // --- SUBPASS DEPENDENCIES ---
+        std::array<VkSubpassDependency, 3> dependencies{};
+
+        // External -> Depth Prepass
+        dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependencies[0].dstSubpass = kSubpass_DEPTH;
+        dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        dependencies[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependencies[0].srcAccessMask = 0;
+        dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        // Depth Prepass -> G-Buffer
+        dependencies[1].srcSubpass = kSubpass_DEPTH;
+        dependencies[1].dstSubpass = kSubpass_GBUFFER;
+        dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        // G-Buffer -> Lighting
+        dependencies[2].srcSubpass = kSubpass_GBUFFER;
+        dependencies[2].dstSubpass = kSubpass_LIGHTING;
+        dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[2].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependencies[2].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        dependencies[2].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        // --- CREATE RENDER PASS ---
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
+        renderPassInfo.pSubpasses = subpasses.data();
+        renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+        renderPassInfo.pDependencies = dependencies.data();
 
         VkRenderPass renderPass;
-        if (vkCreateRenderPass(device, &info, nullptr, &renderPass) != VK_SUCCESS)
-            throw std::runtime_error("Failed to create render pass!");
+        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create deferred render pass!");
+        }
+
         return renderPass;
     }
 };

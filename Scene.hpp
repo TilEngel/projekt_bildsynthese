@@ -1,4 +1,4 @@
-// Scene.hpp (Merged - Snow + Lighting + Mirrors)
+// Scene.hpp
 #pragma once
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -21,9 +21,9 @@ struct PointLight {
 struct LitUniformBufferObject {
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
-    alignas(16) glm::vec3 viewPos;      // Kamera-Position für Specular
-    alignas(4)  int numLights;          // Anzahl Lichter
-    PointLight lights[4];                // Max. 4 Punktlichter
+    alignas(16) glm::vec3 viewPos;
+    alignas(4)  int numLights;
+    PointLight lights[4];
 };
 
 struct RenderObject {
@@ -36,7 +36,15 @@ struct RenderObject {
     VkBuffer instanceBuffer = VK_NULL_HANDLE;
     uint32_t instanceCount = 1;
     bool isSnow = false;
-    bool isLit = false;  
+    bool isLit = false;
+    bool isDeferred = false;  // NEU: Markiert deferred objects
+};
+
+// Deferred Render Object - hat 2 Pipelines
+struct DeferredRenderObject {
+    RenderObject depthPass;    // Subpass 0
+    RenderObject gbufferPass;  // Subpass 1
+    size_t originalIndex;      // Index des ursprünglichen Objekts
 };
 
 // Lichtquellen-Objekt
@@ -46,6 +54,10 @@ struct LightSourceObject {
     float intensity;
     float radius;
     RenderObject renderObject; 
+};
+struct DeferredObjectInfo {
+    size_t depthPassIndex;
+    size_t gbufferPassIndex;
 };
 
 class Scene {
@@ -57,8 +69,34 @@ public:
         if (obj.isLit) {
             _litObjectIndices.push_back(_objects.size());
         }
+        if (obj.isDeferred) {
+            _deferredObjectIndices.push_back(_objects.size());
+        }
         _objects.push_back(obj);
     }
+    
+    //Deferred Objekt hinzufügen
+    void setDeferredRenderObject(DeferredRenderObject& deferredObj) {
+    // Depth Pass Object
+    deferredObj.depthPass.isDeferred = true;
+    _objects.push_back(deferredObj.depthPass);
+    size_t depthIndex = _objects.size() - 1;
+    
+    // G-Buffer Pass Object
+    deferredObj.gbufferPass.isDeferred = true;
+    _objects.push_back(deferredObj.gbufferPass);
+    size_t gbufferIndex = _objects.size() - 1;
+    
+    
+    // Speichere die Indices
+    DeferredObjectInfo info;
+    info.depthPassIndex = depthIndex;
+    info.gbufferPassIndex = gbufferIndex;
+    _deferredObjectInfos.push_back(info);
+    
+    _deferredObjectIndices.push_back(depthIndex);
+    _deferredObjectIndices.push_back(gbufferIndex);
+}
     
     void addLightSource(const LightSourceObject& light) {
         if (_lights.size() >= 4) {
@@ -81,10 +119,39 @@ public:
     size_t getObjectCount() const { return _objects.size(); }
     size_t getSnowObjectCount() const { return _snowObjectIndices.size(); }
     size_t getNormalObjectCount() const { 
-        return _objects.size() - _snowObjectIndices.size() - _litObjectIndices.size(); 
+        return _objects.size() - _snowObjectIndices.size() - _litObjectIndices.size() 
+               - _deferredObjectIndices.size(); 
     }
     size_t getLitObjectCount() const { return _litObjectIndices.size(); }
+    size_t getDeferredObjectCount() const { return _deferredObjectInfos.size(); }
     
+    size_t getLitDescriptorSetCount() const {
+        // Lit objects die NICHT deferred sind
+        size_t count = 0;
+        for (size_t idx : _litObjectIndices) {
+            if (!_objects[idx].isDeferred) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    size_t getNormalDescriptorSetCount() const {
+        size_t count = 0;
+        for (size_t i = 0; i < _objects.size(); i++) {
+            if (!_objects[i].isSnow && !_objects[i].isLit && !_objects[i].isDeferred) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    size_t getDeferredDescriptorSetCount() const {
+        // Deferred objects nutzen normale descriptor sets
+        // Jedes deferred object hat 2 render objects (depth + gbuffer)
+        return _deferredObjectInfos.size() * 2;
+    }
+
     const RenderObject& getObject(size_t index) const { return _objects[index]; }
     RenderObject& getObjectMutable(size_t idx) { return _objects[idx]; }
     
@@ -98,9 +165,37 @@ public:
                != _litObjectIndices.end();
     }
     
+    bool isDeferredObject(size_t index) const {
+        return std::find(_deferredObjectIndices.begin(), _deferredObjectIndices.end(), index) 
+               != _deferredObjectIndices.end();
+    }
+    
+    // NEU: Hilfsmethoden für Deferred Rendering
+    const DeferredObjectInfo& getDeferredInfo(size_t infoIndex) const {
+        return _deferredObjectInfos[infoIndex];
+    }
+    
+    const RenderObject& getDepthPassObject(size_t infoIndex) const {
+        return _objects[_deferredObjectInfos[infoIndex].depthPassIndex];
+    }
+    
+    const RenderObject& getGBufferPassObject(size_t infoIndex) const {
+        return _objects[_deferredObjectInfos[infoIndex].gbufferPassIndex];
+    }
+    
     void updateObject(size_t idx, const glm::mat4& newModel) {
         if (idx < _objects.size()) {
             _objects[idx].modelMatrix = newModel;
+        }
+    }
+    
+    // NEU: Update deferred object (beide Passes gleichzeitig)
+    void updateDeferredObject(size_t infoIndex, const glm::mat4& newModel) {
+        if (infoIndex < _deferredObjectInfos.size()) {
+            size_t depthIdx = _deferredObjectInfos[infoIndex].depthPassIndex;
+            size_t gbufferIdx = _deferredObjectInfos[infoIndex].gbufferPassIndex;
+            _objects[depthIdx].modelMatrix = newModel;
+            _objects[gbufferIdx].modelMatrix = newModel;
         }
     }
     
@@ -126,6 +221,15 @@ public:
     VkDescriptorSetLayout getDescriptorSetLayout() const {
         return _descriptorSetLayout;
     }
+
+    // NEU: Lighting Quad
+    void setLightingQuad(const RenderObject& quad) {
+        _lightingQuad = quad;
+        _hasLightingQuad = true;
+    }
+    
+    bool hasLightingQuad() const { return _hasLightingQuad; }
+    const RenderObject& getLightingQuad() const { return _lightingQuad; }
 
     // Mirror-spezifische Methoden
     void setMirrorMarkObject(const RenderObject& obj) {
@@ -190,10 +294,18 @@ public:
     }
 
 private:
+   
+
     std::vector<RenderObject> _objects;
     std::vector<LightSourceObject> _lights;
     std::vector<size_t> _snowObjectIndices;
     std::vector<size_t> _litObjectIndices;
+    std::vector<size_t> _deferredObjectIndices;
+    std::vector<DeferredObjectInfo> _deferredObjectInfos;
+    
+    // Lighting Quad
+    RenderObject _lightingQuad;
+    bool _hasLightingQuad = false;
     
     // Mirror data
     std::vector<RenderObject> _reflectedObjects;

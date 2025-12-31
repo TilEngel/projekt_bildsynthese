@@ -1,185 +1,148 @@
+// Frame.hpp
 #pragma once
 
 #include <vulkan/vulkan_core.h>
-#include <array>
+#include <vector>
+#include <glm/glm.hpp>
+#include "../Rendering/Swapchain.hpp"
 #include "../Rendering/Framebuffers.hpp"
 #include "../../Scene.hpp"
-#include "../Rendering/Swapchain.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
 #include "../initBuffer.hpp"
 
+struct UniformBufferObject {
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+};
+
 class Frame {
 public:
-    Frame(VkPhysicalDevice physicalDevice, VkDevice device,
-        SwapChain* swapChain, Framebuffers* framebuffers, VkQueue graphicsQueue,
-        VkCommandPool commandPool, VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
-    : _physicalDevice(physicalDevice)
-    , _device(device)
-    , _swapChain(swapChain) 
-    , _framebuffers(framebuffers)
-    , _graphicsQueue(graphicsQueue) {
+    Frame(VkPhysicalDevice physicalDevice, VkDevice device, SwapChain* swapChain,
+          Framebuffers* framebuffers, VkQueue graphicsQueue, VkCommandPool commandPool,
+          VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
+        : _physicalDevice(physicalDevice), _device(device), _swapChain(swapChain),
+          _framebuffers(framebuffers), _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
         createLitUniformBuffer();
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
-    
+
     ~Frame() {
         cleanup();
     }
 
-    bool render(Scene* scene, Camera* camera)  {
-        // wait for fence
+    // Uniform Buffers
+    void createUniformBuffer();
+    void createLitUniformBuffer();
+    void updateUniformBuffer(Camera* camera);
+    void updateLitUniformBuffer(Camera* camera, Scene* scene);
+
+    // Descriptor Sets
+    void allocateDescriptorSets(VkDescriptorPool descriptorPool, 
+                                VkDescriptorSetLayout descriptorSetLayout, 
+                                size_t objectCount);
+    void allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
+                                    VkDescriptorSetLayout descriptorSetLayout, 
+                                    size_t snowObjectCount);
+    void allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
+                                   VkDescriptorSetLayout descriptorSetLayout, 
+                                   size_t objectCount);
+
+    void updateDescriptorSet(Scene* scene);
+    void updateLitDescriptorSet(Scene* scene);
+    void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
+                                 VkImageView imageView, VkSampler sampler);
+
+    // Command Buffer
+    void allocateCommandBuffer(VkCommandPool commandPool);
+    void recordCommandBuffer(Scene* scene, uint32_t imageIndex);
+
+    // Deferred Rendering Passes
+    void renderDeferredDepthPass(Scene* scene);
+    void renderDeferredGBufferPass(Scene* scene);
+    void renderDeferredLightingPass(Scene* scene);
+    void renderForwardObjects(Scene* scene);
+
+    // Helper Methods
+    void renderSingleObject(const RenderObject& obj, size_t normalIdx = 0, 
+                           size_t snowIdx = 0, size_t litIdx = 0);
+    void renderMirrorSystem(Scene* scene, size_t& normalIdx, 
+                           size_t& snowIdx, size_t& litIdx);
+
+    // Sync Objects
+    void createSyncObjects();
+    void waitForFence();
+    void submitCommandBuffer(uint32_t imageIndex);
+
+    // Rendering
+    bool render(Scene* scene, Camera* camera) {
         waitForFence();
 
-        // acquire next image
-        uint32_t imageIndex = _swapChain->acquireNextImage(_renderSemaphore, VK_NULL_HANDLE);
-        if (imageIndex == UINT32_MAX) {
+        uint32_t imageIndex;
+        VkResult result = vkAcquireNextImageKHR(_device, _swapChain->getSwapchain(),
+                                                UINT64_MAX, _renderSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             return true;
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire swap chain image!");
         }
-        // update descriptor set
-        updateDescriptorSet(scene);
 
-        // update uniform buffer
-        updateUniformBuffer(camera);
-
-        // record command buffer
         recordCommandBuffer(scene, imageIndex);
-        
-        // submit command buffer
         submitCommandBuffer(imageIndex);
 
-        // present image
-        bool recreate = _swapChain->presentImage(imageIndex);
-        return recreate;
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
+        VkSemaphore signalSemaphores[] = { _swapChain->getPresentationSemaphore(imageIndex) };
+        presentInfo.pWaitSemaphores = signalSemaphores;
+        VkSwapchainKHR swapChains[] = { _swapChain->getSwapchain()};
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
 
+        result = vkQueuePresentKHR(_graphicsQueue, &presentInfo);
 
-       
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+            return true;
+        } else if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
+
+        return false;
     }
-    void allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout, size_t objectCount);
 
-    void allocateSnowDescriptorSets(VkDescriptorPool descriptorPool, 
-                                    VkDescriptorSetLayout layout,
-                                    size_t count);
-    void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer, 
-                                VkImageView imageView, VkSampler sampler);
-
-       // update _descriptorSet
-    // - write _uniformBuffer to binding 0
-    //   - descriptor type is "uniform buffer"
-    // - write the image view and sampler from the scene object to binding 1
-    //   - image layout is "shader read-only optimal"
-    //   - descriptor type is "combined image sampler"
-    void updateDescriptorSet(Scene* scene);
-
-    // update the uniform buffer
-    // - use _uniformBufferMapped to write to the buffer
-    // - rotate the object in the model matrix
-    //   (animation time could be obtained by calling glfwGetTime())
-    // - set a view matrix such that the object is visible
-    // - use glm::perspectiveFovRH_ZO(...) to set the projection matrix
-    //   (do not forget to proj[1][1] *= -1)
-    void updateUniformBuffer(Camera* camera);
-
-    void createLitUniformBuffer();
-    void allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
-                                    VkDescriptorSetLayout layout, size_t count);
-    void updateLitUniformBuffer(Camera* camera, Scene* scene);
-    void updateLitDescriptorSet(Scene* scene);
+    void cleanup();
 
 private:
-    InitBuffer _buff;
-    VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
-    VkDevice _device = VK_NULL_HANDLE;
-    SwapChain* _swapChain = nullptr;
-    Framebuffers* _framebuffers = nullptr;
-    VkQueue _graphicsQueue = VK_NULL_HANDLE;
-    std::vector<VkDescriptorSet> _snowDescriptorSets;
+    VkPhysicalDevice _physicalDevice;
+    VkDevice _device;
+    SwapChain* _swapChain;
+    Framebuffers* _framebuffers;
+    VkQueue _graphicsQueue;
 
+    // Uniform Buffers
     VkBuffer _uniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _uniformBufferMemory = VK_NULL_HANDLE;
     UniformBufferObject* _uniformBufferMapped = nullptr;
 
-    //VkDescriptorSet _descriptorSet = VK_NULL_HANDLE;
-    std::vector<VkDescriptorSet> _descriptorSets;
-
-    VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
-
-    VkSemaphore _renderSemaphore = VK_NULL_HANDLE;
-    VkFence _inFlightFence = VK_NULL_HANDLE;
-
     VkBuffer _litUniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _litUniformBufferMemory = VK_NULL_HANDLE;
     LitUniformBufferObject* _litUniformBufferMapped = nullptr;
-    
+
+    // Descriptor Sets
+    std::vector<VkDescriptorSet> _descriptorSets;
+    std::vector<VkDescriptorSet> _snowDescriptorSets;
     std::vector<VkDescriptorSet> _litDescriptorSets;
 
-    // create a buffer for UniformBufferObject
-    // - create the buffer object
-    //   - use _uniformBuffer to store the buffer object
-    //   - size of UniformBufferObject
-    //   - usage as uniform buffer)
-    // - allocate memory for buffer
-    //   - use _uniformBufferMemory to store the memory object
-    //   - memory has to be host visible and should be host coherent
-    // - bind memory to buffer
-    // - map memory
-    //   - use _uniformBufferMapped with static_cast to store the pointer
-    void createUniformBuffer();
+    // Command Buffer
+    VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
 
+    // Sync Objects
+    VkSemaphore _renderSemaphore = VK_NULL_HANDLE;
+    VkFence _inFlightFence = VK_NULL_HANDLE;
 
-    
-    // allocate a command buffer
-    // - use _commandBuffer to store the command buffer
-    void allocateCommandBuffer(VkCommandPool commandPool);
-
-    // create the objects needed for synchronization
-    // - create a semaphore for rendering
-    //   - use _renderSemaphore to store the semaphore
-    // - create a fence to synchronize with device
-    //   - create the fence signaled
-    //   - use _inFlightFence to store the fence
-    void createSyncObjects();
-
-    // destroy all created objects
-    // - destroy _uniformBuffer
-    // - free _uniformBufferMemory
-    // - destroy _renderSemaphore
-    // - destroy _inFlightFence
-    void cleanup();
-
-    // wait for _inFlightFence
-    void waitForFence();
-
-
-    // record the command buffer _commandBuffer
-    // - reset the command buffer
-    // - begin recording (call vkBeginCommandBuffer)
-    // - begin a render pass
-    //   - get render pass by calling scene->getRenderPass()
-    //   - get framebuffer by calling _framebuffers->getFramebuffer(imageIndex)
-    // - bind graphics pipeline
-    //   - get pipeline by calling scene->getPipeline()
-    // - set viewport
-    // - set scissor
-    // - bind descriptor set _descriptorSet
-    //   - get pipeline layout by calling scene->getPipelineLayout()
-    // - bind vertex buffer
-    //   - get vertex buffer by calling scene->getVertexBuffer()
-    // - draw
-    //   - get vertex count by calling scene->getVertexCount()
-    // - end render pass
-    // - end recording (call vkEndCommandBuffer)
-    void recordCommandBuffer(Scene* scene, uint32_t imageIndex);
-
-    // submit the command buffer to the graphics queue
-    // - reset _inFlightFence before using it as fence
-    // - use _swapChain->getPresentationSemaphore(imageIndex) as signal semaphore
-    // - use _renderSemaphore as wait semaphore (wait at "top of pipe" stage)
-    // - use _commandBuffer as command buffer
-    // - use _graphics queue as queue
-    // - call vkQueueSubmit
-    void submitCommandBuffer(uint32_t imageIndex);
+    // Helper
+    InitBuffer _buff;
 };

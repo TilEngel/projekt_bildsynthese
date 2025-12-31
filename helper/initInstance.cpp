@@ -366,3 +366,43 @@ void InitInstance::destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLa
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout,nullptr);
     }
 }
+
+
+VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice device) {
+    // Binding 0: G-Buffer Input Attachment
+    VkDescriptorSetLayoutBinding gBufferBinding{};
+    gBufferBinding.binding = 0;
+    gBufferBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    gBufferBinding.descriptorCount = 1;
+    gBufferBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    // Binding 1: Depth Input Attachment
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.binding = 1;
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    depthBinding.descriptorCount = 1;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    // Binding 2: Lighting Uniform Buffer (Camera + Lights)
+    VkDescriptorSetLayoutBinding lightingUboBinding{};
+    lightingUboBinding.binding = 2;
+    lightingUboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    lightingUboBinding.descriptorCount = 1;
+    lightingUboBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+        gBufferBinding, depthBinding, lightingUboBinding
+    };
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
+
+    VkDescriptorSetLayout descriptorSetLayout;
+    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create lighting descriptor set layout!");
+    }
+
+    return descriptorSetLayout;
+}

@@ -6,7 +6,7 @@
 #include <vector>
 #include "../Scene.hpp"
 #include "../ObjectFactory.hpp"
-
+class ObjectFactory;
 struct MirrorConfig {
     glm::vec3 position;
     glm::vec3 normal;

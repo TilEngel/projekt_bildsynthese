@@ -31,12 +31,3 @@ void Framebuffers::create() {
         }
     }
 }
-
-void Framebuffers::cleanup() {
-    for (auto fb : _framebuffers) {
-        if (fb != VK_NULL_HANDLE) {
-            vkDestroyFramebuffer(_device, fb, nullptr);
-        }
-    }
-    _framebuffers.clear();
-}

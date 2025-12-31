@@ -49,6 +49,8 @@ public:
     VkDescriptorSetLayout createSnowDescriptorSetLayout(VkDevice device);
     //Für beleuchtete Objekte
     VkDescriptorSetLayout createLitDescriptorSetLayout(VkDevice device);
+    //Für deferredShading
+    VkDescriptorSetLayout createLightingDescriptorSetLayout(VkDevice device);
 
     void destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descriptorSetLayout);
 };

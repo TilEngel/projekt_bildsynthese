@@ -68,8 +68,10 @@ public:
     // (return value indicates, if swap chain has to be recreated)
     bool presentImage(uint32_t imageIndex);
 
+    VkSwapchainKHR getSwapchain(){
+        return _swapChain;
+    }
 
-    public:
 
     const std::vector<VkImageView>& getImageViews() const {
         return _swapChainImageViews;

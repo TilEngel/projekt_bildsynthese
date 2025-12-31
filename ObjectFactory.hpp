@@ -1,4 +1,4 @@
-// ObjectFactory.hpp (Merged)
+// ObjectFactory.hpp 
 #pragma once
 
 #include <string>
@@ -8,60 +8,71 @@
 #include "helper/initBuffer.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Compute/Snow.hpp"
+#include "helper/MirrorSystem.hpp"
 #include <array>
+
 
 class ObjectFactory {
 public:
-    ObjectFactory(VkPhysicalDevice physicalDevice,
-                  VkDevice device,
-                  VkCommandPool commandPool,
-                  VkQueue graphicsQueue,
-                  VkFormat colorFormat,
-                  VkFormat depthFormat,
-                  VkDescriptorSetLayout descriptorSetLayout, 
-                  VkDescriptorSetLayout litDescriptorSetLayout)
-        : _physicalDevice(physicalDevice),
-          _device(device),
-          _commandPool(commandPool),
-          _graphicsQueue(graphicsQueue),
-          _colorFormat(colorFormat),
-          _depthFormat(depthFormat),
+    ObjectFactory(VkPhysicalDevice physicalDevice, VkDevice device,
+                 VkCommandPool commandPool, VkQueue graphicsQueue,
+                 VkFormat colorFormat, VkFormat depthFormat,
+                 VkDescriptorSetLayout descriptorSetLayout,
+                 VkDescriptorSetLayout litDescriptorSetLayout)
+        : _physicalDevice(physicalDevice), _device(device),
+          _commandPool(commandPool), _graphicsQueue(graphicsQueue),
+          _colorFormat(colorFormat), _depthFormat(depthFormat),
           _descriptorSetLayout(descriptorSetLayout),
           _litDescriptorSetLayout(litDescriptorSetLayout) {}
 
     RenderObject createGenericObject(const char* modelPath,
-                              const char* vertShaderPath,
-                              const char* fragShaderPath,
-                              const char* texturePath,
-                              const glm::mat4& modelMatrix,
-                              VkRenderPass renderPass,
-                              PipelineType type);
+                                         const char* vertShaderPath,
+                                         const char* fragShaderPath,
+                                         const char* texturePath,
+                                         const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass,
+                                         PipelineType type, uint32_t subpassIndex);
 
-    RenderObject createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass);
+    // Neue Methode für deferred gerenderte Objekte
+    DeferredRenderObject createDeferredObject(
+        const char* modelPath,
+        const char* texturePath,
+        const glm::mat4& modelMatrix,
+        VkRenderPass renderPass);
 
-    RenderObject createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces);
+    DeferredRenderObject createDeferredLitObject(
+        const char* modelPath,
+        const char* texturePath,
+        const glm::mat4& modelMatrix,
+        VkRenderPass renderPass);
 
-    RenderObject createSnowflake(const char* texturePath, VkRenderPass renderPass, 
-                                VkBuffer particleBuffer, VkDescriptorSetLayout snowDescriptorSetLayout);
+    // Existing methods bleiben für forward-rendered objects
+    RenderObject createSkybox(VkRenderPass renderPass,
+                             const std::array<const char*, 6>& cubemapFaces,
+                             uint32_t subpassIndex = 2);
+
+    RenderObject createSnowflake(const char* texturePath,
+                                VkRenderPass renderPass,
+                                VkBuffer particleBuffer,
+                                VkDescriptorSetLayout snowDescriptorSetLayout,
+                                uint32_t subpassIndex = 2);
+
+    RenderObject createMirror(const glm::mat4& modelMatrix,
+                             VkRenderPass renderPass,
+                             PipelineType pipelineType,
+                             uint32_t subpassIndex = 2);
 
     LightSourceObject createLightSource(const glm::vec3& position,
                                        const glm::vec3& color,
                                        float intensity,
                                        float radius,
                                        VkRenderPass renderPass);
-    
-    RenderObject createLitObject(const char* modelPath,
-                                const char* texturePath,
-                                const glm::mat4& modelMatrix,
-                                VkRenderPass renderPass);
 
-    RenderObject createMirror(const glm::mat4& modelMatrix, 
-                             VkRenderPass renderPass, 
-                             PipelineType pipelineType);
+    // Fullscreen Quad für Lighting Pass
+    RenderObject createLightingQuad(VkRenderPass renderPass,
+                                   VkDescriptorSetLayout lightingLayout);
 
 private:
-    LoadObj _loader;
-    InitBuffer _buff;
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;
     VkCommandPool _commandPool;
@@ -70,4 +81,7 @@ private:
     VkFormat _depthFormat;
     VkDescriptorSetLayout _descriptorSetLayout;
     VkDescriptorSetLayout _litDescriptorSetLayout;
+
+    InitBuffer _buff;
+    LoadObj _loader;
 };

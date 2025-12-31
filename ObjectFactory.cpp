@@ -10,7 +10,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
                                          VkRenderPass renderPass,
-                                         PipelineType type)
+                                         PipelineType type,
+                                        uint32_t subpassIndex)
 {
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
@@ -20,7 +21,8 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         fragShaderPath,
         renderPass,
         _descriptorSetLayout,
-        type
+        type,
+        subpassIndex
     );
 
     std::vector<Vertex> vertices;
@@ -40,38 +42,9 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
     return obj;
 }
 
-RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderPass renderPass){
-    GraphicsPipeline* pipeline = new GraphicsPipeline(
-        _device,
-        _colorFormat,
-        _depthFormat,
-        "shaders/test.vert.spv", 
-        "shaders/testapp.frag.spv",
-        renderPass,
-        _descriptorSetLayout,
-        PipelineType::STANDARD
-    );
-
-    std::vector<Vertex> vertices;
-    _loader.objLoader("models/wooden_bowl.obj", vertices);
-   
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
-
-    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, "textures/wooden_bowl.jpg");
-
-    RenderObject obj{};
-    obj.vertexBuffer = vertexBuffer;
-    obj.vertexCount = static_cast<uint32_t>(vertices.size());
-    obj.textureImageView = tex->getImageView();
-    obj.textureSampler = tex->getSampler();
-    obj.pipeline = pipeline;
-    obj.modelMatrix = modelMatrix;
-
-    return obj;
-}
 
 RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
-                                         const std::array<const char*, 6>& cubemapFaces) {
+                                         const std::array<const char*, 6>& cubemapFaces, uint32_t subpassIndex) {
     std::vector<Vertex> vertices = {
         {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
         {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
@@ -124,7 +97,8 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD
+        PipelineType::STANDARD,
+        subpassIndex
     );
 
     InitBuffer buff;
@@ -148,7 +122,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
 RenderObject ObjectFactory::createSnowflake(const char* texturePath, 
                                            VkRenderPass renderPass,
                                            VkBuffer particleBuffer, 
-                                           VkDescriptorSetLayout snowDescriptorSetLayout) {
+                                           VkDescriptorSetLayout snowDescriptorSetLayout,uint32_t subpassIndex) {
     std::vector<Vertex> vertices = {
         {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
         {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
@@ -235,43 +209,10 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     return light;
 }
 
-RenderObject ObjectFactory::createLitObject(const char* modelPath,
-                                          const char* texturePath,
-                                          const glm::mat4& modelMatrix,
-                                          VkRenderPass renderPass) {
-    GraphicsPipeline* pipeline = new GraphicsPipeline(
-        _device,
-        _colorFormat,
-        _depthFormat,
-        "shaders/lit.vert.spv",
-        "shaders/lit.frag.spv",
-        renderPass,
-        _litDescriptorSetLayout,
-        PipelineType::STANDARD
-    );
-    
-    std::vector<Vertex> vertices;
-    _loader.objLoader(modelPath, vertices);
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
-                                                    _commandPool, _graphicsQueue, vertices);
-    
-    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
-    
-    RenderObject obj{};
-    obj.vertexBuffer = vertexBuffer;
-    obj.vertexCount = static_cast<uint32_t>(vertices.size());
-    obj.textureImageView = tex->getImageView();
-    obj.textureSampler = tex->getSampler();
-    obj.pipeline = pipeline;
-    obj.modelMatrix = modelMatrix;
-    obj.isLit = true;
-    
-    return obj;
-}
 
 RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
                                          VkRenderPass renderPass,
-                                         PipelineType pipelineType) {
+                                         PipelineType pipelineType,uint32_t subpassIndex) {
     std::vector<Vertex> vertices = {
         {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
         {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
@@ -314,6 +255,106 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+
+    return obj;
+}
+DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,const char* texturePath,const glm::mat4& modelMatrix,VkRenderPass renderPass){
+    DeferredRenderObject deferredObj{};
+
+    // Load geometry
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                     _commandPool, _graphicsQueue, vertices);
+
+    // Load texture
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+
+    // Pipeline for Depth Prepass (Subpass 0)
+    GraphicsPipeline* depthPipeline = new GraphicsPipeline(
+        _device, _colorFormat, _depthFormat,
+        "shaders/depth_only.vert.spv",
+        "shaders/depth_only.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::DEPTH_ONLY,
+        0  // Subpass 0
+    );
+
+    deferredObj.depthPass.vertexBuffer = vertexBuffer;
+    deferredObj.depthPass.vertexCount = static_cast<uint32_t>(vertices.size());
+    deferredObj.depthPass.textureImageView = tex->getImageView();
+    deferredObj.depthPass.textureSampler = tex->getSampler();
+    deferredObj.depthPass.pipeline = depthPipeline;
+    deferredObj.depthPass.modelMatrix = modelMatrix;
+    deferredObj.depthPass.instanceCount = 1;
+    deferredObj.depthPass.isDeferred =true;
+
+    // Pipeline for G-Buffer Pass (Subpass 1)
+    GraphicsPipeline* gbufferPipeline = new GraphicsPipeline(
+        _device, _colorFormat, _depthFormat,
+        "shaders/gbuffer.vert.spv",
+        "shaders/gbuffer.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::GBUFFER,
+        1  // Subpass 1
+    );
+
+    deferredObj.gbufferPass.vertexBuffer = vertexBuffer;
+    deferredObj.gbufferPass.vertexCount = static_cast<uint32_t>(vertices.size());
+    deferredObj.gbufferPass.textureImageView = tex->getImageView();
+    deferredObj.gbufferPass.textureSampler = tex->getSampler();
+    deferredObj.gbufferPass.pipeline = gbufferPipeline;
+    deferredObj.gbufferPass.modelMatrix = modelMatrix;
+    deferredObj.gbufferPass.instanceCount = 1;
+    deferredObj.gbufferPass.isDeferred =true;
+
+    return deferredObj;
+}
+
+DeferredRenderObject ObjectFactory::createDeferredLitObject(
+    const char* modelPath,
+    const char* texturePath,
+    const glm::mat4& modelMatrix,
+    VkRenderPass renderPass)
+{
+    // Basis-Objekt erstellen
+    return createDeferredObject(modelPath, texturePath, modelMatrix, renderPass);
+}
+
+RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
+                                              VkDescriptorSetLayout lightingLayout)
+{
+    // Fullscreen quad - vertices generated in shader
+    std::vector<Vertex> vertices = {
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}
+    };
+
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device, _colorFormat, _depthFormat,
+        "shaders/lighting.vert.spv",
+        "shaders/lighting.frag.spv",
+        renderPass,
+        lightingLayout,
+        PipelineType::LIGHTING,
+        2  // Subpass 2
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.pipeline = pipeline;
+    obj.modelMatrix = glm::mat4(1.0f);
+    obj.instanceCount = 1;
 
     return obj;
 }
