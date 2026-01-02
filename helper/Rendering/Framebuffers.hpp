@@ -106,7 +106,12 @@ private:
         // We need to store physical device reference - for now use a hack
         // TODO: Pass physical device to Framebuffers constructor
         
-        allocInfo.memoryTypeIndex = 0; // Will fix with proper physical device
+        allocInfo.memoryTypeIndex = findMemoryType(
+            memRequirements.memoryTypeBits,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            _physicalDevice
+        );
+
         
         if (vkAllocateMemory(_device, &allocInfo, nullptr, &_gBufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate G-Buffer memory!");

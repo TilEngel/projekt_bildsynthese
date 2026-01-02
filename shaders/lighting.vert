@@ -1,3 +1,4 @@
+//lighting.vert
 #version 450
 
 // Fullscreen quad vertices

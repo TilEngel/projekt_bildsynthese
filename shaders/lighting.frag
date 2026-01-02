@@ -1,3 +1,4 @@
+//lighting.frag
 #version 450
 
 // Input attachments from G-Buffer

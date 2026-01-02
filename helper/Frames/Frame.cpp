@@ -125,9 +125,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
-    std::array<VkClearValue, 2> clearValues{};
+    std::array<VkClearValue, 3> clearValues{};
     clearValues[0].color = { {1.0f, 0.0f, 0.0f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };  // Stencil wird auf 0 gecleart
+    clearValues[2].color = {{0.0f, 0.0f, 0.0f, 0.0f}};   // G-Buffer
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -147,6 +148,97 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.offset = {0, 0};
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
+
+    // ============================================
+    // SUBPASS 0: DEPTH PREPASS
+    // Rendere nur Deferred Objects für Depth
+    // ============================================
+    std::cout << "Rendering Depth Pass..." << std::endl;
+    
+    for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
+        const auto& obj = scene->getDepthPassObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            continue;
+        }
+
+        VkPipeline pipeline = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+
+        // Finde descriptor set index
+        size_t descriptorIdx = 0;
+        for (size_t j = 0; j < scene->getObjectCount(); ++j) {
+            if (&scene->getObject(j) == &obj) break;
+            if (!scene->getObject(j).isSnow && !scene->getObject(j).isLit) {
+                descriptorIdx++;
+            }
+        }
+
+        if (descriptorIdx < _descriptorSets.size()) {
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   layout, 0, 1, &_descriptorSets[descriptorIdx], 0, nullptr);
+        }
+
+        VkBuffer vb[] = {obj.vertexBuffer};
+        VkDeviceSize off[] = {0};
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
+        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+                          0, sizeof(glm::mat4), &obj.modelMatrix);
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    }
+
+    // Advance to G-Buffer Pass
+    vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+    // ============================================
+    // SUBPASS 1: G-BUFFER PASS
+    // Rendere Deferred Objects in G-Buffer
+    // ============================================
+    std::cout << "Rendering G-Buffer Pass..." << std::endl;
+    
+    for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
+        const auto& obj = scene->getGBufferPassObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            continue;
+        }
+
+        VkPipeline pipeline = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+
+        // Gleiche descriptor set logic
+        size_t descriptorIdx = 0;
+        for (size_t j = 0; j < scene->getObjectCount(); ++j) {
+            if (&scene->getObject(j) == &obj) break;
+            if (!scene->getObject(j).isSnow && !scene->getObject(j).isLit) {
+                descriptorIdx++;
+            }
+        }
+
+        if (descriptorIdx < _descriptorSets.size()) {
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   layout, 0, 1, &_descriptorSets[descriptorIdx], 0, nullptr);
+        }
+
+        VkBuffer vb[] = {obj.vertexBuffer};
+        VkDeviceSize off[] = {0};
+        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
+        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+                          0, sizeof(glm::mat4), &obj.modelMatrix);
+        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+    }
+
+    // Advance to Lighting Pass
+    vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+    // ============================================
+    // SUBPASS 2: LIGHTING PASS (Forward Rendering)
+    // Hier rendern wir ALLES was nicht deferred ist
+    // ============================================
+    std::cout << "Rendering Lighting/Forward Pass..." << std::endl;
+
 
     size_t normalObjIdx = 0;
     size_t snowObjIdx = 0;
@@ -184,7 +276,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                    pipelineLayout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
             snowObjIdx++;
-            } else if (obj.isLit) {
+        } else if (obj.isLit) {
             if (litObjIdx >= _litDescriptorSets.size()) {
                 std::cerr << "ERROR: Lit descriptor set index out of range!\n";
                 continue;

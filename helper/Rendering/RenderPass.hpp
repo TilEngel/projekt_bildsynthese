@@ -25,7 +25,7 @@ public:
         // Back buffer (final output)
         attachments[kAttachment_BACK].format = colorFormat;
         attachments[kAttachment_BACK].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachments[kAttachment_BACK].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[kAttachment_BACK].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[kAttachment_BACK].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;

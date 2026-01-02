@@ -12,9 +12,10 @@ void Framebuffers::create() {
 
     for (size_t i = 0; i < swapViews.size(); i++) {
 
-        std::array<VkImageView, 2> attachments = {
+        std::array<VkImageView, 3> attachments = {
             swapViews[i],   // color attachment
-            depthView       // depth attachment
+            depthView,      // depth attachment
+            _gBufferImageView
         };
 
         VkFramebufferCreateInfo info{};

@@ -224,8 +224,15 @@ void GraphicsPipeline::createPipeline() {
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &blendAttachment;
+    
+    // KRITISCH: Depth-Only Pipeline hat KEINE Color Attachments!
+    if (_pipelineType == PipelineType::DEPTH_ONLY) {
+        colorBlending.attachmentCount = 0;  // NULL!
+        colorBlending.pAttachments = nullptr;
+    } else {
+        colorBlending.attachmentCount = 1;
+        colorBlending.pAttachments = &blendAttachment;
+    }
 
     // --- Rasterizer ---
     VkPipelineRasterizationStateCreateInfo rasterizer{};
