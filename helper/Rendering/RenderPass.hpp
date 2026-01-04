@@ -45,12 +45,12 @@ public:
         // G-Buffer (position, normal, albedo packed in RGBA32)
         attachments[kAttachment_GBUFFER].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[kAttachment_GBUFFER].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[kAttachment_GBUFFER].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[kAttachment_GBUFFER].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[kAttachment_GBUFFER].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachments[kAttachment_GBUFFER].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[kAttachment_GBUFFER].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[kAttachment_GBUFFER].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         attachments[kAttachment_GBUFFER].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[kAttachment_GBUFFER].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        attachments[kAttachment_GBUFFER].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         // --- ATTACHMENT REFERENCES ---
         
@@ -91,16 +91,21 @@ public:
         subpasses[kSubpass_GBUFFER].pColorAttachments = &gBufferRef;
         subpasses[kSubpass_GBUFFER].pDepthStencilAttachment = &depthRef;
 
-        // Subpass 2: Lighting Pass
-        subpasses[kSubpass_LIGHTING].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpasses[kSubpass_LIGHTING].inputAttachmentCount = static_cast<uint32_t>(lightingInputs.size());
-        subpasses[kSubpass_LIGHTING].pInputAttachments = lightingInputs.data();
-        subpasses[kSubpass_LIGHTING].colorAttachmentCount = 1;
-        subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
-        subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = nullptr;
+       // Depth attachment reference für Subpass 2 (READ-ONLY!)
+VkAttachmentReference depthReadRef{};
+depthReadRef.attachment = kAttachment_DEPTH;
+depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;  // ✅ READ-ONLY!
+
+// Subpass 2: Lighting Pass
+subpasses[kSubpass_LIGHTING].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+subpasses[kSubpass_LIGHTING].inputAttachmentCount = static_cast<uint32_t>(lightingInputs.size());
+subpasses[kSubpass_LIGHTING].pInputAttachments = lightingInputs.data();
+subpasses[kSubpass_LIGHTING].colorAttachmentCount = 1;
+subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
+subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = &depthReadRef;  // ✅ BENUTZE DEPTH!
 
         // --- SUBPASS DEPENDENCIES ---
-        std::array<VkSubpassDependency, 3> dependencies{};
+        std::array<VkSubpassDependency, 4> dependencies{};
 
         // External -> Depth Prepass
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -128,6 +133,15 @@ public:
         dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         dependencies[2].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
         dependencies[2].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+        // NEU: Explizite Layout Transition für G-Buffer
+        dependencies[3].srcSubpass = kSubpass_GBUFFER;
+        dependencies[3].dstSubpass = kSubpass_LIGHTING;
+        dependencies[3].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[3].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        dependencies[3].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependencies[3].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        dependencies[3].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
         // --- CREATE RENDER PASS ---
         VkRenderPassCreateInfo renderPassInfo{};

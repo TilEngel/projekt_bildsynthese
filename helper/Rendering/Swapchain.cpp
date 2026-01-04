@@ -24,11 +24,22 @@ void SwapChain::create() {
     VkSurfaceFormatKHR selectedFormat = formats[0];
 
     for (const auto& f : formats) {
-        if (f.format == VK_FORMAT_B8G8R8A8_SRGB &&
+        if (f.format == VK_FORMAT_B8G8R8A8_UNORM &&
             f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
         {
             selectedFormat = f;
             break;
+        }
+    }
+    // Fallback auf SRGB, falls UNORM nicht verfügbar
+    if (selectedFormat.format != VK_FORMAT_B8G8R8A8_UNORM) {
+        for (const auto& f : formats) {
+            if (f.format == VK_FORMAT_B8G8R8A8_SRGB &&
+                f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                selectedFormat = f;
+                break;
+            }
         }
     }
 

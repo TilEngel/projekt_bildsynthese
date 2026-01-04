@@ -331,9 +331,9 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
         {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
         {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
         {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
-        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}
+        {{ -1.0f,  -1.0f, 0.0f}, {1.0f, 1.0f}},
+        {{1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}
     };
 
     GraphicsPipeline* pipeline = new GraphicsPipeline(

@@ -151,7 +151,7 @@ private:
         }
     }
 
-    void create();
+    void create(); //Implementierung in Framebuffers.cpp
 
     void cleanup() {
         for (auto fb : _framebuffers) {

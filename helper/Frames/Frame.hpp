@@ -48,11 +48,15 @@ public:
     void allocateLitDescriptorSets(VkDescriptorPool descriptorPool, 
                                    VkDescriptorSetLayout descriptorSetLayout, 
                                    size_t objectCount);
+    void allocateLightingDescriptorSets(VkDescriptorPool descriptorPool, 
+                                          VkDescriptorSetLayout descriptorSetLayout, 
+                                          size_t count);
 
     void updateDescriptorSet(Scene* scene);
     void updateLitDescriptorSet(Scene* scene);
     void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
                                  VkImageView imageView, VkSampler sampler);
+    void updateLightingDescriptorSet(VkImageView gBufferView, VkImageView depthView);
 
     // Command Buffer
     void allocateCommandBuffer(VkCommandPool commandPool);
@@ -135,7 +139,7 @@ private:
     std::vector<VkDescriptorSet> _descriptorSets;
     std::vector<VkDescriptorSet> _snowDescriptorSets;
     std::vector<VkDescriptorSet> _litDescriptorSets;
-
+    std::vector<VkDescriptorSet> _lightingDescriptorSets;
     // Command Buffer
     VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
 
