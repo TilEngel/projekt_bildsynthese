@@ -1,15 +1,14 @@
-//main.cpp (Merged - Snow + Lighting + Mirrors)
+//main.cpp
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <map>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "helper/initBuffer.hpp"
 #include "helper/initInstance.hpp"
-#include "helper/ObjectLoading/loadObj.hpp"
-
 #include "helper/Rendering/Window.hpp"
 #include "helper/Rendering/Surface.hpp"
 #include "helper/Rendering/Swapchain.hpp"
@@ -444,28 +443,109 @@ int main() {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
+    // ========== CLEANUP ==========
     vkDeviceWaitIdle(device);
-    
-    // Cleanup
-    
-    delete mirrorSystem;
-    snow->destroy();
-    delete snow;
-    delete camera;
-    delete scene;
+
+    // 1. Frames zerstören
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         delete framesInFlight[i];
     }
+
+    // 2. Sammle unique Ressourcen
+    std::set<GraphicsPipeline*> uniquePipelines;
+    std::set<Texture*> uniqueTextures;
+    std::map<VkBuffer, VkDeviceMemory> uniqueVertexBuffers;  // Buffer + Memory
+
+    // Normale Objekte
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const RenderObject& obj = scene->getObject(i);
+        
+        if (obj.texture) {
+            uniqueTextures.insert(obj.texture);
+        }
+        
+        if (obj.pipeline) {
+            uniquePipelines.insert(obj.pipeline);
+        }
+        
+        if (obj.vertexBuffer != VK_NULL_HANDLE) {
+            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+        }
+    }
+
+    // Reflektierte Objekte (teilen sich Ressourcen!)
+    for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
+        const RenderObject& obj = scene->getReflectedObject(i);
+        
+        if (obj.texture) {
+            uniqueTextures.insert(obj.texture);
+        }
+        
+        if (obj.pipeline) {
+            uniquePipelines.insert(obj.pipeline);
+        }
+        
+        if (obj.vertexBuffer != VK_NULL_HANDLE) {
+            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+        }
+    }
+
+    // 3. Vertex-Buffer UND Memory zerstören
+    for (const auto& [buffer, memory] : uniqueVertexBuffers) {
+        vkDestroyBuffer(device, buffer, nullptr);
+        if (memory != VK_NULL_HANDLE) {
+            vkFreeMemory(device, memory, nullptr);
+        }
+    }
+
+    // 4. Texturen zerstören
+    for (Texture* tex : uniqueTextures) {
+        if (tex) {
+            tex->destroy();
+            delete tex;
+        }
+    }
+
+    // 5. Pipelines zerstören
+    for (GraphicsPipeline* pipeline : uniquePipelines) {
+        if (pipeline) {
+            pipeline->destroy();
+            delete pipeline;
+        }
+    }
+
+    // 6. Mirror-System
+    delete mirrorSystem;
+
+    // 7. Snow
+    snow->destroy();
+    delete snow;
+
+    // 8. Scene
+    delete scene;
+
+    // 9. Rendering Resources
+    delete framebuffers;
+    delete depthBuffer;
+    delete swapChain;
+
+    // 10. RenderPass
+    vkDestroyRenderPass(device, renderPass, nullptr);
+
+    // 11. Descriptor Resources
     inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyDescriptorSetLayout(device, lightingDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, litDescriptorSetLayout);
+
+    // 12. Command Pool
     inst.destroyCommandPool(device, commandPool);
-    delete framebuffers;
-    delete depthBuffer;
-    delete swapChain;
+
+    // 13. Device
     inst.destroyDevice(device);
+
+    // 14. Instance-Level
     delete surface;
     inst.destroyInstance(instance);
     delete window;

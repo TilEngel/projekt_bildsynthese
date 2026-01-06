@@ -34,6 +34,8 @@ public:
         uint32_t presentQueueFamilyIndex
     );
 
+    VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
+
     void destroyDevice(VkDevice device);
 
     VkCommandPool createCommandPool(VkDevice device, uint32_t graphicsQueueFamilyIndex);

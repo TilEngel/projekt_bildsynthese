@@ -284,7 +284,17 @@ void GraphicsPipeline::createPipeline() {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     }
+     // WICHTIG: Spiegel verschwindet nicht mehr von hinten
+    if (_pipelineType == PipelineType::MIRROR_BLEND) {
+        rasterizer.cullMode = VK_CULL_MODE_NONE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    }
+    
 
+    VkPipelineColorBlendStateCreateInfo blend{};
+    blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    blend.attachmentCount = 1;
+    blend.pAttachments = &blendAttachment;
     // --- Dynamic State ---
     std::vector<VkDynamicState> dynamicStates{
         VK_DYNAMIC_STATE_VIEWPORT,
@@ -349,4 +359,16 @@ void GraphicsPipeline::cleanupPipelineLayout() {
 void GraphicsPipeline::cleanupPipeline() {
     if (_graphicsPipeline)
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
+}
+
+void GraphicsPipeline::destroy() {
+    if (_graphicsPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
+        _graphicsPipeline = VK_NULL_HANDLE;
+    }
+    
+    if (_pipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
+        _pipelineLayout = VK_NULL_HANDLE;
+    }
 }

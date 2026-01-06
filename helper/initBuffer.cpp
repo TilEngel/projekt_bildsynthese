@@ -73,7 +73,8 @@ void InitBuffer::copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue 
 
 VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevice device,
                                         VkCommandPool commandPool, VkQueue graphicsQueue,
-                                        const std::vector<Vertex>& vertices) {
+                                        const std::vector<Vertex>& vertices,
+                                        VkDeviceMemory* outMemory) {
     if (vertices.empty()) {
         throw std::runtime_error("InitBuffer::createVertexBuffer: vertices is empty");
     }
@@ -154,9 +155,14 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
     // 3) staging -> device lokal
     copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, _vertexBuffer, bufferSize);
 
-    // Cleanup
+    // Cleanup staging buffer
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+    // Memory zurückgeben, falls der Pointer nicht null ist
+    if (outMemory != nullptr) {
+        *outMemory = _vertexBufferMemory;
+    }
 
     std::cout << "[DEBUG] Vertex buffer created via staging buffer (" << vertices.size() << " vertices)" << std::endl;
     return _vertexBuffer;

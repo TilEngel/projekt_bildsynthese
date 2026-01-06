@@ -26,12 +26,7 @@ public:
         createTextureSampler();
     }
 
-    void destroy() {
-        vkDestroySampler(_device, _textureSampler, nullptr);
-        vkDestroyImageView(_device, _textureImageView, nullptr);
-        vkDestroyImage(_device, _textureImage, nullptr);
-        vkFreeMemory(_device, _textureImageMemory, nullptr);
-    }
+    void destroy();
 
     VkImageView getImageView() {
         return _textureImageView;

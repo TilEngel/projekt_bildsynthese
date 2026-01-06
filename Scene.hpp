@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "helper/Rendering/GraphicsPipeline.hpp"
+#include "helper/Texture/Texture.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <unordered_set>
@@ -28,9 +29,11 @@ struct LitUniformBufferObject {
 
 struct RenderObject {
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
     uint32_t vertexCount = 0;
     VkImageView textureImageView = VK_NULL_HANDLE;
     VkSampler textureSampler = VK_NULL_HANDLE;
+    Texture* texture = nullptr;
     GraphicsPipeline* pipeline = nullptr;
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     VkBuffer instanceBuffer = VK_NULL_HANDLE;

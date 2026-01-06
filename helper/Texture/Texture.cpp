@@ -79,6 +79,30 @@ void Texture::destroyImageBuffer() {
     }
 }
 
+void Texture::destroy() {
+    if (_textureSampler != VK_NULL_HANDLE) {
+        vkDestroySampler(_device, _textureSampler, nullptr);
+        _textureSampler = VK_NULL_HANDLE;
+    }
+
+    if (_textureImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(_device, _textureImageView, nullptr);
+        _textureImageView = VK_NULL_HANDLE;
+    }
+
+    if (_textureImage != VK_NULL_HANDLE) {
+        vkDestroyImage(_device, _textureImage, nullptr);
+        _textureImage = VK_NULL_HANDLE;
+    }
+
+    if (_textureImageMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(_device, _textureImageMemory, nullptr);
+        _textureImageMemory = VK_NULL_HANDLE;
+    }
+
+    destroyImageBuffer();
+}
+
 void Texture::createTextureImage() {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
