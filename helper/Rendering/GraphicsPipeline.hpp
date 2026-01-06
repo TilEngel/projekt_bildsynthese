@@ -50,9 +50,9 @@ GraphicsPipeline(
     ~GraphicsPipeline() {
         cleanupPipeline();
         cleanupPipelineLayout();
-    //    cleanupDescriptorSetLayout();
-    //    cleanupRenderPass();
     }
+
+    void destroy();
 
     VkRenderPass getRenderPass() {
         return _renderPass;

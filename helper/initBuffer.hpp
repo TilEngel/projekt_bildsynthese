@@ -41,7 +41,7 @@ public:
 
     //Selbsterklärend 
     void copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-    VkBuffer createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue, const std::vector<Vertex>& vertices);
+    VkBuffer createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue, const std::vector<Vertex>& vertices, VkDeviceMemory* outMemory);
     void destroyVertexBuffer(VkDevice device);
     VkBuffer createImageBuffer(VkPhysicalDevice physicalDevice, VkDevice device, const char* imagePath);
     void destroyImageBuffer(VkDevice device);

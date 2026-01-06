@@ -366,3 +366,15 @@ void GraphicsPipeline::cleanupPipeline() {
     if (_graphicsPipeline)
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
 }
+
+void GraphicsPipeline::destroy() {
+    if (_graphicsPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
+        _graphicsPipeline = VK_NULL_HANDLE;
+    }
+    
+    if (_pipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
+        _pipelineLayout = VK_NULL_HANDLE;
+    }
+}

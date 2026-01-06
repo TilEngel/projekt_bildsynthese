@@ -3,6 +3,7 @@
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Texture/CubeMap.hpp"
 #include "helper/Texture/Texture.hpp"
+#include <vulkan/vulkan_core.h>
 
 RenderObject ObjectFactory::createGenericObject(const char* modelPath,
                                          const char* vertShaderPath,
@@ -25,17 +26,21 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
 
     std::vector<Vertex> vertices;
     _loader.objLoader(modelPath, vertices);
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+
+    VkDeviceMemory vertexBufferMemory;
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
 
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
 
     return obj;
 }
@@ -55,17 +60,20 @@ RenderObject ObjectFactory::createGround(const glm::mat4& modelMatrix, VkRenderP
     std::vector<Vertex> vertices;
     _loader.objLoader("models/wooden_bowl.obj", vertices);
    
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+    VkDeviceMemory vertexBufferMemory;
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
 
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, "textures/wooden_bowl.jpg");
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
 
     return obj;
 }
@@ -128,14 +136,15 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
     );
 
     InitBuffer buff;
-    VkBuffer vertexBuffer = buff.createVertexBuffer(_physicalDevice, _device,
-                                                    _commandPool, _graphicsQueue, vertices);
+    VkDeviceMemory vertexBufferMemory;
+    VkBuffer vertexBuffer = buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
 
     CubeMap* cubemap = new CubeMap(_physicalDevice, _device,
                                    _commandPool, _graphicsQueue, cubemapFaces);
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = cubemap->getImageView();
     obj.textureSampler = cubemap->getSampler();
@@ -170,13 +179,14 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         PipelineType::STANDARD
     );
 
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
-                                                    _commandPool, _graphicsQueue, vertices);
+    VkDeviceMemory vertexBufferMemory;
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
 
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
@@ -185,6 +195,7 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
     obj.instanceBuffer = particleBuffer;
     obj.instanceCount = NUMBER_PARTICLES;
     obj.isSnow = true;
+    obj.texture = tex;
 
     return obj;
 }
@@ -214,8 +225,9 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
         PipelineType::STANDARD
     );
     
+    VkDeviceMemory vertexBufferMemory;
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
-                                                    _commandPool, _graphicsQueue, sphereVertices);
+                                                    _commandPool, _graphicsQueue, sphereVertices, &vertexBufferMemory);
     
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
                               "textures/white.png");
@@ -224,6 +236,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f));
     
     light.renderObject.vertexBuffer = vertexBuffer;
+    light.renderObject.vertexBufferMemory = vertexBufferMemory;
     light.renderObject.vertexCount = static_cast<uint32_t>(sphereVertices.size());
     light.renderObject.textureImageView = tex->getImageView();
     light.renderObject.textureSampler = tex->getSampler();
@@ -231,6 +244,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     light.renderObject.modelMatrix = modelMatrix;
     light.renderObject.instanceCount = 1;
     light.renderObject.isLit = false;
+    light.renderObject.texture = tex;
     
     return light;
 }
@@ -252,19 +266,22 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
     
     std::vector<Vertex> vertices;
     _loader.objLoader(modelPath, vertices);
+    VkDeviceMemory vertexBufferMemory;
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
-                                                    _commandPool, _graphicsQueue, vertices);
+                                                    _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
     
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
     
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
     obj.isLit = true;
+    obj.texture = tex;
     
     return obj;
 }
@@ -300,20 +317,22 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         pipelineType
     );
 
+    VkDeviceMemory vertexBufferMemory;
     VkBuffer vertexBuffer = _buff.createVertexBuffer(
-        _physicalDevice, _device, _commandPool, _graphicsQueue, vertices
-    );
+        _physicalDevice, _device, _commandPool, _graphicsQueue, vertices, &vertexBufferMemory);
 
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, 
                                _graphicsQueue, "textures/mirror.jpg");
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
 
     return obj;
 }
