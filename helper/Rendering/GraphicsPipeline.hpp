@@ -52,8 +52,8 @@ public:
     ~GraphicsPipeline() {
         cleanupPipeline();
         cleanupPipelineLayout();
+ 
     }
-
     void destroy();
 
     VkPipeline getPipeline() const { return _graphicsPipeline; }
