@@ -210,6 +210,42 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     return light;
 }
 
+RenderObject ObjectFactory::createLitObject(const char* modelPath,
+                                          const char* texturePath,
+                                          const glm::mat4& modelMatrix,
+                                          VkRenderPass renderPass) {
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/lit.vert.spv",
+        "shaders/lit.frag.spv",
+        renderPass,
+        _litDescriptorSetLayout,
+        PipelineType::STANDARD,
+        2
+    );
+    
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+    VkDeviceMemory vertexBufferMemory;
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
+                                                    _commandPool, _graphicsQueue, vertices);
+    
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+    
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.isLit = true;
+    
+    
+    return obj;
+}
 
 RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
                                          VkRenderPass renderPass,

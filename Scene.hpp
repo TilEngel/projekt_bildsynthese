@@ -189,7 +189,7 @@ public:
         }
     }
     
-    // NEU: Update deferred object (beide Passes gleichzeitig)
+    //Update deferred object (beide Passes gleichzeitig)
     void updateDeferredObject(size_t infoIndex, const glm::mat4& newModel) {
         if (infoIndex < _deferredObjectInfos.size()) {
             size_t depthIdx = _deferredObjectInfos[infoIndex].depthPassIndex;
@@ -222,7 +222,7 @@ public:
         return _descriptorSetLayout;
     }
 
-    // NEU: Lighting Quad
+    //Lighting Quad für deferred
     void setLightingQuad(const RenderObject& quad) {
         _lightingQuad = quad;
         _hasLightingQuad = true;

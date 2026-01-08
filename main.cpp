@@ -76,7 +76,7 @@ int main() {
     Framebuffers* framebuffers = new Framebuffers(device,physicalDevice, swapChain, depthBuffer, renderPass);
     
     std::cout << "\nValidating G-Buffer setup..." << std::endl;
-    VkImageView gBufferView = framebuffers->getGBufferView();
+    VkImageView gBufferView = framebuffers->getGBufferNormalView();
     if (gBufferView == VK_NULL_HANDLE) {
         throw std::runtime_error("G-Buffer view is NULL!");
     }
@@ -110,7 +110,7 @@ int main() {
 
     // Licht 1 (Beim Zwerg)
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(-2.0f, 3.0f, 0.2f),
+        glm::vec3(-2.3f, 3.0f, 0.2f),
         glm::vec3(1.0f, 0.5f, 0.5f),
         5.0f,
         10.0f,
@@ -165,24 +165,12 @@ int main() {
     size_t gnomeIndex = scene->getDeferredObjectCount() - 1;
 
     // Sonnenschirm
-    // glm::mat4 modelUmbrella = glm::mat4(1.0f);
-    // modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
-    // modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
-    // modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
-    // DeferredRenderObject umbrella = factory.createDeferredLitObject("./models/sonnenschirm.obj",
-    //     "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
-    // scene->setDeferredRenderObject(umbrella);
-    // size_t umbrellaIndex = scene->getDeferredObjectCount() - 1;
-
-
-    // Sonnenschirm
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
     modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
     modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
     modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
-    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj","shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/sonnenschirm.jpg", modelUmbrella, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv",
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
     scene->setRenderObject(umbrella);
     size_t umbrellaIndex = scene->getObjectCount() - 1;
 
@@ -245,8 +233,7 @@ int main() {
     // Reflexionen erstellen
     mirrorSystem->createReflections(scene);
 
-    // ========== LIGHTING QUAD ERSTELLEN (WICHTIG!) ==========
-    // NACH allen anderen Objekten, VOR Descriptor Pool
+    // Lighting Quad für deferred Shading
     std::cout << "Creating lighting quad..." << std::endl;
     RenderObject lightingQuad = factory.createLightingQuad(
         renderPass,
@@ -256,15 +243,7 @@ int main() {
     std::cout << "Lighting quad created successfully!" << std::endl;
 
 
-
-    // In main.cpp - ERSETZE die Object Counts Sektion:
-
-    // ========== OBJECT COUNTS (DEBUGGING) ==========
-
-    std::cout << "\n=== SCENE COMPOSITION ===" << std::endl;
-    std::cout << "Total objects: " << scene->getObjectCount() << std::endl;
-    std::cout << "Deferred objects: " << scene->getDeferredObjectCount() << std::endl;
-
+    
     // Zähle Forward Objects nach Typ
     size_t normalForwardCount = 0;
     size_t snowCount = 0;
@@ -283,45 +262,24 @@ int main() {
         }
     }
 
-    std::cout << "Forward objects breakdown:" << std::endl;
-    std::cout << "  Normal forward: " << normalForwardCount << std::endl;
-    std::cout << "  Snow: " << snowCount << std::endl;
-    std::cout << "  Lit: " << litCount << std::endl;
-
     // ========== DESCRIPTOR SET COUNTS ==========
 
     // 1. Normale Descriptor Sets:
     //    - Deferred Objects: 2 pro object (depth pass + gbuffer pass)
     //    - Normal Forward: 1 pro object
     size_t normalDescriptorSets = (scene->getDeferredObjectCount() * 2) + normalForwardCount;
-
     // 2. Snow Descriptor Sets
     size_t snowDescriptorSets = snowCount;
-
     // 3. Lit Descriptor Sets
     size_t litDescriptorSets = litCount;
-
     // 4. Lighting Descriptor Sets
     size_t lightingDescriptorSets = scene->hasLightingQuad() ? 1 : 0;
-
-    std::cout << "\n=== DESCRIPTOR SET ALLOCATION ===" << std::endl;
-    std::cout << "Normal descriptor sets: " << normalDescriptorSets << std::endl;
-    std::cout << "  (Deferred: " << scene->getDeferredObjectCount() * 2 << ", Forward: " << normalForwardCount << ")" << std::endl;
-    std::cout << "Snow descriptor sets: " << snowDescriptorSets << std::endl;
-    std::cout << "Lit descriptor sets: " << litDescriptorSets << std::endl;
-    std::cout << "Lighting descriptor sets: " << lightingDescriptorSets << std::endl;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalDescriptorSets);
     uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowDescriptorSets);
     uint32_t maxLitSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * litDescriptorSets);
     uint32_t maxLightingSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * lightingDescriptorSets);
-
-    std::cout << "\nPer-frame allocation:" << std::endl;
-    std::cout << "  Normal sets per frame: " << normalDescriptorSets << std::endl;
-    std::cout << "  Snow sets per frame: " << snowDescriptorSets << std::endl;
-    std::cout << "  Lit sets per frame: " << litDescriptorSets << std::endl;
-    std::cout << "  Lighting sets per frame: " << lightingDescriptorSets << std::endl;
 
     // Descriptor pool
     std::array<VkDescriptorPoolSize, 4> poolSizes{};
@@ -340,21 +298,14 @@ int main() {
 
     // Input Attachments: Nur Lighting (1 pro set)
     poolSizes[3].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-    poolSizes[3].descriptorCount = maxLightingSets * 2;
+    poolSizes[3].descriptorCount = maxLightingSets * 3;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = maxNormalSets + maxSnowSets + maxLitSets + maxLightingSets;
-
-    std::cout << "\nTotal descriptor pool:" << std::endl;
-    std::cout << "  Max sets: " << poolInfo.maxSets << std::endl;
-    std::cout << "  UBOs: " << poolSizes[0].descriptorCount << std::endl;
-    std::cout << "  Samplers: " << poolSizes[1].descriptorCount << std::endl;
-    std::cout << "  Storage: " << poolSizes[2].descriptorCount << std::endl;
-    std::cout << "  Input Attachments: " << poolSizes[3].descriptorCount << std::endl;
-
+    //Descriptor Pool
     VkDescriptorPool descriptorPool;
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool in main");
@@ -456,9 +407,9 @@ int main() {
         framesInFlight[currentFrame]->updateLitUniformBuffer(camera, scene);
         framesInFlight[currentFrame]->updateLightingUniformBuffer(camera,scene);
         framesInFlight[currentFrame]->updateDescriptorSet(scene);
-        // if (litObjectCount > 0) {
-        //     framesInFlight[currentFrame]->updateLitDescriptorSet(scene);
-        // }
+        if (litCount > 0) {
+            framesInFlight[currentFrame]->updateLitDescriptorSet(scene);
+        }
                 
         // Update snow descriptor sets
         size_t snowIdx = 0;
@@ -476,7 +427,8 @@ int main() {
         }
         if (scene->hasLightingQuad()) {
             framesInFlight[currentFrame]->updateLightingDescriptorSet(
-                framebuffers->getGBufferView(),
+                framebuffers->getGBufferNormalView(),
+                framebuffers->getGBufferAlbedoView(),
                 depthBuffer->getImageView()
             );
         }

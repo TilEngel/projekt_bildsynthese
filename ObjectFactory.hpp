@@ -67,6 +67,7 @@ public:
                                        float intensity,
                                        float radius,
                                        VkRenderPass renderPass);
+    RenderObject createLitObject(const char* modelPath, const char* texturePath, const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
     // Fullscreen Quad für Lighting Pass
     RenderObject createLightingQuad(VkRenderPass renderPass,

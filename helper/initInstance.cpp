@@ -367,35 +367,37 @@ void InitInstance::destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLa
     }
 }
 
-// ERSETZE die createLightingDescriptorSetLayout Funktion in initInstance.cpp
 
 VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice device) {
-    // ✅ JETZT 3 BINDINGS: G-Buffer, Depth, UBO
+    //4 Bindings: Normal, Albedo, Depth, UBO
     
-    // Binding 0: G-Buffer Input Attachment
-    VkDescriptorSetLayoutBinding gBufferBinding{};
-    gBufferBinding.binding = 0;
-    gBufferBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-    gBufferBinding.descriptorCount = 1;
-    gBufferBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    // Binding 1: Depth Input Attachment
+    //Normal
+    VkDescriptorSetLayoutBinding normalBinding{};
+    normalBinding.binding = 0;
+    normalBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    normalBinding.descriptorCount = 1;
+    normalBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    //Albedo
+    VkDescriptorSetLayoutBinding albedoBinding{};
+    albedoBinding.binding = 1;
+    albedoBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+    albedoBinding.descriptorCount = 1;
+    albedoBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    //Depth
     VkDescriptorSetLayoutBinding depthBinding{};
-    depthBinding.binding = 1;
+    depthBinding.binding = 2;
     depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     depthBinding.descriptorCount = 1;
     depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    // ✅ NEU: Binding 2: Lighting UBO
+    //UBO
     VkDescriptorSetLayoutBinding uboBinding{};
-    uboBinding.binding = 2;
+    uboBinding.binding = 3;  // ✅ Jetzt Binding 3!
     uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboBinding.descriptorCount = 1;
     uboBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    // ✅ WICHTIG: JETZT 3 BINDINGS!
-    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
-        gBufferBinding, depthBinding, uboBinding
+    std::array<VkDescriptorSetLayoutBinding, 4> bindings = {
+        normalBinding, albedoBinding, depthBinding, uboBinding
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};

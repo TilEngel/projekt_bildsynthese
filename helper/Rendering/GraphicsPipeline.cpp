@@ -203,42 +203,52 @@ void GraphicsPipeline::createPipeline() {
     }
 
     // --- Color Blend State ---
-    VkPipelineColorBlendAttachmentState blendAttachment{};
-    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                     VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    
+    std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
+
     if (_pipelineType == PipelineType::DEPTH_ONLY) {
         // Depth Prepass: Kein Color Write
-        blendAttachment.colorWriteMask = 0;
-        blendAttachment.blendEnable = VK_FALSE;
-    } else if (_pipelineType == PipelineType::MIRROR_MARK) {
-        // Stencil Marking: Keine Farbe schreiben
-        blendAttachment.colorWriteMask = 0;
-        blendAttachment.blendEnable = VK_FALSE;
-    } else if (_pipelineType == PipelineType::MIRROR_BLEND) {
-        // Alpha Blending für transparenten Spiegel
-        blendAttachment.blendEnable = VK_TRUE;
-        blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-        blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-        blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-        blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+        // attachmentCount = 0, keine Attachments
+    } else if (_pipelineType == PipelineType::GBUFFER) {
+        //G-Buffer hat 2 Color Outputs!
+        blendAttachments.resize(2);
+        
+        for (auto& attachment : blendAttachments) {
+            attachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+            attachment.blendEnable = VK_FALSE;
+        }
     } else {
-        blendAttachment.blendEnable = VK_FALSE;
+        // Standard: 1 Color Output
+        blendAttachments.resize(1);
+        blendAttachments[0].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        
+        if (_pipelineType == PipelineType::MIRROR_MARK) {
+            blendAttachments[0].colorWriteMask = 0;
+            blendAttachments[0].blendEnable = VK_FALSE;
+        } else if (_pipelineType == PipelineType::MIRROR_BLEND) {
+            blendAttachments[0].blendEnable = VK_TRUE;
+            blendAttachments[0].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            blendAttachments[0].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            blendAttachments[0].colorBlendOp = VK_BLEND_OP_ADD;
+            blendAttachments[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            blendAttachments[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+            blendAttachments[0].alphaBlendOp = VK_BLEND_OP_ADD;
+        } else {
+            blendAttachments[0].blendEnable = VK_FALSE;
+        }
     }
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
-    
-    // KRITISCH: Depth-Only Pipeline hat KEINE Color Attachments!
+
     if (_pipelineType == PipelineType::DEPTH_ONLY) {
-        colorBlending.attachmentCount = 0;  // NULL!
+        colorBlending.attachmentCount = 0;
         colorBlending.pAttachments = nullptr;
     } else {
-        colorBlending.attachmentCount = 1;
-        colorBlending.pAttachments = &blendAttachment;
+        colorBlending.attachmentCount = static_cast<uint32_t>(blendAttachments.size());
+        colorBlending.pAttachments = blendAttachments.data();
     }
 
     // --- Rasterizer ---

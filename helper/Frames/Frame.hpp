@@ -76,7 +76,7 @@ public:
     void updateLitDescriptorSet(Scene* scene);
     void updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
                                  VkImageView imageView, VkSampler sampler);
-    void updateLightingDescriptorSet(VkImageView gBufferView, VkImageView depthView);
+    void updateLightingDescriptorSet(VkImageView gBufferNormalView,VkImageView gBufferAlbedoView, VkImageView depthView);
 
     // Command Buffer
     void allocateCommandBuffer(VkCommandPool commandPool);
