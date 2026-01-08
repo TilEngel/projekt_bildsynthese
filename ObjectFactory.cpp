@@ -97,7 +97,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         "shaders/skybox.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD,
+        PipelineType::SKYBOX,
         subpassIndex
     );
 
@@ -141,7 +141,8 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         "shaders/snow.frag.spv",
         renderPass,
         snowDescriptorSetLayout,
-        PipelineType::STANDARD
+        PipelineType::STANDARD,
+        2
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -185,7 +186,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD
+        PipelineType::STANDARD,2
     );
     
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -238,7 +239,8 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         fragShader,
         renderPass,
         _descriptorSetLayout,
-        pipelineType
+        pipelineType,
+        2
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(

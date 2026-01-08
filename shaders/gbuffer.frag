@@ -1,23 +1,25 @@
+//gbuffer.frag
 #version 450
 
 layout(binding = 1) uniform sampler2D texSampler;
 
 layout(location = 0) in vec3 fragWorldPos;
-layout(location = 1) in vec3 fragWorldNormal;
-layout(location = 2) in vec2 fragTexCoord;
-layout(location = 3) in vec3 fragViewPos;
+layout(location = 1) in vec2 fragTexCoord;
 
 layout(location = 0) out vec4 outGBuffer;
 
 void main() {
-    vec4 albedo = texture(texSampler, fragTexCoord);
+    // Textur-Farbe
+    vec3 albedo = texture(texSampler, fragTexCoord).rgb;
     
-    // Normale berechnen (im Fragment Shader für bessere Qualität)
-    vec3 normal = normalize(cross(dFdx(fragWorldPos), dFdy(fragWorldPos)));
+    // Normale aus Position-Derivaten berechnen
+    vec3 dPdx = dFdx(fragWorldPos);
+    vec3 dPdy = dFdy(fragWorldPos);
+    vec3 normal = normalize(cross(dPdy, dPdx));
     
-    // Pack: RGB = Albedo, A = encoded normal
-    // (Vereinfacht - für echtes Deferred bräuchtest du mehrere Attachments)
-    float normalEncoded = dot(normal, vec3(0.333));
-    
-    outGBuffer = vec4(albedo.rgb, normalEncoded);
+    //XYZ als RGB, Albedo als Alpha
+    outGBuffer = vec4(
+        normal * 0.5 + 0.5,          // Normal XYZ: [-1,1] -> [0,1]
+        dot(albedo, vec3(0.299, 0.587, 0.114))  // Luminance im Alpha-Kanal
+    );
 }

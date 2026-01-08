@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan_core.h>
+#include<iostream>
 #include <vector>
 #include <stdexcept>
 #include <array>
@@ -51,9 +52,9 @@ private:
     VkDeviceMemory _gBufferMemory = VK_NULL_HANDLE;
     VkImageView _gBufferImageView = VK_NULL_HANDLE;
 
-    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, VkPhysicalDevice physicalDevice) {
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
-        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+        vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
 
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
             if ((typeFilter & (1 << i)) && 
@@ -67,6 +68,9 @@ private:
     void createGBufferResources() {
         VkExtent2D extent = _swapChain->getExtent();
         VkFormat gBufferFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+
+        std::cout << "\n=== CREATING G-BUFFER RESOURCES ===" << std::endl;
+        std::cout << "Extent: " << extent.width << "x" << extent.height << std::endl;
 
         // Create G-Buffer Image
         VkImageCreateInfo imageInfo{};
@@ -87,38 +91,39 @@ private:
         if (vkCreateImage(_device, &imageInfo, nullptr, &_gBufferImage) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create G-Buffer image!");
         }
-
+        std::cout << "G-Buffer image created: " << (_gBufferImage != VK_NULL_HANDLE) << std::endl;
         // Allocate memory
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(_device, _gBufferImage, &memRequirements);
-
-        // Need physical device - get from depth buffer helper
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-        // This is a workaround - ideally pass physical device to constructor
-        // For now, we'll use device-local memory properties
+        std::cout << "Memory requirements:" << std::endl;
+        std::cout << "  Size: " << memRequirements.size << " bytes" << std::endl;
+        std::cout << "  Alignment: " << memRequirements.alignment << std::endl;
+        std::cout << "  Memory type bits: " << memRequirements.memoryTypeBits << std::endl;
+        
         
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         
-        // Find memory type (device local)
-        VkPhysicalDeviceMemoryProperties memProperties;
-        // We need to store physical device reference - for now use a hack
-        // TODO: Pass physical device to Framebuffers constructor
         
-        allocInfo.memoryTypeIndex = findMemoryType(
-            memRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            _physicalDevice
-        );
+        try {
+            allocInfo.memoryTypeIndex = findMemoryType(
+                memRequirements.memoryTypeBits,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+            );
+            std::cout << "Selected memory type index: " << allocInfo.memoryTypeIndex << std::endl;
+        } catch (const std::runtime_error& e) {
+            std::cerr << "ERROR finding memory type: " << e.what() << std::endl;
+            throw;
+        }
 
         
         if (vkAllocateMemory(_device, &allocInfo, nullptr, &_gBufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate G-Buffer memory!");
         }
-
+        std::cout << "G-Buffer memory allocated: " << (_gBufferMemory != VK_NULL_HANDLE) << std::endl;
         vkBindImageMemory(_device, _gBufferImage, _gBufferMemory, 0);
-
+        std::cout << "G-Buffer memory bound successfully" << std::endl;
         // Create Image View
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -134,6 +139,21 @@ private:
         if (vkCreateImageView(_device, &viewInfo, nullptr, &_gBufferImageView) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create G-Buffer image view!");
         }
+        std::cout << "G-Buffer image view created: " << (_gBufferImageView != VK_NULL_HANDLE) << std::endl;
+
+        // ========== VALIDATION ==========
+        std::cout << "\n=== G-BUFFER VALIDATION ===" << std::endl;
+        std::cout << "G-Buffer Image: " << (_gBufferImage != VK_NULL_HANDLE ? "VALID" : "NULL") << std::endl;
+        std::cout << "G-Buffer Memory: " << (_gBufferMemory != VK_NULL_HANDLE ? "VALID" : "NULL") << std::endl;
+        std::cout << "G-Buffer View: " << (_gBufferImageView != VK_NULL_HANDLE ? "VALID" : "NULL") << std::endl;
+        
+        if (_gBufferImage == VK_NULL_HANDLE || 
+            _gBufferMemory == VK_NULL_HANDLE || 
+            _gBufferImageView == VK_NULL_HANDLE) {
+            throw std::runtime_error("G-Buffer creation failed validation!");
+        }
+        
+        std::cout << "✅ G-Buffer resources created successfully!" << std::endl;
     }
 
     void cleanupGBufferResources() {
@@ -151,7 +171,103 @@ private:
         }
     }
 
-    void create(); //Implementierung in Framebuffers.cpp
+    void transitionGBufferLayout(VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue) {
+    // Create temporary command buffer
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = _gBufferImage;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphicsQueue);
+
+    vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+    
+}
+
+    void create() {
+
+    const auto& swapViews = _swapChain->getImageViews();
+    VkExtent2D extent = _swapChain->getExtent();
+    VkImageView depthView = _depthBuffer->getImageView();
+
+    _framebuffers.resize(swapViews.size());
+    std::cout << "\nCreating " << swapViews.size() << " framebuffers..." << std::endl;
+    for (size_t i = 0; i < swapViews.size(); i++) {
+
+        std::array<VkImageView, 3> attachments = {
+            swapViews[i],   // color attachment
+            depthView,      // depth attachment
+            _gBufferImageView   //gBuffer
+        };
+        // ✅ VALIDATION: Prüfe alle Attachments
+            if (swapViews[i] == VK_NULL_HANDLE) {
+                throw std::runtime_error("Swap chain view " + std::to_string(i) + " is NULL!");
+            }
+            if (depthView == VK_NULL_HANDLE) {
+                throw std::runtime_error("Depth view is NULL!");
+            }
+            if (_gBufferImageView == VK_NULL_HANDLE) {
+                throw std::runtime_error("G-Buffer view is NULL!");
+            }
+
+        VkFramebufferCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        info.renderPass = _renderPass;
+        info.attachmentCount = static_cast<uint32_t>(attachments.size());
+        info.pAttachments = attachments.data();
+        info.width = extent.width;
+        info.height = extent.height;
+        info.layers = 1;
+
+        if (vkCreateFramebuffer(_device, &info, nullptr, &_framebuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create framebuffer!");
+        }
+    }
+    std::cout << "All framebuffers created successfully!" << std::endl;
+}
 
     void cleanup() {
         for (auto fb : _framebuffers) {

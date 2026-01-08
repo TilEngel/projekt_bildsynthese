@@ -1,6 +1,7 @@
 #include "GraphicsPipeline.hpp"
 
 #include <stdexcept>
+#include <iostream>
 #include <vector>
 #include <fstream>
 #include <array>
@@ -132,7 +133,7 @@ void GraphicsPipeline::createPipeline() {
             // G-Buffer Pass: Depth Test, aber kein Write (bereits vom Prepass)
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_FALSE;  // WICHTIG!
-            depthStencil.depthCompareOp = VK_COMPARE_OP_EQUAL;  // Nur Pixel vom Prepass
+            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;  // Nur Pixel vom Prepass
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
             
@@ -187,6 +188,12 @@ void GraphicsPipeline::createPipeline() {
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
             
+        case PipelineType::SKYBOX:
+            depthStencil.depthTestEnable = VK_TRUE;
+            depthStencil.depthWriteEnable = VK_FALSE;
+            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+            depthStencil.stencilTestEnable = VK_FALSE;
+            break;
         default:  // STANDARD
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_TRUE;
@@ -242,6 +249,16 @@ void GraphicsPipeline::createPipeline() {
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
 
+    //Depth Bias für G-Buffer Pass- sonst zfighting Depth & GBuffer
+    if (_pipelineType == PipelineType::GBUFFER) {
+        rasterizer.depthBiasEnable = VK_TRUE;
+        rasterizer.depthBiasConstantFactor = -1.5f;  //Leicht verschieben
+        rasterizer.depthBiasSlopeFactor = -1.5f;
+        rasterizer.depthBiasClamp = 0.0f;
+    } else {
+        rasterizer.depthBiasEnable = VK_FALSE;
+    }
+
     // Culling und Front Face
     if (_pipelineType == PipelineType::MIRROR_REFLECT) {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -296,6 +313,22 @@ void GraphicsPipeline::createPipeline() {
 
     vkDestroyShaderModule(_device, vertModule, nullptr);
     vkDestroyShaderModule(_device, fragModule, nullptr);
+
+    std::cout << "\n=== PIPELINE CREATED ===" << std::endl;
+    std::cout << "Type: ";
+    switch (_pipelineType) {
+        case PipelineType::STANDARD: std::cout << "STANDARD"; break;
+        case PipelineType::DEPTH_ONLY: std::cout << "DEPTH_ONLY"; break;
+        case PipelineType::GBUFFER: std::cout << "GBUFFER"; break;
+        case PipelineType::LIGHTING: std::cout << "LIGHTING"; break;
+        case PipelineType::SKYBOX: std::cout << "SKYBOX"; break;
+        default: std::cout << "UNKNOWN"; break;
+    }
+    std::cout << std::endl;
+    std::cout << "Vertex Shader: " << _vertexShaderPath << std::endl;
+    std::cout << "Fragment Shader: " << _fragmentShaderPath << std::endl;
+    std::cout << "Subpass: " << _subpassIndex << std::endl;
+    std::cout << "Pipeline Handle: " << (_graphicsPipeline != VK_NULL_HANDLE) << std::endl;
 }
 
 void GraphicsPipeline::cleanupPipelineLayout() {

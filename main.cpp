@@ -75,6 +75,13 @@ int main() {
     
     Framebuffers* framebuffers = new Framebuffers(device,physicalDevice, swapChain, depthBuffer, renderPass);
     
+    std::cout << "\nValidating G-Buffer setup..." << std::endl;
+    VkImageView gBufferView = framebuffers->getGBufferView();
+    if (gBufferView == VK_NULL_HANDLE) {
+        throw std::runtime_error("G-Buffer view is NULL!");
+    }
+    std::cout << "G-Buffer view valid: " << (gBufferView != VK_NULL_HANDLE) << std::endl;
+
     VkDescriptorSetLayout descriptorSetLayout = inst.createStandardDescriptorSetLayout(device);
     VkDescriptorSetLayout snowDescriptorSetLayout = inst.createSnowDescriptorSetLayout(device);
     VkDescriptorSetLayout litDescriptorSetLayout = inst.createLitDescriptorSetLayout(device);
@@ -101,9 +108,9 @@ int main() {
     RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces, static_cast<uint32_t>(SubpassIndex::LIGHTING));
     scene->setRenderObject(skybox);
 
-    // Licht 1
+    // Licht 1 (Beim Zwerg)
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(-2.3f, 3.0f, 0.2f),
+        glm::vec3(-2.0f, 3.0f, 0.2f),
         glm::vec3(1.0f, 0.5f, 0.5f),
         5.0f,
         10.0f,
@@ -112,12 +119,13 @@ int main() {
     scene->addLightSource(light1);
     scene->setRenderObject(light1.renderObject);
 
-    // Licht 2
+    // Licht 2 (Bei der Lampe)
+    //glm::vec3(-8.2f, 12.2f, -6.5f)
     LightSourceObject light2 = factory.createLightSource(
-        glm::vec3(-8.2f, 12.2f, -6.5f),
-        glm::vec3(0.7f, 0.7f, 0.7f),
+        glm::vec3(-8.0f, 12.2f, -6.0f),
+        glm::vec3(0.0f, 0.1f, 0.7f),
         5.0f,
-        100.0f,
+        300.0f,
         renderPass
     );
     scene->addLightSource(light2);
@@ -127,7 +135,7 @@ int main() {
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    DeferredRenderObject chair = factory.createDeferredObject(
+    DeferredRenderObject chair = factory.createDeferredLitObject(
         "./models/plastic_monobloc_chair.obj",
         "textures/plastic_monobloc_chair.jpg",
         modelChair, renderPass);
@@ -135,15 +143,15 @@ int main() {
     size_t chairIndex = scene->getDeferredObjectCount() - 1;
 
     // //Fliegender Holländer
-    // glm::mat4 modelDutch = glm::mat4(1.0f);
-    // RenderObject dutch = factory.createGenericObject(
-    //     "./models/flying_dutchman.obj",
-    //     "shaders/test.vert.spv",
-    //     "shaders/testapp.frag.spv",
-    //     "textures/duck.jpg",
-    //     modelDutch, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    // scene->setRenderObject(dutch);
-    // size_t dutchIndex = scene->getObjectCount() - 1;
+    glm::mat4 modelDutch = glm::mat4(1.0f);
+    RenderObject dutch = factory.createGenericObject(
+        "./models/flying_dutchman.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/duck.jpg",
+        modelDutch, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    scene->setRenderObject(dutch);
+    size_t dutchIndex = scene->getObjectCount() - 1;
 
     //Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
@@ -157,14 +165,26 @@ int main() {
     size_t gnomeIndex = scene->getDeferredObjectCount() - 1;
 
     // Sonnenschirm
+    // glm::mat4 modelUmbrella = glm::mat4(1.0f);
+    // modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
+    // modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
+    // modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
+    // DeferredRenderObject umbrella = factory.createDeferredLitObject("./models/sonnenschirm.obj",
+    //     "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
+    // scene->setDeferredRenderObject(umbrella);
+    // size_t umbrellaIndex = scene->getDeferredObjectCount() - 1;
+
+
+    // Sonnenschirm
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
     modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
     modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
     modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
-    DeferredRenderObject umbrella = factory.createDeferredLitObject("./models/sonnenschirm.obj",
-        "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
-    scene->setDeferredRenderObject(umbrella);
-    size_t umbrellaIndex = scene->getDeferredObjectCount() - 1;
+    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj","shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    scene->setRenderObject(umbrella);
+    size_t umbrellaIndex = scene->getObjectCount() - 1;
 
     // Lampe
     glm::mat4 modelLamp = glm::mat4(1.0f);
@@ -179,10 +199,12 @@ int main() {
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
-    DeferredRenderObject ground = factory.createDeferredLitObject("./models/wooden_bowl.obj",
-        "textures/wooden_bowl.jpg", modelGround, renderPass);
-    scene->setDeferredRenderObject(ground);
-    size_t groundfIndex = scene->getDeferredObjectCount() - 1;
+    RenderObject ground = factory.createGenericObject("./models/wooden_bowl.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    scene->setRenderObject(ground);
+    size_t groundfIndex = scene->getObjectCount() - 1;
 
     // Schneeflocken ZULETZT hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
@@ -235,55 +257,90 @@ int main() {
 
 
 
-    // ========== OBJECT COUNTS ==========
+    // In main.cpp - ERSETZE die Object Counts Sektion:
 
-    // 1. Normale Objects (forward-rendered, nicht lit, nicht snow)
-    size_t normalObjectCount = scene->getNormalDescriptorSetCount();
+    // ========== OBJECT COUNTS (DEBUGGING) ==========
 
-    // 2. Deferred Objects (nutzen normale descriptor sets, 2 pro object)
-    size_t deferredDescriptorCount = scene->getDeferredDescriptorSetCount();
-
-    // 3. Snow Objects
-    size_t snowObjectCount = scene->getSnowObjectCount();
-
-    // 4. Lit Objects (NUR forward-rendered lit objects)
-    size_t litObjectCount = 0;
-    size_t lightingSetCount = scene->hasLightingQuad() ? 1 : 0;
-    // TOTAL für normale Descriptor Sets: normal + deferred
-    size_t totalNormalSets = normalObjectCount + deferredDescriptorCount;
-
-    std::cout << "=== DESCRIPTOR SET COUNTS ===" << std::endl;
-    std::cout << "Normal (forward) objects: " << normalObjectCount << std::endl;
-    std::cout << "Deferred descriptor sets: " << deferredDescriptorCount << std::endl;
-    std::cout << "Total normal descriptor sets: " << totalNormalSets << std::endl;
-    std::cout << "Snow objects: " << snowObjectCount << std::endl;
-    std::cout << "Lit objects (forward): " << litObjectCount << std::endl;
+    std::cout << "\n=== SCENE COMPOSITION ===" << std::endl;
+    std::cout << "Total objects: " << scene->getObjectCount() << std::endl;
     std::cout << "Deferred objects: " << scene->getDeferredObjectCount() << std::endl;
-    
+
+    // Zähle Forward Objects nach Typ
+    size_t normalForwardCount = 0;
+    size_t snowCount = 0;
+    size_t litCount = 0;
+
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const auto& obj = scene->getObject(i);
+        if (obj.isDeferred) continue;  // Deferred werden separat gezählt
+        
+        if (obj.isSnow) {
+            snowCount++;
+        } else if (obj.isLit) {
+            litCount++;
+        } else {
+            normalForwardCount++;
+        }
+    }
+
+    std::cout << "Forward objects breakdown:" << std::endl;
+    std::cout << "  Normal forward: " << normalForwardCount << std::endl;
+    std::cout << "  Snow: " << snowCount << std::endl;
+    std::cout << "  Lit: " << litCount << std::endl;
+
+    // ========== DESCRIPTOR SET COUNTS ==========
+
+    // 1. Normale Descriptor Sets:
+    //    - Deferred Objects: 2 pro object (depth pass + gbuffer pass)
+    //    - Normal Forward: 1 pro object
+    size_t normalDescriptorSets = (scene->getDeferredObjectCount() * 2) + normalForwardCount;
+
+    // 2. Snow Descriptor Sets
+    size_t snowDescriptorSets = snowCount;
+
+    // 3. Lit Descriptor Sets
+    size_t litDescriptorSets = litCount;
+
+    // 4. Lighting Descriptor Sets
+    size_t lightingDescriptorSets = scene->hasLightingQuad() ? 1 : 0;
+
+    std::cout << "\n=== DESCRIPTOR SET ALLOCATION ===" << std::endl;
+    std::cout << "Normal descriptor sets: " << normalDescriptorSets << std::endl;
+    std::cout << "  (Deferred: " << scene->getDeferredObjectCount() * 2 << ", Forward: " << normalForwardCount << ")" << std::endl;
+    std::cout << "Snow descriptor sets: " << snowDescriptorSets << std::endl;
+    std::cout << "Lit descriptor sets: " << litDescriptorSets << std::endl;
+    std::cout << "Lighting descriptor sets: " << lightingDescriptorSets << std::endl;
+
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT *totalNormalSets);
-    uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowObjectCount);
-    uint32_t maxLitSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * litObjectCount);
-    uint32_t maxLightingSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * lightingSetCount);
-    std::cout << "Allocating descriptor sets:" << std::endl;
-    std::cout << "  maxNormalSets: " << maxNormalSets << std::endl;
-    std::cout << "  maxSnowSets: " << maxSnowSets << std::endl;
-    std::cout << "  maxLightingSets: " << maxLightingSets << std::endl;
+    uint32_t maxNormalSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * normalDescriptorSets);
+    uint32_t maxSnowSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * snowDescriptorSets);
+    uint32_t maxLitSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * litDescriptorSets);
+    uint32_t maxLightingSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * lightingDescriptorSets);
+
+    std::cout << "\nPer-frame allocation:" << std::endl;
+    std::cout << "  Normal sets per frame: " << normalDescriptorSets << std::endl;
+    std::cout << "  Snow sets per frame: " << snowDescriptorSets << std::endl;
+    std::cout << "  Lit sets per frame: " << litDescriptorSets << std::endl;
+    std::cout << "  Lighting sets per frame: " << lightingDescriptorSets << std::endl;
 
     // Descriptor pool
     std::array<VkDescriptorPoolSize, 4> poolSizes{};
-    // UBOs: Normal + Snow + Lit (Lighting hat kein UBO erstmal)
+
+    // UBOs: Normal + Snow + Lit + Lighting 
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
+    poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets+ maxLightingSets;
+
     // Samplers: Normal + Snow + Lit
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
+
     // Storage Buffers: Nur Snow
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     poolSizes[2].descriptorCount = maxSnowSets;
-    // Input Attachments: Lighting Pass (G-Buffer + Depth)
+
+    // Input Attachments: Nur Lighting (1 pro set)
     poolSizes[3].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-    poolSizes[3].descriptorCount = maxLightingSets * 2; // G-Buffer + Depth
+    poolSizes[3].descriptorCount = maxLightingSets * 2;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -291,7 +348,12 @@ int main() {
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = maxNormalSets + maxSnowSets + maxLitSets + maxLightingSets;
 
-    std::cout << "Total descriptor pool maxSets: " << poolInfo.maxSets << std::endl;
+    std::cout << "\nTotal descriptor pool:" << std::endl;
+    std::cout << "  Max sets: " << poolInfo.maxSets << std::endl;
+    std::cout << "  UBOs: " << poolSizes[0].descriptorCount << std::endl;
+    std::cout << "  Samplers: " << poolSizes[1].descriptorCount << std::endl;
+    std::cout << "  Storage: " << poolSizes[2].descriptorCount << std::endl;
+    std::cout << "  Input Attachments: " << poolSizes[3].descriptorCount << std::endl;
 
     VkDescriptorPool descriptorPool;
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
@@ -301,37 +363,38 @@ int main() {
     // Frames in flight
     std::vector<Frame*> framesInFlight(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        std::cout << "\n=== Frame " << i << " Initialization ===" << std::endl;
+        
         framesInFlight[i] = new Frame(physicalDevice, device, swapChain, framebuffers,
                                     graphicsQueue, commandPool, descriptorPool,
                                     scene->getDescriptorSetLayout());
         
-        std::cout << "Frame " << i << " allocating " << totalNormalSets << " normal descriptor sets" << std::endl;
+        // Normale Descriptor Sets
+        std::cout << "Allocating " << normalDescriptorSets << " normal descriptor sets..." << std::endl;
+        framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, normalDescriptorSets);
         
-        // Normale + Deferred descriptor sets
-        framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, totalNormalSets);
-        
-        std::cout << "Frame " << i << " allocating " << snowObjectCount << " snow descriptor sets" << std::endl;
-        
-        // Snow descriptor sets
-        framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout, snowObjectCount);
-        
-        // Lit descriptor sets
-        if (litObjectCount > 0) {
-            std::cout << "  Allocating " << litObjectCount << " lit descriptor sets..." << std::endl;
-            framesInFlight[i]->allocateLitDescriptorSets(descriptorPool, litDescriptorSetLayout, litObjectCount);
+        // Snow Descriptor Sets
+        if (snowDescriptorSets > 0) {
+            std::cout << "Allocating " << snowDescriptorSets << " snow descriptor sets..." << std::endl;
+            framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout, snowDescriptorSets);
         }
         
-        // Lighting descriptor sets (NEU!)
-        if (lightingSetCount > 0) {
-            std::cout << "  Allocating " << lightingSetCount << " lighting descriptor sets..." << std::endl;
-            framesInFlight[i]->allocateLightingDescriptorSets(descriptorPool, lightingDescriptorSetLayout, lightingSetCount);
+        // Lit Descriptor Sets
+        if (litDescriptorSets > 0) {
+            std::cout << "Allocating " << litDescriptorSets << " lit descriptor sets..." << std::endl;
+            framesInFlight[i]->allocateLitDescriptorSets(descriptorPool, litDescriptorSetLayout, litDescriptorSets);
         }
-    
-        std::cout << "Frame " << i << " descriptor sets allocated successfully" << std::endl;
+        
+        // Lighting Descriptor Sets
+        if (lightingDescriptorSets > 0) {
+            std::cout << "Allocating " << lightingDescriptorSets << " lighting descriptor sets..." << std::endl;
+            framesInFlight[i]->allocateLightingDescriptorSets(descriptorPool, lightingDescriptorSetLayout, lightingDescriptorSets);
+        }
+        
+        std::cout << "Frame " << i << " initialized successfully!" << std::endl;
     }
 
-    std::cout << "All frames initialized successfully!" << std::endl;
-
+    std::cout << "\n=== All frames initialized! ===" << std::endl;
     // Render loop
     float lastTime = static_cast<float>(glfwGetTime());
     float dutchAngle = 0.0f;
@@ -367,15 +430,15 @@ int main() {
         }
 
         // // Schiff animation
-        // dutchAngle += deltaTime * glm::radians(5.0f);
-        // float radius = 60.0f;
-        // float circleX = radius * cos(dutchAngle);
-        // float circleY = radius * sin(dutchAngle);
-        // modelDutch = glm::mat4(1.0f);
-        // modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
-        // modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-        // modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
-        // scene->updateObject(dutchIndex, modelDutch);
+        dutchAngle += deltaTime * glm::radians(5.0f);
+        float radius = 60.0f;
+        float circleX = radius * cos(dutchAngle);
+        float circleY = radius * sin(dutchAngle);
+        modelDutch = glm::mat4(1.0f);
+        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
+        modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+        modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
+        scene->updateObject(dutchIndex, modelDutch);
 
         // Compute Shader für Schnee ausführen
         snow->waitForCompute();
@@ -391,10 +454,11 @@ int main() {
 
         framesInFlight[currentFrame]->updateUniformBuffer(camera);
         framesInFlight[currentFrame]->updateLitUniformBuffer(camera, scene);
+        framesInFlight[currentFrame]->updateLightingUniformBuffer(camera,scene);
         framesInFlight[currentFrame]->updateDescriptorSet(scene);
-        if (litObjectCount > 0) {
-            framesInFlight[currentFrame]->updateLitDescriptorSet(scene);
-        }
+        // if (litObjectCount > 0) {
+        //     framesInFlight[currentFrame]->updateLitDescriptorSet(scene);
+        // }
                 
         // Update snow descriptor sets
         size_t snowIdx = 0;

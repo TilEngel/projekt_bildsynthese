@@ -15,7 +15,8 @@ enum class PipelineType {
     MIRROR_BLEND,      // Transparent mirror
     DEPTH_ONLY,        // Depth prepass (subpass 0)
     GBUFFER,          // G-Buffer generation (subpass 1)
-    LIGHTING          // Deferred lighting (subpass 2)
+    LIGHTING,          // Deferred lighting (subpass 2)
+    SKYBOX              //Extra für die Skybox
 };
 
 enum class SubpassIndex {

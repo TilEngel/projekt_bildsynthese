@@ -15,6 +15,23 @@ struct UniformBufferObject {
     alignas(16) glm::mat4 proj;
 };
 
+//UBO für deferred Shading
+struct LightingUniformBufferObject {
+    alignas(16) glm::mat4 invView;
+    alignas(16) glm::mat4 invProj;
+    alignas(16) glm::vec3 viewPos;
+    alignas(4)  int32_t numLights;
+    alignas(8)  glm::vec2 screenSize;  
+    alignas(8)  glm::vec2 _padding;
+    
+    struct Light {
+        alignas(16) glm::vec3 position;
+        alignas(4)  float intensity;
+        alignas(16) glm::vec3 color;
+        alignas(4)  float radius;
+    } lights[4];
+};
+
 class Frame {
 public:
     Frame(VkPhysicalDevice physicalDevice, VkDevice device, SwapChain* swapChain,
@@ -24,6 +41,7 @@ public:
           _framebuffers(framebuffers), _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
         createLitUniformBuffer();
+        createLightingUniformBuffer();
         allocateCommandBuffer(commandPool);
         createSyncObjects();
     }
@@ -35,8 +53,10 @@ public:
     // Uniform Buffers
     void createUniformBuffer();
     void createLitUniformBuffer();
+    void createLightingUniformBuffer();
     void updateUniformBuffer(Camera* camera);
     void updateLitUniformBuffer(Camera* camera, Scene* scene);
+    void updateLightingUniformBuffer(Camera* camera, Scene* scene);
 
     // Descriptor Sets
     void allocateDescriptorSets(VkDescriptorPool descriptorPool, 
@@ -134,6 +154,11 @@ private:
     VkBuffer _litUniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory _litUniformBufferMemory = VK_NULL_HANDLE;
     LitUniformBufferObject* _litUniformBufferMapped = nullptr;
+
+    //Uniform Buffers für deferred
+    VkBuffer _lightingUniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory _lightingUniformBufferMemory = VK_NULL_HANDLE;
+    LightingUniformBufferObject* _lightingUniformBufferMapped = nullptr;
 
     // Descriptor Sets
     std::vector<VkDescriptorSet> _descriptorSets;

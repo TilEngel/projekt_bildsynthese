@@ -367,11 +367,10 @@ void InitInstance::destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLa
     }
 }
 
-
-// initInstance.cpp - ERSETZE die createLightingDescriptorSetLayout Funktion
+// ERSETZE die createLightingDescriptorSetLayout Funktion in initInstance.cpp
 
 VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice device) {
-    // NUR 2 BINDINGS - kein UBO!
+    // ✅ JETZT 3 BINDINGS: G-Buffer, Depth, UBO
     
     // Binding 0: G-Buffer Input Attachment
     VkDescriptorSetLayoutBinding gBufferBinding{};
@@ -387,9 +386,16 @@ VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice d
     depthBinding.descriptorCount = 1;
     depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    // WICHTIG: NUR 2 BINDINGS!
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
-        gBufferBinding, depthBinding
+    // ✅ NEU: Binding 2: Lighting UBO
+    VkDescriptorSetLayoutBinding uboBinding{};
+    uboBinding.binding = 2;
+    uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboBinding.descriptorCount = 1;
+    uboBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    // ✅ WICHTIG: JETZT 3 BINDINGS!
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+        gBufferBinding, depthBinding, uboBinding
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};

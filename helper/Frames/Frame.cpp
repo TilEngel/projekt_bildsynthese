@@ -75,6 +75,39 @@ void Frame::createLitUniformBuffer() {
     _litUniformBufferMapped = static_cast<LitUniformBufferObject*>(data);
 }
 
+void Frame::createLightingUniformBuffer() {
+    VkDeviceSize bufferSize = sizeof(LightingUniformBufferObject);
+
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = bufferSize;
+    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(_device, &bufferInfo, nullptr, &_lightingUniformBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create lighting uniform buffer!");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(_device, _lightingUniformBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = _buff.findMemoryType(memRequirements.memoryTypeBits,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _physicalDevice);
+
+    if (vkAllocateMemory(_device, &allocInfo, nullptr, &_lightingUniformBufferMemory) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate lighting uniform buffer memory!");
+    }
+
+    vkBindBufferMemory(_device, _lightingUniformBuffer, _lightingUniformBufferMemory, 0);
+
+    void* data = nullptr;
+    vkMapMemory(_device, _lightingUniformBufferMemory, 0, bufferSize, 0, &data);
+    _lightingUniformBufferMapped = static_cast<LightingUniformBufferObject*>(data);
+}
+
 void Frame::submitCommandBuffer(uint32_t imageIndex) {
     
     VkSubmitInfo submitInfo{};
@@ -100,6 +133,8 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
 }
 
 
+// Frame.cpp - recordCommandBuffer - KOMPLETT ERSETZT
+
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkResetCommandBuffer(_commandBuffer, 0);
 
@@ -120,11 +155,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChain->getExtent();
 
-    // WICHTIG: 3 Clear Values!
     std::array<VkClearValue, 3> clearValues{};
     clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};  // Back buffer
-    clearValues[1].depthStencil = {1.0f, 0};              // Depth/Stencil
-    clearValues[2].color = {{0.0f, 1.0f, 1.0f, 1.0f}};   // G-Buffer
+    clearValues[1].depthStencil = {1.0f, 0};              // Depth
+    clearValues[2].color = {{0.0f, 0.0f, 0.0f, 0.0f}};   // G-Buffer
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
@@ -147,12 +181,14 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     // ============================================
     // SUBPASS 0: DEPTH PREPASS
-    // ============================================
+    // ============================================    
+    size_t deferredDescriptorIdx = 0;  // Zähler für deferred descriptor sets
     
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
         const auto& obj = scene->getDepthPassObject(i);
         
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            deferredDescriptorIdx++;  // Auch bei skip hochzählen!
             continue;
         }
 
@@ -160,23 +196,11 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
 
-        // Finde passenden descriptor set
-        size_t descriptorIdx = 0;
-        bool found = false;
-        for (size_t j = 0; j < scene->getObjectCount(); ++j) {
-            const auto& checkObj = scene->getObject(j);
-            if (&checkObj == &obj) {
-                found = true;
-                break;
-            }
-            if (!checkObj.isSnow && !checkObj.isLit) {
-                descriptorIdx++;
-            }
-        }
-
-        if (found && descriptorIdx < _descriptorSets.size()) {
+        // Descriptor set binden (Index = deferredDescriptorIdx * 2 + 0)
+        size_t setIndex = deferredDescriptorIdx * 2;
+        if (setIndex < _descriptorSets.size()) {
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                   layout, 0, 1, &_descriptorSets[descriptorIdx], 0, nullptr);
+                                   layout, 0, 1, &_descriptorSets[setIndex], 0, nullptr);
         }
 
         VkBuffer vb[] = {obj.vertexBuffer};
@@ -185,105 +209,78 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+        
+        deferredDescriptorIdx++;
     }
 
     // ============================================
-    // ADVANCE TO SUBPASS 1
-    // ============================================
-    vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-    // ✅ WICHTIG: Viewport/Scissor ERNEUT setzen nach Subpass-Wechsel
-    
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(_swapChain->getExtent().width);
-    viewport.height = static_cast<float>(_swapChain->getExtent().height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
-
-    
-    scissor.offset = {0, 0};
-    scissor.extent = _swapChain->getExtent();
-    vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
-    // ============================================
     // SUBPASS 1: G-BUFFER PASS
     // ============================================
-    
+    vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
+
+
+
+    deferredDescriptorIdx = 0;
+
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
         const auto& obj = scene->getGBufferPassObject(i);
         
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            std::cout << "  [GBUFFER] Skipping object " << i << " (invalid)" << std::endl;
+            deferredDescriptorIdx++;
             continue;
+        }    
+        if (obj.pipeline) {
+            VkPipeline pipeline = obj.pipeline->getPipeline();
         }
 
         VkPipeline pipeline = obj.pipeline->getPipeline();
         vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
 
-        size_t descriptorIdx = 0;
-        bool found = false;
-        for (size_t j = 0; j < scene->getObjectCount(); ++j) {
-            const auto& checkObj = scene->getObject(j);
-            if (&checkObj == &obj) {
-                found = true;
-                break;
-            }
-            if (!checkObj.isSnow && !checkObj.isLit) {
-                descriptorIdx++;
-            }
-        }
-
-        if (found && descriptorIdx < _descriptorSets.size()) {
+        // Descriptor set binden
+        size_t setIndex = deferredDescriptorIdx * 2 + 1;
+        
+        if (setIndex < _descriptorSets.size()) {
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                   layout, 0, 1, &_descriptorSets[descriptorIdx], 0, nullptr);
+                                layout, 0, 1, &_descriptorSets[setIndex], 0, nullptr);
+        } else {
+            std::cout << "    ERROR: Descriptor set index out of range!" << std::endl;
         }
 
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
         vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
-                          0, sizeof(glm::mat4), &obj.modelMatrix);
+                        0, sizeof(glm::mat4), &obj.modelMatrix);
+        
+      
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
+
+        
+        deferredDescriptorIdx++;
     }
-    std::cout << "G-Buffer pass rendered " << scene->getDeferredObjectCount() 
-          << " objects" << std::endl;
     // ============================================
-    // ADVANCE TO SUBPASS 2
+    // SUBPASS 2: LIGHTING + FORWARD RENDERING
     // ============================================
     vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-    // ✅ WICHTIG: Viewport/Scissor ERNEUT setzen nach Subpass-Wechsel
-    
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(_swapChain->getExtent().width);
-    viewport.height = static_cast<float>(_swapChain->getExtent().height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
-
-    
-    scissor.offset = {0, 0};
-    scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
-    // ============================================
-    // SUBPASS 2: LIGHTING PASS + FORWARD RENDERING
-    // ============================================
-
-    // ZUERST: Lighting Quad rendern
+    
+//    std::cout << "\n=== SUBPASS 2: LIGHTING + FORWARD ===" << std::endl;
+    // 1. LIGHTING QUAD
     if (scene->hasLightingQuad() && !_lightingDescriptorSets.empty()) {
-        std::cout << "RENDERING LIGHTING QUAD" << std::endl;  // ✅ DEBUG
+//        std::cout << "Rendering lighting quad..." << std::endl;
         
         const auto& lightingQuad = scene->getLightingQuad();
-        
-        std::cout << "  Vertex count: " << lightingQuad.vertexCount << std::endl;
-        std::cout << "  Pipeline: " << (lightingQuad.pipeline ? "OK" : "NULL") << std::endl;
         
         if (lightingQuad.vertexCount > 0 && lightingQuad.vertexBuffer != VK_NULL_HANDLE) {
             VkPipeline pipeline = lightingQuad.pipeline->getPipeline();
             vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
             VkPipelineLayout layout = lightingQuad.pipeline->getPipelineLayout();
             
-            // Bind lighting descriptor set
             vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 layout, 0, 1, &_lightingDescriptorSets[0], 0, nullptr);
             
@@ -292,71 +289,73 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
             vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
             
             vkCmdDraw(_commandBuffer, lightingQuad.vertexCount, 1, 0, 0);
-            
-            std::cout << "  Lighting quad drawn!" << std::endl;
-        } else {
-            std::cout << "  ERROR: Invalid lighting quad!" << std::endl;
         }
-    } else {
-        std::cout << "ERROR: No lighting quad or descriptor sets!" << std::endl;
-        std::cout << "  hasLightingQuad: " << scene->hasLightingQuad() << std::endl;
-        std::cout << "  descriptorSets.size: " << _lightingDescriptorSets.size() << std::endl;
     }
+
+    // 2. FORWARD OBJECTS (normale, snow, lit)
+    // ✅ WICHTIG: Viewport/Scissor nochmal setzen!
+    vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
     
-    // DANN: Forward rendered objects (Skybox Lichter, Schnee, etc.)
-    size_t normalObjIdx = 0;
-    size_t snowObjIdx = 0;
-    size_t litObjIdx = 0;
-
-    size_t deferredCount = scene->getDeferredObjectCount() * 2;
-
+//    std::cout << "\nRendering forward objects..." << std::endl;
+    
+    // Zähler für jede Descriptor Set Kategorie
+    size_t normalForwardIdx = 0;  // Normale forward objects (NACH deferred)
+    size_t snowIdx = 0;
+    size_t litIdx = 0;
+    
+    // Berechne Offset für normale forward objects (nach deferred sets)
+    size_t normalForwardOffset = scene->getDeferredObjectCount() * 2;
+    
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
         
-        // Skip deferred objects
+        // Skip deferred objects - die wurden schon gerendert
         if (obj.isDeferred) {
             continue;
         }
         
         // Skip mirror objects erstmal
         if (scene->isMirrorObject(i)) {
-            if (!obj.isSnow && !obj.isLit) normalObjIdx++;
+            if (!obj.isSnow && !obj.isLit) normalForwardIdx++;
             continue;
         }
         
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            if (obj.isSnow) snowIdx++;
+            else if (obj.isLit) litIdx++;
+            else normalForwardIdx++;
             continue;
         }
-        // ✅ DEBUG: Welches Objekt wird gerendert?
-    std::cout << "Rendering forward object " << i 
-              << " (vertices: " << obj.vertexCount 
-              << ", snow: " << obj.isSnow 
-              << ", lit: " << obj.isLit << ")" << std::endl;
 
         VkPipeline pipeline = obj.pipeline->getPipeline();
         vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
         VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
 
-        // Descriptor Set binden
+        // Descriptor Set binden basierend auf Typ
         if (obj.isSnow) {
-            if (snowObjIdx < _snowDescriptorSets.size()) {
+//            std::cout << "  Snow object " << i << " (descriptor " << snowIdx << ")" << std::endl;
+            if (snowIdx < _snowDescriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       layout, 0, 1, &_snowDescriptorSets[snowObjIdx], 0, nullptr);
+                                       layout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
             }
-            snowObjIdx++;
+            snowIdx++;
         } else if (obj.isLit) {
-            if (litObjIdx < _litDescriptorSets.size()) {
+ //           std::cout << "  Lit object " << i << " (descriptor " << litIdx << ")" << std::endl;
+            if (litIdx < _litDescriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       layout, 0, 1, &_litDescriptorSets[litObjIdx], 0, nullptr);
+                                       layout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
             }
-            litObjIdx++;
+            litIdx++;
         } else {
-            size_t actualIdx = deferredCount + normalObjIdx;
-            if (actualIdx < _descriptorSets.size()) {
+            // Normale forward object
+            size_t setIndex = normalForwardOffset + normalForwardIdx;
+//            std::cout << "  Normal forward object " << i << " (descriptor " << setIndex << ")" << std::endl;
+            if (setIndex < _descriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       layout, 0, 1, &_descriptorSets[actualIdx], 0, nullptr);
+                                       layout, 0, 1, &_descriptorSets[setIndex], 0, nullptr);
             }
-            normalObjIdx++;
+            normalForwardIdx++;
         }
 
         VkBuffer vb[] = {obj.vertexBuffer};
@@ -372,120 +371,9 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         }
     }
 
-    // ========================================
-    // MIRROR SYSTEM (bleibt wie vorher)
-    // ========================================
-    for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
-        const auto& reflObj = scene->getReflectedObject(i);
-        
-        if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
-            continue;
-        }
+    // 3. MIRROR SYSTEM (bleibt vorerst auskommentiert bis Basics funktionieren)
+    // TODO: Mirror rendering...
 
-        VkPipeline pipelineHandle = reflObj.pipeline->getPipeline();
-        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-        VkPipelineLayout pipelineLayout = reflObj.pipeline->getPipelineLayout();
-
-        vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
-
-        size_t originalIdx = scene->getReflectedDescriptorIndex(i);
-        const auto& originalObj = scene->getObject(originalIdx);
-        
-        if (originalObj.isSnow) {
-            size_t snowIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (scene->isSnowObject(j)) snowIdx++;
-            }
-            if (snowIdx < _snowDescriptorSets.size()) {
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
-            }
-        } else if (originalObj.isLit) {
-            size_t litIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (scene->isLitObject(j)) litIdx++;
-            }
-            if (litIdx < _litDescriptorSets.size()) {
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
-            }
-        } else {
-            size_t normIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (!scene->isSnowObject(j) && !scene->isLitObject(j) && !scene->isMirrorObject(j)) {
-                    normIdx++;
-                }
-            }
-            if (normIdx < _descriptorSets.size()) {
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_descriptorSets[normIdx], 0, nullptr);
-            }
-        }
-
-        VkBuffer vertexBuffers[] = { reflObj.vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
-
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
-
-        vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
-    }
-
-    // Mirror Blend Pass
-    const auto& mirrorBlendIndices = scene->getMirrorBlendIndices();
-    normalObjIdx = 0;
-    for (size_t i = 0; i < scene->getObjectCount(); i++) {
-        if (!scene->isMirrorObject(i) || scene->isLitObject(i) || scene->isSnowObject(i)) {
-            if (!scene->isMirrorObject(i) && !scene->isLitObject(i) && !scene->isSnowObject(i)) {
-                normalObjIdx++;
-            }
-            continue;
-        }
-        
-        bool isMirrorBlend = false;
-        for (size_t blendIdx : mirrorBlendIndices) {
-            if (i == blendIdx) {
-                isMirrorBlend = true;
-                break;
-            }
-        }
-        
-        if (!isMirrorBlend) {
-            normalObjIdx++;
-            continue;
-        }
-        
-        const auto& obj = scene->getObject(i);
-        
-        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-            normalObjIdx++;
-            continue;
-        } 
-        VkPipeline pipelineHandle = obj.pipeline->getPipeline();
-        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-        VkPipelineLayout pipelineLayout = obj.pipeline->getPipelineLayout();
-
-        if (normalObjIdx >= _descriptorSets.size()) {
-            std::cerr << "ERROR: Mirror blend descriptor set index out of range!\n";
-            normalObjIdx++;
-            continue;
-        }
-        
-        vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                               pipelineLayout, 0, 1, &_descriptorSets[normalObjIdx], 0, nullptr);
-        normalObjIdx++;
-
-        VkBuffer vertexBuffers[] = { obj.vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
-
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
-
-        vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
-    }
-    
     vkCmdEndRenderPass(_commandBuffer);
 
     if (vkEndCommandBuffer(_commandBuffer) != VK_SUCCESS) {
@@ -507,28 +395,81 @@ void Frame::allocateDescriptorSets(VkDescriptorPool descriptorPool, VkDescriptor
     }
 }
 
+// Frame.cpp - updateDescriptorSet - ERSETZT
+
 void Frame::updateDescriptorSet(Scene* scene) {
-    // bufferInfo 
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = _uniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    // NUR normale Objekte (nicht Schnee!)
     size_t descriptorSetIndex = 0;
     
+    // 1. DEFERRED OBJECTS (2 descriptor sets pro object)
+    for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
+        const auto& depthObj = scene->getDepthPassObject(i);
+        const auto& gbufferObj = scene->getGBufferPassObject(i);
+        
+        // Depth Pass Descriptor
+        VkDescriptorImageInfo depthImageInfo{};
+        depthImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        depthImageInfo.imageView = depthObj.textureImageView;
+        depthImageInfo.sampler = depthObj.textureSampler;
+
+        std::array<VkWriteDescriptorSet, 2> depthWrites{};
+        depthWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        depthWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
+        depthWrites[0].dstBinding = 0;
+        depthWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        depthWrites[0].descriptorCount = 1;
+        depthWrites[0].pBufferInfo = &bufferInfo;
+
+        depthWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        depthWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
+        depthWrites[1].dstBinding = 1;
+        depthWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        depthWrites[1].descriptorCount = 1;
+        depthWrites[1].pImageInfo = &depthImageInfo;
+
+        vkUpdateDescriptorSets(_device, 2, depthWrites.data(), 0, nullptr);
+        descriptorSetIndex++;
+        
+        // G-Buffer Pass Descriptor
+        VkDescriptorImageInfo gbufferImageInfo{};
+        gbufferImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        gbufferImageInfo.imageView = gbufferObj.textureImageView;
+        gbufferImageInfo.sampler = gbufferObj.textureSampler;
+
+        std::array<VkWriteDescriptorSet, 2> gbufferWrites{};
+        gbufferWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        gbufferWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
+        gbufferWrites[0].dstBinding = 0;
+        gbufferWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        gbufferWrites[0].descriptorCount = 1;
+        gbufferWrites[0].pBufferInfo = &bufferInfo;
+
+        gbufferWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        gbufferWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
+        gbufferWrites[1].dstBinding = 1;
+        gbufferWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        gbufferWrites[1].descriptorCount = 1;
+        gbufferWrites[1].pImageInfo = &gbufferImageInfo;
+
+        vkUpdateDescriptorSets(_device, 2, gbufferWrites.data(), 0, nullptr);
+        descriptorSetIndex++;
+    }
+    
+    // 2. NORMAL FORWARD OBJECTS
     for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
         
-        // Schnee-Objekte überspringen - die werden separat behandelt
-        if (obj.isSnow || obj.isLit) {
+        // Skip deferred, snow, lit
+        if (obj.isDeferred || obj.isSnow || obj.isLit) {
             continue;
         }
         
-        // Sicherheitscheck
         if (descriptorSetIndex >= _descriptorSets.size()) {
-            std::cerr << "ERROR: Descriptor set index " << descriptorSetIndex 
-                      << " out of range (max: " << _descriptorSets.size() << ")\n";
+            std::cerr << "ERROR: Descriptor set index out of range!" << std::endl;
             break;
         }
 
@@ -538,11 +479,9 @@ void Frame::updateDescriptorSet(Scene* scene) {
         imageInfo.sampler = obj.textureSampler;
 
         std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &bufferInfo;
@@ -550,18 +489,16 @@ void Frame::updateDescriptorSet(Scene* scene) {
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = _descriptorSets[descriptorSetIndex];
         descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
         descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[1].descriptorCount = 1;
         descriptorWrites[1].pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(_device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(),
-                               0, nullptr);
+        vkUpdateDescriptorSets(_device, 2, descriptorWrites.data(), 0, nullptr);
         
         descriptorSetIndex++;
     }
+    
+
 }
 
 void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
@@ -732,16 +669,22 @@ void Frame::updateLightingDescriptorSet(VkImageView gBufferView, VkImageView dep
     // Binding 0: G-Buffer Input Attachment
     imageInfos[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfos[0].imageView = gBufferView;
-    imageInfos[0].sampler = VK_NULL_HANDLE; // Input attachments don't use samplers
+    imageInfos[0].sampler = VK_NULL_HANDLE;
     
     // Binding 1: Depth Input Attachment
     imageInfos[1].imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
     imageInfos[1].imageView = depthView;
     imageInfos[1].sampler = VK_NULL_HANDLE;
 
-    std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+    // ✅ Binding 2: Lighting UBO
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = _lightingUniformBuffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(LightingUniformBufferObject);
 
-    // Binding 0: G-Buffer
+    std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
+    //GBuffer
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[0].dstSet = _lightingDescriptorSets[0];
     descriptorWrites[0].dstBinding = 0;
@@ -750,7 +693,7 @@ void Frame::updateLightingDescriptorSet(VkImageView gBufferView, VkImageView dep
     descriptorWrites[0].descriptorCount = 1;
     descriptorWrites[0].pImageInfo = &imageInfos[0];
 
-    // Binding 1: Depth
+    //Depth
     descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[1].dstSet = _lightingDescriptorSets[0];
     descriptorWrites[1].dstBinding = 1;
@@ -758,6 +701,15 @@ void Frame::updateLightingDescriptorSet(VkImageView gBufferView, VkImageView dep
     descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     descriptorWrites[1].descriptorCount = 1;
     descriptorWrites[1].pImageInfo = &imageInfos[1];
+
+    //UBO
+    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrites[2].dstSet = _lightingDescriptorSets[0];
+    descriptorWrites[2].dstBinding = 2;
+    descriptorWrites[2].dstArrayElement = 0;
+    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorWrites[2].descriptorCount = 1;
+    descriptorWrites[2].pBufferInfo = &bufferInfo;
 
     vkUpdateDescriptorSets(_device, 
                           static_cast<uint32_t>(descriptorWrites.size()),
@@ -810,6 +762,14 @@ void Frame::cleanup() {
     if (_litUniformBufferMemory != VK_NULL_HANDLE) {
         vkFreeMemory(_device, _litUniformBufferMemory, nullptr);
         _litUniformBufferMemory = VK_NULL_HANDLE;
+    }
+    if(_lightingUniformBuffer != VK_NULL_HANDLE){
+        vkDestroyBuffer(_device, _lightingUniformBuffer, nullptr);
+        _lightingUniformBuffer = VK_NULL_HANDLE;
+    }
+    if(_lightingUniformBufferMemory != VK_NULL_HANDLE){
+        vkFreeMemory(_device, _lightingUniformBufferMemory,nullptr);
+        _lightingUniformBufferMemory = VK_NULL_HANDLE;
     }
     if (_renderSemaphore != VK_NULL_HANDLE) {
         vkDestroySemaphore(_device, _renderSemaphore, nullptr);
@@ -874,6 +834,41 @@ void Frame::updateLitUniformBuffer(Camera* camera, Scene* scene) {
     }
     
     std::memcpy(_litUniformBufferMapped, &ubo, sizeof(ubo));
+}
+
+void Frame::updateLightingUniformBuffer(Camera* camera, Scene* scene) {
+    if (!_lightingUniformBufferMapped) return;
+
+    LightingUniformBufferObject ubo{};
+    
+    //view und proj Matrizen
+    glm::mat4 view = camera->getViewMatrix();
+    VkExtent2D extent = _swapChain->getExtent();
+    glm::mat4 proj = glm::perspective(
+        glm::radians(camera->getZoom()),
+        static_cast<float>(extent.width) / static_cast<float>(extent.height),
+        0.1f, 100.0f
+    );
+    proj[1][1] *= -1.0f;
+    
+    ubo.invView = glm::inverse(view);
+    ubo.invProj = glm::inverse(proj);
+    ubo.viewPos = camera->getPosition();
+    ubo.numLights = static_cast<int32_t>(scene->getLightCount());
+    
+    //screen-Size für UV-Berechnung
+    ubo.screenSize = glm::vec2(extent.width, extent.height);
+    
+    // Lichtquellen kopieren
+    const auto& lights = scene->getLights();
+    for (size_t i = 0; i < lights.size() && i < 4; ++i) {
+        ubo.lights[i].position = lights[i].position;
+        ubo.lights[i].color = lights[i].color;
+        ubo.lights[i].intensity = lights[i].intensity;
+        ubo.lights[i].radius = lights[i].radius;
+    }
+    
+    std::memcpy(_lightingUniformBufferMapped, &ubo, sizeof(ubo));
 }
 
 // Frame.cpp - Teil 4: Mirror System (bleibt wie im Original)
