@@ -635,6 +635,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
             continue;
         }
         
+        
         if (descriptorSetIndex >= _descriptorSets.size()) {
             std::cerr << "ERROR: Descriptor set index out of range!" << std::endl;
             break;

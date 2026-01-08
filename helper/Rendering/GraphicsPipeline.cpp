@@ -34,6 +34,12 @@ VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code
 }
 
 void GraphicsPipeline::createPipelineLayout() {
+    std::cout << "Creating pipeline layout with device: " << _device 
+              << ", layout: " << _descriptorSetLayout << std::endl;
+    
+    if (_device == VK_NULL_HANDLE) {
+        throw std::runtime_error("Device is NULL!");
+    }
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushRange.offset = 0;
@@ -291,10 +297,10 @@ void GraphicsPipeline::createPipeline() {
     }
     
 
-    VkPipelineColorBlendStateCreateInfo blend{};
-    blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    blend.attachmentCount = 1;
-    blend.pAttachments = &blendAttachment;
+    // VkPipelineColorBlendStateCreateInfo blend{};
+    // blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    // blend.attachmentCount = 1;
+    // blend.pAttachments = &blendAttachment;
     // --- Dynamic State ---
     std::vector<VkDynamicState> dynamicStates{
         VK_DYNAMIC_STATE_VIEWPORT,

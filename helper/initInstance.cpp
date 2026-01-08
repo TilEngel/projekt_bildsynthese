@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #ifndef NDEBUG
-static const bool enableValidationLayers = true;
+static const bool enableValidationLayers = false;
 #endif
 
 static const std::vector<const char*> validationLayers = {
@@ -70,7 +70,7 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
                     found = true;
 
             if (!found)
-                throw std::runtime_error("Validation Layer fehlt!");
+                 throw std::runtime_error("Validation Layer fehlt!");
         }
     }
 
@@ -223,7 +223,7 @@ VkDevice InitInstance::createLogicalDevice(
     };
 
 #ifdef __APPLE__
-    extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+    //extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 #endif
 
     VkPhysicalDeviceFeatures features{};

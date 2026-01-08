@@ -51,6 +51,9 @@ int main() {
     );
     
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
+    if(device == VK_NULL_HANDLE){
+        std::cout<<"AAAAAHHHHHHHHAHAHAHAHAHAHAHAHAHA\n";
+    }
     
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
@@ -203,7 +206,7 @@ int main() {
     );
     scene->setRenderObject(snowflakes);
 
-    // ========== SPIEGEL-SYSTEM SETUP ==========
+    //========== SPIEGEL-SYSTEM SETUP ==========
     
     MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
     
@@ -515,7 +518,7 @@ int main() {
     }
 
     // 6. Mirror-System
-    delete mirrorSystem;
+   delete mirrorSystem;
 
     // 7. Snow
     snow->destroy();
