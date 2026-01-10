@@ -15,8 +15,8 @@ struct MirrorConfig {
 
 class MirrorSystem {
 public:
-    MirrorSystem(ObjectFactory* factory, VkRenderPass renderPass)
-        : _factory(factory), _renderPass(renderPass) {}
+    MirrorSystem(VkDevice device,ObjectFactory* factory, VkRenderPass renderPass)
+        : _device(device), _factory(factory), _renderPass(renderPass) {}
 
     // Fügt einen Spiegel zur Szene hinzu
     void addMirror(Scene* scene, const MirrorConfig& config);
@@ -44,6 +44,7 @@ private:
     VkRenderPass _renderPass;
     std::vector<MirrorData> _mirrors;
     std::vector<size_t> _reflectableObjects;
+    VkDevice _device;
 
     void createMirrorObjects(Scene* scene, const MirrorConfig& config, MirrorData& mirror);
     void createReflectedObject(Scene* scene, size_t objectIndex, const MirrorData& mirror);

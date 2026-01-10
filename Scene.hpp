@@ -40,7 +40,7 @@ struct RenderObject {
     uint32_t instanceCount = 1;
     bool isSnow = false;
     bool isLit = false;
-    bool isDeferred = false;  // NEU: Markiert deferred objects
+    bool isDeferred = false; 
 };
 
 // Deferred Render Object - hat 2 Pipelines
