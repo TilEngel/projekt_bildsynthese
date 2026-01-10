@@ -343,7 +343,6 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         } else {
             // Normale forward object
             size_t setIndex = normalForwardOffset + normalForwardIdx;
-//            std::cout << "  Normal forward object " << i << " (descriptor " << setIndex << ")" << std::endl;
             if (setIndex < _descriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                        layout, 0, 1, &_descriptorSets[setIndex], 0, nullptr);
@@ -426,63 +425,99 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // Diese werden "hinter" der Spiegelebene gerendert
     // ========================================
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
-        const auto& reflObj = scene->getReflectedObject(i);
-        
-        if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
-            continue;
+    const auto& reflObj = scene->getReflectedObject(i);
+    
+    if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
+        continue;
+    }
+
+    VkPipeline pipelineHandle = reflObj.pipeline->getPipeline();
+    vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
+    VkPipelineLayout pipelineLayout = reflObj.pipeline->getPipelineLayout();
+
+    // WICHTIG: Stencil Reference auf 1 setzen
+    vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
+
+    //DescriptorSet vom Original-Objekt mit korrektem Offset
+    size_t originalIdx = scene->getReflectedDescriptorIndex(i);
+    const auto& originalObj = scene->getObject(originalIdx);
+    
+    if (originalObj.isSnow) {
+        size_t snowIdx = 0;
+        for (size_t j = 0; j < originalIdx; j++) {
+            if (scene->isSnowObject(j)) snowIdx++;
         }
-
-        VkPipeline pipelineHandle = reflObj.pipeline->getPipeline();
-        vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
-        VkPipelineLayout pipelineLayout = reflObj.pipeline->getPipelineLayout();
-
-        // WICHTIG: Stencil Reference auf 1 setzen
-        // Nur rendern wo der Spiegel ist (Stencil == 1)
-        vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
-
-        // Descriptor Set vom Original-Objekt verwenden
-        size_t originalIdx = scene->getReflectedDescriptorIndex(i);
-        const auto& originalObj = scene->getObject(originalIdx);
+        if (snowIdx < _snowDescriptorSets.size()) {
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
+        }
+    } else if (originalObj.isLit) {
+        size_t litIdx = 0;
+        for (size_t j = 0; j < originalIdx; j++) {
+            if (scene->isLitObject(j)) litIdx++;
+        }
+        if (litIdx < _litDescriptorSets.size()) {
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
+        }
+    } else if(originalObj.isDeferred){
+        // Finde DeferredInfo für Objekt
+        size_t deferredInfoIdx = SIZE_MAX;
+        for (size_t d = 0; d < scene->getDeferredObjectCount(); d++) {
+            const auto& info = scene->getDeferredInfo(d);
+            // Prüfe ob originalIdx zu diesem deferredObject gehört
+            if (info.depthPassIndex == originalIdx || info.gbufferPassIndex == originalIdx) {
+                deferredInfoIdx = d;
+                break;
+            }
+        }
         
-        if (originalObj.isSnow) {
-            size_t snowIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (scene->isSnowObject(j)) snowIdx++;
-            }
-            if (snowIdx < _snowDescriptorSets.size()) {
+        if (deferredInfoIdx != SIZE_MAX) {
+            //GBuffer Pass Descriptor nutzen(Index = deferredInfoIdx * 2 + 1)
+            size_t descriptorIdx = deferredInfoIdx * 2 + 1;
+            
+            if (descriptorIdx < _descriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
-            }
-        } else if (originalObj.isLit) {
-            size_t litIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (scene->isLitObject(j)) litIdx++;
-            }
-            if (litIdx < _litDescriptorSets.size()) {
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
+                                       pipelineLayout, 0, 1, &_descriptorSets[descriptorIdx], 0, nullptr);
+            } else {
+                std::cerr << "ERROR: Deferred descriptor index out of range!" << std::endl;
             }
         } else {
-            size_t normIdx = 0;
-            for (size_t j = 0; j < originalIdx; j++) {
-                if (!scene->isSnowObject(j) && !scene->isLitObject(j) && !scene->isMirrorObject(j)) {
-                    normIdx++;
-                }
-            }
-            if (normIdx < _descriptorSets.size()) {
-                vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_descriptorSets[normIdx], 0, nullptr);
+            std::cerr << "ERROR: Could not find deferred info for object " << originalIdx << std::endl;
+        }
+    
+    }else {
+        //Deferred Objects Offset berücksichtigen
+        size_t deferredOffset = scene->getDeferredObjectCount() * 2;
+        size_t normIdx = 0;
+        
+        for (size_t j = 0; j < originalIdx; j++) {
+            if (!scene->isSnowObject(j) && !scene->isLitObject(j) && 
+                !scene->isMirrorObject(j) && !scene->isDeferredObject(j)) {
+                normIdx++;
             }
         }
+        
+        size_t finalIdx = deferredOffset + normIdx;
 
-        VkBuffer vertexBuffers[] = { reflObj.vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
+        
+        if (finalIdx < _descriptorSets.size()) {
+            vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                   pipelineLayout, 0, 1, &_descriptorSets[finalIdx], 0, nullptr);
+        } else {
+            std::cerr << "  ERROR: Descriptor set index " << finalIdx 
+                      << " out of range (size: " << _descriptorSets.size() << ")" << std::endl;
+        }
+    }
 
-        vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
+    VkBuffer vertexBuffers[] = { reflObj.vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
+    vkCmdPushConstants(_commandBuffer, pipelineLayout, 
+                      VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
+
+    vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
     }
 
     // ========================================
@@ -1094,7 +1129,12 @@ void Frame::renderMirrorSystem(Scene* scene, size_t& normalIdx,
     // ========================================
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
         const auto& reflObj = scene->getReflectedObject(i);
-        
+        size_t originalIdx = scene->getReflectedDescriptorIndex(i);
+        std::cout << "\n++++++Rendering reflected object " << i 
+              << " (original: " << originalIdx << ")+++++++" << std::endl;
+         std::cout << "  TextureView valid: " << (reflObj.textureImageView != VK_NULL_HANDLE) 
+              << std::endl;
+
         if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
             continue;
         }
@@ -1107,7 +1147,7 @@ void Frame::renderMirrorSystem(Scene* scene, size_t& normalIdx,
         vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
 
         // Descriptor Set vom Original-Objekt verwenden
-        size_t originalIdx = scene->getReflectedDescriptorIndex(i);
+        
         const auto& originalObj = scene->getObject(originalIdx);
         
         if (originalObj.isSnow) {
@@ -1128,17 +1168,21 @@ void Frame::renderMirrorSystem(Scene* scene, size_t& normalIdx,
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                        pipelineLayout, 0, 1, &_litDescriptorSets[litIdxTmp], 0, nullptr);
             }
-        } else {
-            size_t normIdxTmp = 0;
+        }else {
+            size_t normIdx = 0;
+            size_t deferredOffset = scene->getDeferredObjectCount() * 2; 
+            
             for (size_t j = 0; j < originalIdx; j++) {
                 if (!scene->isSnowObject(j) && !scene->isLitObject(j) && 
-                    !scene->isMirrorObject(j) && !scene->isDeferredObject(j)) {
-                    normIdxTmp++;
+                    !scene->isMirrorObject(j) && !scene->isDeferredObject(j)) {  
+                    normIdx++;
                 }
             }
-            if (normIdxTmp < _descriptorSets.size()) {
+            
+            size_t finalIdx = deferredOffset + normIdx; 
+            if (finalIdx < _descriptorSets.size()) {
                 vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                       pipelineLayout, 0, 1, &_descriptorSets[normIdxTmp], 0, nullptr);
+                                    pipelineLayout, 0, 1, &_descriptorSets[finalIdx], 0, nullptr);
             }
         }
 

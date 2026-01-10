@@ -142,7 +142,7 @@ int main() {
         "textures/plastic_monobloc_chair.jpg",
         modelChair, renderPass);
     scene->setDeferredRenderObject(chair);
-    size_t chairIndex = scene->getDeferredObjectCount() - 1;
+    size_t chairIndex = scene->getObjectCount() - 1;
 
     // //Fliegender Holländer
     glm::mat4 modelDutch = glm::mat4(1.0f);
@@ -164,7 +164,7 @@ int main() {
         "textures/garden_gnome.jpg",
         modelGnome, renderPass);
     scene->setDeferredRenderObject(gnome);
-    size_t gnomeIndex = scene->getDeferredObjectCount() - 1;
+    size_t gnomeIndex = scene->getObjectCount() - 1;
 
     // Sonnenschirm
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
@@ -225,10 +225,10 @@ int main() {
     mirrorSystem->addMirror(scene, mirror2);
     
     // Objekte markieren, die gespiegelt werden sollen
-//    mirrorSystem->addReflectableObject(gnomeIndex);
+    mirrorSystem->addReflectableObject(gnomeIndex);
     mirrorSystem->addReflectableObject(chairIndex);
     mirrorSystem->addReflectableObject(umbrellaIndex);
-//    scene->markObjectAsReflectable(gnomeIndex);
+    scene->markObjectAsReflectable(gnomeIndex);
     scene->markObjectAsReflectable(chairIndex);
     scene->markObjectAsReflectable(umbrellaIndex);
     
