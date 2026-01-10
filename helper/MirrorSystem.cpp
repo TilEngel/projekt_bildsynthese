@@ -145,14 +145,15 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
     
     // Pipeline für gespiegelte Objekte verwenden
     GraphicsPipeline* reflectedPipeline = new GraphicsPipeline(
-        originalObj.pipeline->getDevice(),
+        _device,
         originalObj.pipeline->getColorFormat(),
         originalObj.pipeline->getDepthFormat(),
         "shaders/testapp.vert.spv",
         "shaders/testapp.frag.spv",
         _renderPass,
         scene->getDescriptorSetLayout(),
-        PipelineType::MIRROR_REFLECT
+        PipelineType::MIRROR_REFLECT,
+        2
     );
     
     reflectedObj.pipeline = reflectedPipeline;

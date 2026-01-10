@@ -208,7 +208,7 @@ int main() {
 
     //========== SPIEGEL-SYSTEM SETUP ==========
     
-    MirrorSystem* mirrorSystem = new MirrorSystem(&factory, renderPass);
+    MirrorSystem* mirrorSystem = new MirrorSystem(device, &factory, renderPass);
     
     // Spiegel 1: Hinter dem Gnom
     MirrorConfig mirror1;
