@@ -27,6 +27,9 @@ public:
     // Erstellt alle gespiegelten Objekte für alle Spiegel
     void createReflections(Scene* scene);
 
+    //Resettet Spiegel und erschafft neue Reflexion, nötig für bewegende Objekte
+    void updateReflections(Scene* scene, size_t objectIndex);
+
     // Berechnet die Reflexionsmatrix für eine Ebene
     static glm::mat4 calculateReflectionMatrix(const glm::vec3& planePoint, 
                                                const glm::vec3& planeNormal);

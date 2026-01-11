@@ -71,10 +71,13 @@ public:
             _position += _up * velocity;
         if (direction == DOWN)
             _position -= _up * velocity;
+        
+        _model = glm::mat4(1.0);
+        _model = glm::translate(_model, _position);
     }
 
     //Checkt ob Taste gedrückt wird und ruft entsprechend processKeyboard auf
-    void checkKeyboard(Window* window, float deltaTime){
+    glm::mat4 checkKeyboard(Window* window, float deltaTime){
         
         if (window->getKey(GLFW_KEY_W) == GLFW_PRESS)
             processKeyboard(Camera::FORWARD, deltaTime);
@@ -89,6 +92,7 @@ public:
         if (window->getKey(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             processKeyboard(Camera::DOWN, deltaTime);
 
+        return _model;
     }
 
     // Getter
@@ -102,6 +106,8 @@ public:
     void setMouseSensitivity(float sensitivity) { _mouseSensitivity = sensitivity; }
 
 private:
+
+    glm::mat4 _model = glm::mat4(1.0);
 
     // Kamera-Attribute
     glm::vec3 _position;

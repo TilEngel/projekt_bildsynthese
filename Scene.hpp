@@ -273,6 +273,9 @@ public:
     const RenderObject& getReflectedObject(size_t idx) const { 
         return _reflectedObjects[idx]; 
     }
+    RenderObject& getReflectedObject(size_t idx){
+        return _reflectedObjects[idx];
+    }
 
     size_t getReflectedDescriptorIndex(size_t idx) const {
         return _reflectedDescriptorIndices[idx];
@@ -294,6 +297,13 @@ public:
 
     void markObjectAsReflectable(size_t idx) {
         _reflectableObjectIndices.insert(idx);
+    }
+
+    //Updatet reflektierte Objekte im Spiegel
+    void updateReflectedObject(size_t index, const glm::mat4& newModel) {
+        if (index < _reflectedObjects.size()) {
+            _reflectedObjects[index].modelMatrix = newModel;
+        }
     }
 
 private:

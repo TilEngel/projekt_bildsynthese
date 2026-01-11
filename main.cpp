@@ -133,6 +133,19 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
+
+    glm::mat4 modelCamera = glm::mat4(1.0f);
+  
+    RenderObject cam = factory.createGenericObject(
+        "./models/rat.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/duck.jpg",
+        modelCamera, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        scene->setRenderObject(cam);
+        size_t camIndex = scene->getObjectCount()-1;
+    
+
     //Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
@@ -228,9 +241,11 @@ int main() {
     mirrorSystem->addReflectableObject(gnomeIndex);
     mirrorSystem->addReflectableObject(chairIndex);
     mirrorSystem->addReflectableObject(umbrellaIndex);
+    mirrorSystem->addReflectableObject(camIndex);
     scene->markObjectAsReflectable(gnomeIndex);
     scene->markObjectAsReflectable(chairIndex);
     scene->markObjectAsReflectable(umbrellaIndex);
+    scene->markObjectAsReflectable(camIndex);
     
     // Reflexionen erstellen
     mirrorSystem->createReflections(scene);
@@ -376,11 +391,13 @@ int main() {
         if (window->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
             deltaTime *= 5;
         }
-        camera->checkKeyboard(window, deltaTime);
+        modelCamera = camera->checkKeyboard(window, deltaTime);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
         }
+        scene->updateObject(camIndex,modelCamera);
+        mirrorSystem->updateReflections(scene, camIndex);
 
         // // Schiff animation
         dutchAngle += deltaTime * glm::radians(5.0f);

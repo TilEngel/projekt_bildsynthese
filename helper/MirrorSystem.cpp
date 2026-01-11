@@ -160,3 +160,37 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
     
     scene->addReflectedObject(reflectedObj, objectIndex);
 }
+
+
+void MirrorSystem::updateReflections(Scene* scene, size_t objectIndex) {
+    // Prüfe ob das Objekt überhaupt reflektierbar ist
+    auto it = std::find(_reflectableObjects.begin(), _reflectableObjects.end(), objectIndex);
+    if (it == _reflectableObjects.end()) {
+        return; // Objekt ist nicht reflektierbar
+    }
+    
+    // Finde die Position des Objekts in der reflectableObjects-Liste
+    size_t objPositionInList = std::distance(_reflectableObjects.begin(), it);
+    
+    const auto& originalObj = scene->getObject(objectIndex);
+    
+    // Für jeden Spiegel
+    for (size_t mirrorIdx = 0; mirrorIdx < _mirrors.size(); mirrorIdx++) {
+        const auto& mirror = _mirrors[mirrorIdx];
+        
+        glm::mat4 reflectionMatrix = calculateReflectionMatrix(
+            mirror.position, mirror.normal);
+        
+        glm::mat4 reflectedMatrix = reflectionMatrix * originalObj.modelMatrix;
+        
+        // Berechne den Index in der reflectedObjects-Liste:
+        // (Spiegel-Index * Anzahl reflektierbare Objekte) + Position des Objekts
+        size_t reflectionIdx = mirrorIdx * _reflectableObjects.size() + objPositionInList;
+        
+        // Update nur dieses eine gespiegelte Objekt
+        if (reflectionIdx < scene->getReflectedObjectCount()) {
+            RenderObject& reflectedObj = scene->getReflectedObject(reflectionIdx);
+            reflectedObj.modelMatrix = reflectedMatrix;
+        }
+    }
+}
