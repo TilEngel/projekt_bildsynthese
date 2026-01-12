@@ -136,12 +136,10 @@ int main() {
 
     glm::mat4 modelCamera = glm::mat4(1.0f);
   
-    RenderObject cam = factory.createGenericObject(
-        "./models/rat.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/duck.jpg",
-        modelCamera, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    RenderObject cam = factory.createLitObject(
+        "./models/fly.obj",
+        "textures/black.png",
+        modelCamera, renderPass);
         scene->setRenderObject(cam);
         size_t camIndex = scene->getObjectCount()-1;
     
@@ -391,11 +389,14 @@ int main() {
         if (window->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
             deltaTime *= 5;
         }
+
+       
         modelCamera = camera->checkKeyboard(window, deltaTime);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
         }
+      
         scene->updateObject(camIndex,modelCamera);
         mirrorSystem->updateReflections(scene, camIndex);
 
@@ -409,6 +410,7 @@ int main() {
         modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
         scene->updateObject(dutchIndex, modelDutch);
+
 
         // Compute Shader für Schnee ausführen
         snow->waitForCompute();
