@@ -1,5 +1,6 @@
 /*
 * Verantwortlich für Buffer-bezogene Aufgaben
+* Überbleibsel aus den Übungen - erledigt boilerplate Zeug
 */
 #pragma once
 

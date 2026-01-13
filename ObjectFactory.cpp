@@ -354,15 +354,6 @@ DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,c
     return deferredObj;
 }
 
-DeferredRenderObject ObjectFactory::createDeferredLitObject(
-    const char* modelPath,
-    const char* texturePath,
-    const glm::mat4& modelMatrix,
-    VkRenderPass renderPass)
-{
-    // Basis-Objekt erstellen
-    return createDeferredObject(modelPath, texturePath, modelMatrix, renderPass);
-}
 
 RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
                                               VkDescriptorSetLayout lightingLayout)

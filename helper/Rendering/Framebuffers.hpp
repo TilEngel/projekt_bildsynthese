@@ -69,7 +69,7 @@ private:
         }
         throw std::runtime_error("Failed to find suitable memory type!");
     }
-
+    //ruft createSingleGBuffer() für beide GBuffers auf
     void createGBufferResources();
 
     // Helper zum Erstellen eines G-Buffers
@@ -78,7 +78,6 @@ private:
 
     void cleanupGBufferResources();
 
-    void transitionGBufferLayout(VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue);
 
     void create();
 

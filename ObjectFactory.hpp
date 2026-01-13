@@ -24,7 +24,8 @@ public:
           _colorFormat(colorFormat), _depthFormat(depthFormat),
           _descriptorSetLayout(descriptorSetLayout),
           _litDescriptorSetLayout(litDescriptorSetLayout) {}
-
+    
+    //erstellt generische Objekte (Keine Beleuchtung, keine sonstigen gimmicks)
     RenderObject createGenericObject(const char* modelPath,
                                          const char* vertShaderPath,
                                          const char* fragShaderPath,
@@ -40,33 +41,30 @@ public:
         const glm::mat4& modelMatrix,
         VkRenderPass renderPass);
 
-    DeferredRenderObject createDeferredLitObject(
-        const char* modelPath,
-        const char* texturePath,
-        const glm::mat4& modelMatrix,
-        VkRenderPass renderPass);
-
-    // Existing methods bleiben für forward-rendered objects
+    //Erstellt die Skybox
     RenderObject createSkybox(VkRenderPass renderPass,
                              const std::array<const char*, 6>& cubemapFaces,
                              uint32_t subpassIndex = 2);
-
+    //Schnee (Compute-Shader)
     RenderObject createSnowflake(const char* texturePath,
                                 VkRenderPass renderPass,
                                 VkBuffer particleBuffer,
                                 VkDescriptorSetLayout snowDescriptorSetLayout,
                                 uint32_t subpassIndex = 2);
-
+    //Spiegel (Stencil-Buffer)
     RenderObject createMirror(const glm::mat4& modelMatrix,
                              VkRenderPass renderPass,
                              PipelineType pipelineType,
                              uint32_t subpassIndex = 2);
-
+    
+                       
+    //Erstellt Punktlichter 
     LightSourceObject createLightSource(const glm::vec3& position,
                                        const glm::vec3& color,
                                        float intensity,
                                        float radius,
                                        VkRenderPass renderPass);
+    //Objekte, die von den Lichtern beleuchtet werden
     RenderObject createLitObject(const char* modelPath, const char* texturePath, const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
     // Fullscreen Quad für Lighting Pass

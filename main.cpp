@@ -93,7 +93,8 @@ int main() {
     // Schneeflocken-Simulation erstellen
     Snow* snow = new Snow(physicalDevice, device, graphicsIndex);
 
-    // Objekte erstellen
+    //######### Objekte erstellen #################
+
     ObjectFactory factory(physicalDevice, device, commandPool, graphicsQueue,
                          swapChain->getImageFormat(), depthBuffer->getImageFormat(),
                          descriptorSetLayout, litDescriptorSetLayout);
@@ -148,7 +149,7 @@ int main() {
     glm::mat4 modelChair = glm::mat4(1.0f);
     modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
     modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    DeferredRenderObject chair = factory.createDeferredLitObject(
+    DeferredRenderObject chair = factory.createDeferredObject(
         "./models/plastic_monobloc_chair.obj",
         "textures/plastic_monobloc_chair.jpg",
         modelChair, renderPass);
@@ -170,7 +171,7 @@ int main() {
     glm::mat4 modelGnome = glm::mat4(1.0f);
     modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
     modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
-    DeferredRenderObject gnome = factory.createDeferredLitObject(
+    DeferredRenderObject gnome = factory.createDeferredObject(
         "./models/garden_gnome.obj",
         "textures/garden_gnome.jpg",
         modelGnome, renderPass);
@@ -217,10 +218,9 @@ int main() {
     );
     scene->setRenderObject(snowflakes);
 
-    //========== SPIEGEL-SYSTEM SETUP ==========
+    //####### Spiegel System Setup ##############
     
     MirrorSystem* mirrorSystem = new MirrorSystem(device, &factory, renderPass);
-    
     // Spiegel 1: Hinter dem Gnom
     MirrorConfig mirror1;
     mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
@@ -267,7 +267,6 @@ int main() {
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
         if (obj.isDeferred) continue;  // Deferred werden separat gezählt
-        
         if (obj.isSnow) {
             snowCount++;
         } else if (obj.isLit) {
@@ -277,17 +276,15 @@ int main() {
         }
     }
 
-    // ========== DESCRIPTOR SET COUNTS ==========
+    //Descriptor Sets & -Pool
 
-    // 1. Normale Descriptor Sets:
-    //    - Deferred Objects: 2 pro object (depth pass + gbuffer pass)
-    //    - Normal Forward: 1 pro object
+    //normale Descriptor Sets:
     size_t normalDescriptorSets = (scene->getDeferredObjectCount() * 2) + normalForwardCount;
-    // 2. Snow Descriptor Sets
+    //snow Descriptor Sets
     size_t snowDescriptorSets = snowCount;
-    // 3. Lit Descriptor Sets
+    // Lit Descriptor Sets
     size_t litDescriptorSets = litCount;
-    // 4. Lighting Descriptor Sets
+    //Lighting Descriptor Sets
     size_t lightingDescriptorSets = scene->hasLightingQuad() ? 1 : 0;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
@@ -361,7 +358,9 @@ int main() {
     }
 
     std::cout << "\n=== All frames initialized! ===" << std::endl;
-    // Render loop
+
+    //######## Render Loop ###########
+
     float lastTime = static_cast<float>(glfwGetTime());
     float dutchAngle = 0.0f;
     uint32_t currentFrame = 0;
@@ -373,6 +372,7 @@ int main() {
         float deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
+        // Maus-input
         double xpos, ypos;
         window->getCursorPos(&xpos, &ypos);
         if (firstMouse) {
@@ -390,17 +390,16 @@ int main() {
             deltaTime *= 5;
         }
 
-       
+        //Tastatur-Input
         modelCamera = camera->checkKeyboard(window, deltaTime);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
         }
-      
         scene->updateObject(camIndex,modelCamera);
         mirrorSystem->updateReflections(scene, camIndex);
 
-        // // Schiff animation
+        //Schiff animation
         dutchAngle += deltaTime * glm::radians(5.0f);
         float radius = 60.0f;
         float circleX = radius * cos(dutchAngle);
@@ -423,7 +422,7 @@ int main() {
         if (vkQueueSubmit(graphicsQueue, 1, &computeSubmit, snow->getComputeFence()) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit compute command buffer");
         }
-
+        //UBOs & DescriptorSets updaten
         framesInFlight[currentFrame]->updateUniformBuffer(camera);
         framesInFlight[currentFrame]->updateLitUniformBuffer(camera, scene);
         framesInFlight[currentFrame]->updateLightingUniformBuffer(camera,scene);
@@ -465,7 +464,7 @@ int main() {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    // ========== CLEANUP ==========
+    // ###### Cleanup ###########
     vkDeviceWaitIdle(device);
 
     // 1. Frames zerstören
