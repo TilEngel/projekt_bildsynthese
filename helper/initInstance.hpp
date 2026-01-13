@@ -1,5 +1,6 @@
 /*
-* Erstellung der Instances, Devices und Command Pools
+* Erstellung und Zerstörung der Instances, Devices, Command Pools und DescriptorSetLayouts
+* Überbleibsel aus den Übungen - erledigt boilerplate-Code
 */
 #pragma once
 

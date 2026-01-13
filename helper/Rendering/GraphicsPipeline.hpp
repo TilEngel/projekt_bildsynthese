@@ -9,10 +9,10 @@ struct Vertex {
 };
 
 enum class PipelineType {
-    STANDARD,          // Normal forward rendering
+    STANDARD,          // Normales forward rendering
     MIRROR_MARK,       // Stencil marking pass
-    MIRROR_REFLECT,    // Reflected objects
-    MIRROR_BLEND,      // Transparent mirror
+    MIRROR_REFLECT,    // Reflektierte objekte
+    MIRROR_BLEND,      // Transparenter Spiegel
     DEPTH_ONLY,        // Depth prepass (subpass 0)
     GBUFFER,          // G-Buffer generation (subpass 1)
     LIGHTING,          // Deferred lighting (subpass 2)

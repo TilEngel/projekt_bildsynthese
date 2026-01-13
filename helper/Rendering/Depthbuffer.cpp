@@ -3,28 +3,9 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include "../initBuffer.hpp"
 
-uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties,
-                        VkPhysicalDevice physicalDevice)
-{
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
-        if ( (typeFilter & (1 << i)) &&
-             (memProperties.memoryTypes[i].propertyFlags & properties) == properties )
-        {
-            return i;
-        }
-    }
-
-    throw std::runtime_error("Failed to find suitable memory type for depth buffer!");
-}
-
-
-// ------------------------------------------------------------
-// create depth image with memory
-// ------------------------------------------------------------
+//Erstellt depth image 
 void DepthBuffer::createDepthImage(VkExtent2D extent)
 {
     // WICHTIG: Formate MIT Stencil bevorzugen!
@@ -78,8 +59,10 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memReq.size;
+    //MemoryType finden
+    InitBuffer initB;
     allocInfo.memoryTypeIndex =
-        findMemoryType(memReq.memoryTypeBits,
+        initB.findMemoryType(memReq.memoryTypeBits,
                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                        _physicalDevice);
 

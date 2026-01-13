@@ -19,6 +19,7 @@ public:
         , _zoom(45.0f)
     {
         updateCameraVectors();
+        updateModelMatrix();
     }
 
     // View-Matrix zurückgeben
@@ -43,6 +44,7 @@ public:
         }
 
         updateCameraVectors();
+        updateModelMatrix();
     }
 
     // Tastatur-Bewegung
@@ -71,10 +73,12 @@ public:
             _position += _up * velocity;
         if (direction == DOWN)
             _position -= _up * velocity;
+        
+        updateModelMatrix();
     }
 
     //Checkt ob Taste gedrückt wird und ruft entsprechend processKeyboard auf
-    void checkKeyboard(Window* window, float deltaTime){
+    glm::mat4 checkKeyboard(Window* window, float deltaTime){
         
         if (window->getKey(GLFW_KEY_W) == GLFW_PRESS)
             processKeyboard(Camera::FORWARD, deltaTime);
@@ -89,6 +93,7 @@ public:
         if (window->getKey(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             processKeyboard(Camera::DOWN, deltaTime);
 
+        return _model;
     }
 
     // Getter
@@ -102,6 +107,8 @@ public:
     void setMouseSensitivity(float sensitivity) { _mouseSensitivity = sensitivity; }
 
 private:
+
+    glm::mat4 _model = glm::mat4(1.0);
 
     // Kamera-Attribute
     glm::vec3 _position;
@@ -129,5 +136,22 @@ private:
 
         _right = glm::normalize(glm::cross(_front, _worldUp));
         _up = glm::normalize(glm::cross(_right, _front));
+
+       
+    }
+
+    void updateModelMatrix(){
+        _model = glm::mat4(1.0f);
+        
+        //Translation auf Kamera Position
+        _model = glm::translate(_model,_position);
+        //Drehung in Kamera Richtung
+        _model = glm::rotate(_model, glm::radians(-90.0f),glm::vec3(1.0,0.0,0.0));
+        _model= glm::rotate(_model, glm::radians(0.0f),glm::vec3(0.0,1.0,0.0));
+        _model = glm::rotate(_model, glm::radians(90.0f),glm::vec3(0.0,0.0,1.0));
+        _model = glm::rotate(_model, glm::radians(-_yaw), glm::vec3(0.0f,0.0f,1.0f));
+        _model = glm::rotate(_model, glm::radians(-_pitch), glm::vec3(1.0f,0.0f,0.0f));
+        
+        _model = glm::scale(_model, glm::vec3(0.01,0.01,0.01));
     }
 };

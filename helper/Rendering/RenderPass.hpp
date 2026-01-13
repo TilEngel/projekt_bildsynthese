@@ -5,6 +5,8 @@
 
 class RenderPass {
 public:
+    //Erstellt den RenderPass, wie er nunmal für das Projekt gebraucht wird
+    //mit passenden Attachments, Subpasses, etc
     VkRenderPass createRenderPass(VkDevice device, VkFormat colorFormat, VkFormat depthFormat) {
         // Attachment indices
         enum {
@@ -33,7 +35,7 @@ public:
         attachments[kAttachment_BACK].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachments[kAttachment_BACK].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-        // Depth buffer (with stencil for mirrors)
+        //Depth buffer (mit stencil für spiegel)
         attachments[kAttachment_DEPTH].format = depthFormat;
         attachments[kAttachment_DEPTH].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_DEPTH].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -43,7 +45,7 @@ public:
         attachments[kAttachment_DEPTH].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;;
 
-        // G-Buffer 1: Normal & metallic
+        //GBuffer 1: Normal & metallic
         attachments[kAttachment_GBUFFER_NORMAL].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[kAttachment_GBUFFER_NORMAL].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_GBUFFER_NORMAL].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -53,7 +55,7 @@ public:
         attachments[kAttachment_GBUFFER_NORMAL].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachments[kAttachment_GBUFFER_NORMAL].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        //G-Buffer 2: Albedo & roughness
+        //GBuffer 2: Albedo & roughness
         attachments[kAttachment_GBUFFER_ALBEDO].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[kAttachment_GBUFFER_ALBEDO].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_GBUFFER_ALBEDO].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -70,7 +72,7 @@ public:
         depthRef.attachment = kAttachment_DEPTH;
         depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        // G-Buffer output reference
+        //GBuffer output reference
         std::array<VkAttachmentReference, 2> gBufferRefs{};
         gBufferRefs[0].attachment = kAttachment_GBUFFER_NORMAL;
         gBufferRefs[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -101,7 +103,7 @@ public:
         subpasses[kSubpass_DEPTH].pDepthStencilAttachment = &depthRef;
 
 
-        //G-Buffer
+        //GBuffer
         subpasses[kSubpass_GBUFFER].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpasses[kSubpass_GBUFFER].colorAttachmentCount = 2;
         subpasses[kSubpass_GBUFFER].pColorAttachments = gBufferRefs.data();
@@ -133,7 +135,7 @@ public:
         dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
         std::cout<<"0 Done\n";
-        // Depth Prepass -> G-Buffer
+        // Depth Prepass -> GBuffer
         dependencies[1].srcSubpass = kSubpass_DEPTH;
         dependencies[1].dstSubpass = kSubpass_GBUFFER;
         dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -142,7 +144,7 @@ public:
         dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
         std::cout<<"1 Done\n";
-        // G-Buffer -> Lighting
+        //GBuffer -> Lighting
         dependencies[2].srcSubpass = kSubpass_GBUFFER;
         dependencies[2].dstSubpass = kSubpass_LIGHTING;
         dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
