@@ -74,7 +74,7 @@ void MirrorSystem::addMirror(Scene* scene, const MirrorConfig& config) {
     mirror.transform *= normalToRotation(config.normal);
     mirror.transform = glm::scale(mirror.transform, config.scale);
     
-    createMirrorObjects(scene, config, mirror);
+    createMirrorObjects(scene, mirror);
     _mirrors.push_back(mirror);
     
     std::cout << "Mirror added at position (" 
@@ -87,8 +87,7 @@ void MirrorSystem::addMirror(Scene* scene, const MirrorConfig& config) {
               << mirror.normal.z << ")" << std::endl;
 }
 
-void MirrorSystem::createMirrorObjects(Scene* scene, const MirrorConfig& config, 
-                                       MirrorData& mirror) {
+void MirrorSystem::createMirrorObjects(Scene* scene, MirrorData& mirror) {
     // PASS 1: Spiegel-Markierung (schreibt in Stencil)
     RenderObject mirrorMark = _factory->createMirror(
         mirror.transform, _renderPass, PipelineType::MIRROR_MARK);
@@ -110,8 +109,6 @@ void MirrorSystem::addReflectableObject(size_t objectIndex) {
 void MirrorSystem::createReflections(Scene* scene) {
     // Für jeden Spiegel
     for (const auto& mirror : _mirrors) {
-        glm::mat4 reflectionMatrix = calculateReflectionMatrix(
-            mirror.position, mirror.normal);
         
         // Für jedes zu spiegelnde Objekt
         for (size_t objIndex : _reflectableObjects) {

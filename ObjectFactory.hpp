@@ -42,20 +42,16 @@ public:
         VkRenderPass renderPass);
 
     //Erstellt die Skybox
-    RenderObject createSkybox(VkRenderPass renderPass,
-                             const std::array<const char*, 6>& cubemapFaces,
-                             uint32_t subpassIndex = 2);
+    RenderObject createSkybox(VkRenderPass renderPass,const std::array<const char*, 6>& cubemapFaces);
     //Schnee (Compute-Shader)
     RenderObject createSnowflake(const char* texturePath,
                                 VkRenderPass renderPass,
                                 VkBuffer particleBuffer,
-                                VkDescriptorSetLayout snowDescriptorSetLayout,
-                                uint32_t subpassIndex = 2);
+                                VkDescriptorSetLayout snowDescriptorSetLayout);
     //Spiegel (Stencil-Buffer)
     RenderObject createMirror(const glm::mat4& modelMatrix,
                              VkRenderPass renderPass,
-                             PipelineType pipelineType,
-                             uint32_t subpassIndex = 2);
+                             PipelineType pipelineType);
     
                        
     //Erstellt Punktlichter 

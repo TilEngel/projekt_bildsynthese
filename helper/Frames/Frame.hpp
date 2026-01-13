@@ -35,8 +35,7 @@ struct LightingUniformBufferObject {
 class Frame {
 public:
     Frame(VkPhysicalDevice physicalDevice, VkDevice device, SwapChain* swapChain,
-          Framebuffers* framebuffers, VkQueue graphicsQueue, VkCommandPool commandPool,
-          VkDescriptorPool descriptorPool, VkDescriptorSetLayout descriptorSetLayout)
+          Framebuffers* framebuffers, VkQueue graphicsQueue, VkCommandPool commandPool)
         : _physicalDevice(physicalDevice), _device(device), _swapChain(swapChain),
           _framebuffers(framebuffers), _graphicsQueue(graphicsQueue) {
         createUniformBuffer();
@@ -91,8 +90,7 @@ public:
     // Helper Methods
     void renderSingleObject(const RenderObject& obj, size_t normalIdx = 0, 
                            size_t snowIdx = 0, size_t litIdx = 0);
-    void renderMirrorSystem(Scene* scene, size_t& normalIdx, 
-                           size_t& snowIdx, size_t& litIdx);
+   
 
     // Sync Objects
     void createSyncObjects();
@@ -100,7 +98,7 @@ public:
     void submitCommandBuffer(uint32_t imageIndex);
 
     // Rendering
-    bool render(Scene* scene, Camera* camera) {
+    bool render(Scene* scene) {
         waitForFence();
 
         uint32_t imageIndex;

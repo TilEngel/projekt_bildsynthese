@@ -108,7 +108,7 @@ int main() {
         "textures/skybox/front.jpg",
         "textures/skybox/back.jpg"
     };
-    RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
     scene->setRenderObject(skybox);
 
     // Licht 1 (Beim Zwerg)
@@ -196,7 +196,7 @@ int main() {
     DeferredRenderObject lamp = factory.createDeferredObject("./models/desk_lamp.obj",
         "textures/desk_lamp.jpg", modelLamp, renderPass);
     scene->setDeferredRenderObject(lamp);
-    size_t lampIndex = scene->getDeferredObjectCount() - 1;
+    
 
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
@@ -206,16 +206,14 @@ int main() {
         "shaders/testapp.frag.spv",
         "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
     scene->setRenderObject(ground);
-    size_t groundfIndex = scene->getObjectCount() - 1;
+    
 
     // Schneeflocken ZULETZT hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
         "textures/snowflake.png",
         renderPass,
         snow->getCurrentBuffer(),
-        snowDescriptorSetLayout,
-        static_cast<uint32_t>(SubpassIndex::LIGHTING)
-    );
+        snowDescriptorSetLayout);
     scene->setRenderObject(snowflakes);
 
     //####### Spiegel System Setup ##############
@@ -329,8 +327,7 @@ int main() {
         std::cout << "\n=== Frame " << i << " Initialization ===" << std::endl;
         
         framesInFlight[i] = new Frame(physicalDevice, device, swapChain, framebuffers,
-                                    graphicsQueue, commandPool, descriptorPool,
-                                    scene->getDescriptorSetLayout());
+                                    graphicsQueue, commandPool);
         
         // Normale Descriptor Sets
         std::cout << "Allocating " << normalDescriptorSets << " normal descriptor sets..." << std::endl;
@@ -454,7 +451,7 @@ int main() {
         }
 
         // Render
-        bool recreate = framesInFlight[currentFrame]->render(scene, camera);
+        bool recreate = framesInFlight[currentFrame]->render(scene);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();

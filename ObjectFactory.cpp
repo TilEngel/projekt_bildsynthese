@@ -46,8 +46,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
 }
 
 
-RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, 
-                                         const std::array<const char*, 6>& cubemapFaces, uint32_t subpassIndex) {
+RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces) {
     std::vector<Vertex> vertices = {
         {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
         {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
@@ -101,7 +100,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
         renderPass,
         _descriptorSetLayout,
         PipelineType::SKYBOX,
-        subpassIndex
+        2
     );
 
     InitBuffer buff;
@@ -125,7 +124,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass,
 RenderObject ObjectFactory::createSnowflake(const char* texturePath, 
                                            VkRenderPass renderPass,
                                            VkBuffer particleBuffer, 
-                                           VkDescriptorSetLayout snowDescriptorSetLayout,uint32_t subpassIndex) {
+                                           VkDescriptorSetLayout snowDescriptorSetLayout) {
     std::vector<Vertex> vertices = {
         {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
         {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
@@ -252,7 +251,7 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
 
 RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix, 
                                          VkRenderPass renderPass,
-                                         PipelineType pipelineType,uint32_t subpassIndex) {
+                                         PipelineType pipelineType) {
     std::vector<Vertex> vertices = {
         {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
         {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
