@@ -6,7 +6,7 @@
 #include <fstream>
 #include <array>
 
-// Helper: read SPIR-V file
+// Helper: SPIR-V file lesen
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("Failed to open shader file!");
@@ -19,7 +19,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// Helper: create shader module
+// Helper:  shader-Modul erstellen
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -58,7 +58,7 @@ void GraphicsPipeline::createPipelineLayout() {
 }
 
 void GraphicsPipeline::createPipeline() {
-    // Load shader modules
+    //shader module laden
     auto vertCode = readFile(_vertexShaderPath);
     auto fragCode = readFile(_fragmentShaderPath);
 
@@ -81,7 +81,7 @@ void GraphicsPipeline::createPipeline() {
 
     VkPipelineShaderStageCreateInfo stages[] = { vertStage, fragStage };
 
-    // --- Vertex Input ---
+    //Vertex Input
     VkVertexInputBindingDescription binding{};
     binding.binding = 0;
     binding.stride = sizeof(Vertex);
@@ -105,29 +105,29 @@ void GraphicsPipeline::createPipeline() {
     vertexInput.vertexAttributeDescriptionCount = attributes.size();
     vertexInput.pVertexAttributeDescriptions = attributes.data();
 
-    // --- Input Assembly ---
+    // Input Assembly
     VkPipelineInputAssemblyStateCreateInfo assembly{};
     assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     assembly.primitiveRestartEnable = VK_FALSE;
 
-    // --- Viewport State (dynamic) ---
+    //Viewport State
     VkPipelineViewportStateCreateInfo viewport{};
     viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewport.viewportCount = 1;
     viewport.scissorCount = 1;
 
-    // --- Multisampling ---
+    //Multisampling
     VkPipelineMultisampleStateCreateInfo msaa{};
     msaa.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     msaa.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-    // --- Depth-Stencil State basierend auf Pipeline-Typ ---
+    //Depth-Stencil State basierend auf Pipeline-Typ
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
     switch (_pipelineType) {
-        case PipelineType::DEPTH_ONLY:
+        case PipelineType::DEPTH_ONLY: 
             // Depth Prepass: Nur Depth schreiben, kein Color Output
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_TRUE;
@@ -138,12 +138,12 @@ void GraphicsPipeline::createPipeline() {
         case PipelineType::GBUFFER:
             // G-Buffer Pass: Depth Test, aber kein Write (bereits vom Prepass)
             depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_FALSE;  // WICHTIG!
+            depthStencil.depthWriteEnable = VK_FALSE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;  // Nur Pixel vom Prepass
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
             
-        case PipelineType::LIGHTING:
+        case PipelineType::LIGHTING: 
             // Lighting Pass: Kein Depth Test (Fullscreen Quad)
             depthStencil.depthTestEnable = VK_FALSE;
             depthStencil.depthWriteEnable = VK_FALSE;
@@ -151,7 +151,7 @@ void GraphicsPipeline::createPipeline() {
             break;
         
         case PipelineType::MIRROR_MARK:
-            // Pass 1: Nur Stencil schreiben, keine Farbe/Depth
+            //Pass 1: Nur Stencil schreiben, keine Farbe/Depth
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_FALSE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -169,7 +169,7 @@ void GraphicsPipeline::createPipeline() {
             break;
             
         case PipelineType::MIRROR_REFLECT:
-            // Pass 2: Gespiegelte Objekte - nur rendern wo Stencil == 1
+            //Pass 2: Gespiegelte Objekte -> nur rendern wo Stencil == 1
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_TRUE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
@@ -187,7 +187,7 @@ void GraphicsPipeline::createPipeline() {
             break;
 
         case PipelineType::MIRROR_BLEND:
-            // Pass 3: Transparenter Spiegel
+            // Pass3: Transparenter Spiegel
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_FALSE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -200,7 +200,7 @@ void GraphicsPipeline::createPipeline() {
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
-        default:  // STANDARD
+        default:
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_TRUE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -208,12 +208,11 @@ void GraphicsPipeline::createPipeline() {
             break;
     }
 
-    // --- Color Blend State ---
+    //Color Blend State
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
 
     if (_pipelineType == PipelineType::DEPTH_ONLY) {
         // Depth Prepass: Kein Color Write
-        // attachmentCount = 0, keine Attachments
     } else if (_pipelineType == PipelineType::GBUFFER) {
         //G-Buffer hat 2 Color Outputs!
         blendAttachments.resize(2);
@@ -224,7 +223,7 @@ void GraphicsPipeline::createPipeline() {
             attachment.blendEnable = VK_FALSE;
         }
     } else {
-        // Standard: 1 Color Output
+        //standard: 1 Color Output
         blendAttachments.resize(1);
         blendAttachments[0].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
                                             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -257,7 +256,7 @@ void GraphicsPipeline::createPipeline() {
         colorBlending.pAttachments = blendAttachments.data();
     }
 
-    // --- Rasterizer ---
+    //Rasterizer
     VkPipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
@@ -290,18 +289,13 @@ void GraphicsPipeline::createPipeline() {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     }
-     // WICHTIG: Spiegel verschwindet nicht mehr von hinten
+     //Spiegel verschwindet nicht mehr von hinten
     if (_pipelineType == PipelineType::MIRROR_BLEND) {
         rasterizer.cullMode = VK_CULL_MODE_NONE;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     }
-    
-
-    // VkPipelineColorBlendStateCreateInfo blend{};
-    // blend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    // blend.attachmentCount = 1;
-    // blend.pAttachments = &blendAttachment;
-    // --- Dynamic State ---
+   
+    //Dynamic State
     std::vector<VkDynamicState> dynamicStates{
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
@@ -316,7 +310,7 @@ void GraphicsPipeline::createPipeline() {
     dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamic.pDynamicStates = dynamicStates.data();
 
-    // --- Pipeline CreateInfo ---
+    // Pipeline Erstellen
     VkGraphicsPipelineCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     info.stageCount = 2;
@@ -331,7 +325,7 @@ void GraphicsPipeline::createPipeline() {
     info.pDynamicState = &dynamic;
     info.layout = _pipelineLayout;
     info.renderPass = _renderPass;
-    info.subpass = _subpassIndex;  // WICHTIG: Subpass Index!
+    info.subpass = _subpassIndex; 
 
     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &_graphicsPipeline)
         != VK_SUCCESS)

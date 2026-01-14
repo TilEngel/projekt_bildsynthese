@@ -8,7 +8,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-// Standardfenstergröße (kann nach Bedarf geändert werden)
+// Standardfenstergröße
 static const uint32_t WINDOW_WIDTH  = 800;
 static const uint32_t WINDOW_HEIGHT = 600;
 
@@ -17,11 +17,9 @@ Window::Window() {
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }
-
-    // Keine OpenGL-Kontext-Erzeugung (wir verwenden Vulkan)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    // Erzeuge das GLFW-Fenster
+    //GLFW-Fenster erzeugen
     _window = glfwCreateWindow(static_cast<int>(WINDOW_WIDTH),
                                static_cast<int>(WINDOW_HEIGHT),
                                "Vulkan Window",
@@ -32,10 +30,10 @@ Window::Window() {
         throw std::runtime_error("Failed to create GLFW window");
     }
 
-    // setze das "user pointer" auf dieses Objekt, damit der statische Callback Zugriff hat
+    // setze "user pointer" auf das Objekt
     glfwSetWindowUserPointer(_window, this);
 
-    // setze framebuffer resize callback
+    //setze framebuffer resize callback
     glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
 }
 
@@ -75,7 +73,7 @@ VkExtent2D Window::getExtent() {
     }
     int width = 0, height = 0;
     glfwGetFramebufferSize(_window, &width, &height);
-    // Falls das Fenster minimiert wurde, kann height==0 sein — Caller muss ggf. warten/neu prüfen
+    //falls das Fenster minimiert ist, kann height==0 sein  warten/neu prüfen
     return VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 }
 
@@ -99,7 +97,7 @@ VkSurfaceKHR Window::createSurface(VkInstance instance) {
 // statischer Callback: setzt das Flag im zugehörigen Window-Objekt
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
     (void) width; (void) height;
-    // wir holen uns das Window-Objekt aus dem user pointer
+    // window Objekt aus dem User-Pointer holen
     Window* win = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
     if (win) {
         win->_framebufferResized = true;

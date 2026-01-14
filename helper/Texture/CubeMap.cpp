@@ -48,7 +48,7 @@ void CubeMap::loadCubeMap(const std::array<const char*, 6>& faces) {
     void* data;
     vkMapMemory(_device, _imageBufferMemory, 0, imageSize, 0, &data);
 
-    // Kopiere erste Textur
+    //erste Textur kopieren
     memcpy(data, firstPixels, static_cast<size_t>(layerSize));
     stbi_image_free(firstPixels);
 
@@ -187,7 +187,7 @@ void CubeMap::createTextureImageView() {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = _textureImage;
-    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE; // CUBE statt 2D!
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE; // CUBE weil Würfel halt
     viewInfo.format = IMAGE_FORMAT;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
