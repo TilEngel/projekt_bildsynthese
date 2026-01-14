@@ -8,10 +8,10 @@
 //Erstellt depth image 
 void DepthBuffer::createDepthImage(VkExtent2D extent)
 {
-    // WICHTIG: Formate MIT Stencil bevorzugen!
+    //Formate MIT Stencil bevorzugen!
     const std::vector<VkFormat> candidates = {
-        VK_FORMAT_D24_UNORM_S8_UINT,      // Bevorzugt: 24-bit depth + 8-bit stencil
-        VK_FORMAT_D32_SFLOAT_S8_UINT,     // Alternative mit 32-bit depth + stencil
+        VK_FORMAT_D24_UNORM_S8_UINT,      //Bevorzugt: 24-bit depth + 8-bit stencil
+        VK_FORMAT_D32_SFLOAT_S8_UINT,     //alternative mit 32-bit depth + stencil
         VK_FORMAT_D32_SFLOAT               // Fallback ohne Stencil (für Mirror nicht ideal)
     };
 
@@ -81,7 +81,7 @@ void DepthBuffer::createDepthImageView()
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = _depthImageFormat;
 
-    // WICHTIG: Aspect Mask muss Stencil enthalten wenn Format es hat
+    //Aspect Mask muss Stencil enthalten wenn Format es hat
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     
     // Prüfen ob Format Stencil hat
@@ -100,9 +100,7 @@ void DepthBuffer::createDepthImageView()
     }
 }
 
-// ------------------------------------------------------------
-// destroy all depth buffer resources
-// ------------------------------------------------------------
+// depth buffer resources zerstören
 void DepthBuffer::cleanupDepthRessources()
 {
     if (_depthImageView != VK_NULL_HANDLE) {

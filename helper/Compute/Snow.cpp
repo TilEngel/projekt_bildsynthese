@@ -9,7 +9,7 @@
 #include "../initBuffer.hpp"
 #include <array>
 
-// Helper: read file
+// Helper: Datei (compute Shader) einlesen
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("failed to open file: " + filename);
@@ -164,12 +164,12 @@ void Snow::createStorageBuffers() {
     
     // Schneeflocken verteilen sich über die Szene
     std::uniform_real_distribution<float> posX(-2.8f, 0.8f);
-    std::uniform_real_distribution<float> posY(5.0f, 5.5f);  // Starten oben
+    std::uniform_real_distribution<float> posY(5.0f, 5.5f);  //Starten oben
     std::uniform_real_distribution<float> posZ(-2.0f, 1.0f);
     
     // Langsame Fallgeschwindigkeit mit leichter Variation
     std::uniform_real_distribution<float> velX(-0.008f, 0.008f);
-    std::uniform_real_distribution<float> velY(-0.01f, -0.0005f);  // Langsam nach unten
+    std::uniform_real_distribution<float> velY(-0.01f, -0.0005f);  //langsam nach unten
     std::uniform_real_distribution<float> velZ(-0.008f, 0.008f);
 
     for (uint32_t i = 0; i < NUMBER_PARTICLES; ++i) {
@@ -179,7 +179,7 @@ void Snow::createStorageBuffers() {
 
     VkDeviceSize bufSize = sizeof(Particle) * NUMBER_PARTICLES;
 
-    // Buffer mit Initialdaten der Schneeflocken
+    //Buffer mit Initialdaten der Schneeflocken
     createBuffer(_physicalDevice, _device, bufSize,
                  VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,

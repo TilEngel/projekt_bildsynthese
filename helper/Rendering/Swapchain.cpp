@@ -6,10 +6,7 @@
 #include <iostream>
 
 void SwapChain::create() {
-
-    // ------------------------------------------------------------
-    // 1. Query Surface Information
-    // ------------------------------------------------------------
+    //Query Surface Information
     auto formats       = _surface->queryFormats(_physicalDevice);
     auto presentModes  = _surface->queryPresentModes(_physicalDevice);
     auto capabilities  = _surface->queryCapabilities(_physicalDevice);
@@ -17,10 +14,7 @@ void SwapChain::create() {
     if (formats.empty() || presentModes.empty()) {
         throw std::runtime_error("SwapChain creation failed: no valid formats or present modes.");
     }
-
-    // ------------------------------------------------------------
-    // 2. Choose Surface Format
-    // ------------------------------------------------------------
+    // Surface Format wählen
     VkSurfaceFormatKHR selectedFormat = formats[0];
 
     for (const auto& f : formats) {
@@ -45,11 +39,7 @@ void SwapChain::create() {
 
     _imageFormat = selectedFormat.format;
 
-
-    // ------------------------------------------------------------
-    // 3. Choose Present Mode
-    // Mailbox > FIFO (Mailbox häufig nicht verfügbar auf macOS!)
-    // ------------------------------------------------------------
+    //Present Mode wählen
     VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     for (const auto& pm : presentModes) {
@@ -59,15 +49,13 @@ void SwapChain::create() {
         }
     }
 
+    //Choose Swap Extent
 
-    // ------------------------------------------------------------
-    // 4. Choose Swap Extent
-    // ------------------------------------------------------------
     if (capabilities.currentExtent.width != UINT32_MAX) {
         // Vulkan darf Extent vorgeben
         _extent = capabilities.currentExtent;
     } else {
-        // Fenstergröße benutzen
+        //Fenstergröße benutzen
         VkExtent2D windowExtent = _surface->getExtent();
 
         _extent.width  = std::clamp(windowExtent.width,
@@ -79,20 +67,15 @@ void SwapChain::create() {
                                     capabilities.maxImageExtent.height);
     }
 
-
-    // ------------------------------------------------------------
-    // 5. Choose Image Count
-    // ------------------------------------------------------------
+    //Image Count wählen
     uint32_t imageCount = capabilities.minImageCount + 1;
 
     if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
         imageCount = capabilities.maxImageCount;
     }
 
+    //Sharing Mode auswählen
 
-    // ------------------------------------------------------------
-    // 6. Choose Sharing Mode
-    // ------------------------------------------------------------
     uint32_t qIndices[2] = { _graphicsQueueFamilyIndex, _presentQueueFamilyIndex };
     bool sameFamily = (_graphicsQueueFamilyIndex == _presentQueueFamilyIndex);
 
@@ -122,18 +105,13 @@ void SwapChain::create() {
     info.clipped        = VK_TRUE;
     info.oldSwapchain   = VK_NULL_HANDLE;
 
-
-    // ------------------------------------------------------------
-    // 7. Create SwapChain
-    // ------------------------------------------------------------
+    //SwapChain erstellen
     if (vkCreateSwapchainKHR(_device, &info, nullptr, &_swapChain) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create SwapChain!");
     }
 
 
-    // ------------------------------------------------------------
-    // 8. Retrieve SwapChain Images
-    // ------------------------------------------------------------
+    // SwapChain Images holen
     uint32_t count = 0;
     vkGetSwapchainImagesKHR(_device, _swapChain, &count, nullptr);
 
@@ -147,10 +125,7 @@ void SwapChain::create() {
 }
 
 
-
-// ------------------------------------------------------------
-// Destroy SwapChain
-// ------------------------------------------------------------
+// Destroy
 void SwapChain::cleanup() {
     if (_swapChain != VK_NULL_HANDLE) {
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
@@ -161,11 +136,9 @@ void SwapChain::cleanup() {
 }
 
 
-// ------------------------------------------------------------
-// Create image views for all swapchain images
-// ------------------------------------------------------------
+//image views für swapchain images erstellen
 void SwapChain::createImageViews() {
-    cleanupImageViews(); // sicherstellen, dass keine alten Views existieren
+    cleanupImageViews(); //sicherstellen dass keine alten Views existieren
 
     _swapChainImageViews.reserve(_images.size());
 
@@ -197,11 +170,9 @@ void SwapChain::createImageViews() {
 }
 
 
-// ------------------------------------------------------------
-// create semaphores for all swapchain images
-// ------------------------------------------------------------
+//semaphores ür swapchain images erstellen
 void SwapChain::createSemaphores() {
-    cleanupSemaphores(); // alte Semaphoren zerstören, falls vorhanden
+    cleanupSemaphores(); // alte Semaphores zerstören
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -220,10 +191,7 @@ void SwapChain::createSemaphores() {
     std::cout << "Created " << _presentationSemaphores.size() << " presentation semaphores\n";
 }
 
-
-// ------------------------------------------------------------
-// destroy the image views for the swap chain
-// ------------------------------------------------------------
+//image views für swap chain zerstören
 void SwapChain::cleanupImageViews() {
     for (VkImageView view : _swapChainImageViews) {
         if (view != VK_NULL_HANDLE) {
@@ -234,9 +202,7 @@ void SwapChain::cleanupImageViews() {
 }
 
 
-// ------------------------------------------------------------
-// destroy the semaphores
-// ------------------------------------------------------------
+// destroy semaphores
 void SwapChain::cleanupSemaphores() {
     for (VkSemaphore sem : _presentationSemaphores) {
         if (sem != VK_NULL_HANDLE) {
@@ -247,12 +213,8 @@ void SwapChain::cleanupSemaphores() {
 }
 
 
-// ------------------------------------------------------------
-// acquire the next image of the swap chain
-// - call vkAcquireNextImageKHR
-// - return the image index
-// - throw error if the result is not "success" or "suboptimal"
-// ------------------------------------------------------------
+
+//nächstes Image aus Swapchain holen
 uint32_t SwapChain::acquireNextImage(VkSemaphore semaphore, VkFence fence) {
     if (_swapChain == VK_NULL_HANDLE) {
         throw std::runtime_error("AcquireNextImage called but swapchain is not created.");
@@ -269,21 +231,12 @@ uint32_t SwapChain::acquireNextImage(VkSemaphore semaphore, VkFence fence) {
     if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR) {
         return imageIndex;
     } else {
-        // Gemäß Kommentar: Fehler werfen, wenn Ergebnis weder SUCCESS noch SUBOPTIMAL
         throw std::runtime_error("Failed to acquire next swap chain image (vkAcquireNextImageKHR returned error).");
     }
 }
 
 
-// ------------------------------------------------------------
-// present the image with index imageIndex
-// - call vkQueuePresentKHR
-// - wait for the images semaphore
-// - return true, if result is "error out of date" or "suboptimal"
-// - else throw error, if the result is not "success"
-// - else return false
-// (return value indicates, if swap chain has to be recreated)
-// ------------------------------------------------------------
+// present Image mit index imageIndex
 bool SwapChain::presentImage(uint32_t imageIndex) {
     if (_swapChain == VK_NULL_HANDLE) {
         throw std::runtime_error("PresentImage called but swapchain is not created.");
@@ -306,7 +259,7 @@ bool SwapChain::presentImage(uint32_t imageIndex) {
     VkResult result = vkQueuePresentKHR(_presentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-        // Swapchain muss möglicherweise neu erstellt werden
+        // swapchain muss möglicherweise neu erstellt werden
         return true;
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("Failed to present swap chain image (vkQueuePresentKHR returned error).");
