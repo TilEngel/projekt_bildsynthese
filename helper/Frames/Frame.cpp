@@ -1017,6 +1017,7 @@ void Frame::updateUniformBuffer(Camera* camera) {
         0.1f, 100.0f
     );
     ubo.proj[1][1] *= -1.0f;
+    ubo.cameraPos = camera->getPosition();
 
     std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
 }
@@ -1082,4 +1083,166 @@ void Frame::updateLightingUniformBuffer(Camera* camera, Scene* scene) {
     }
     
     std::memcpy(_lightingUniformBufferMapped, &ubo, sizeof(ubo));
+}
+
+void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
+    VkCommandBuffer cmd = probe->getCommandBuffer();
+    uint32_t resolution = probe->getResolution();
+    
+    auto views = probe->getCubeFaceViews();
+    auto proj = probe->getProjection();
+
+    // Finde reflektierende Objekte (die nicht in Cubemap gerendert werden)
+    size_t reflectiveObjectIndex = SIZE_MAX;
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        if (scene->isReflectiveObject(i)) {
+            reflectiveObjectIndex = i;
+            break;
+        }
+    }
+    //origina UBO sichern
+    UniformBufferObject originalUBO;
+    std::memcpy(&originalUBO, _uniformBufferMapped, sizeof(UniformBufferObject));
+
+    // Command Buffer für alle 6 Faces aufzeichnen
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(cmd, &beginInfo);
+
+    // Rendere alle 6 Cubemap-Faces
+    for (uint32_t face = 0; face < 6; face++) {
+        // Update UBO für diesen Face
+        UniformBufferObject ubo{};
+        ubo.view = views[face];
+        ubo.proj = proj;
+        ubo.cameraPos = probe->getPosition();
+        std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
+
+        // Begin RenderPass für diesen Face
+        VkRenderPassBeginInfo rpInfo{};
+        rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        rpInfo.renderPass = probe->getRenderPass();
+        rpInfo.framebuffer = probe->getFramebuffer(face);
+        rpInfo.renderArea.offset = {0, 0};
+        rpInfo.renderArea.extent = {resolution, resolution};
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+        clearValues[1].depthStencil = {1.0f, 0};
+
+        rpInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        rpInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        // Viewport & Scissor
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(resolution);
+        viewport.height = static_cast<float>(resolution);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = {resolution, resolution};
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+        // Rendere alle Objekte (außer dem reflektierenden)
+        renderObjectsForCubemap(cmd, scene, reflectiveObjectIndex);
+
+        vkCmdEndRenderPass(cmd);
+    }
+
+    vkEndCommandBuffer(cmd);
+
+    // Submit Command Buffer
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmd;
+
+    vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(_graphicsQueue); // Warte auf Fertigstellung
+    //original UBO wiederherstellen
+    std::memcpy(_uniformBufferMapped, &originalUBO, sizeof(UniformBufferObject));
+}
+
+void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
+                                    size_t reflectiveObjectIndex) {
+    // Zähler für Descriptor Sets
+    size_t normalForwardIdx = 0;
+    size_t snowIdx = 0;
+    size_t litIdx = 0;
+    size_t deferredDescriptorIdx = 0;
+    
+    size_t normalForwardOffset = scene->getDeferredObjectCount() * 2;
+
+    // Rendere alle normalen Forward Objects
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        // Skip: Reflektierendes Objekt, Deferred, Mirrors
+        if (i == reflectiveObjectIndex || 
+            scene->isDeferredObject(i) || 
+            scene->isMirrorObject(i)) {
+            if (!scene->isSnowObject(i) && !scene->isLitObject(i) && !scene->isDeferredObject(i)) {
+                normalForwardIdx++;
+            }
+            continue;
+        }
+
+        const auto& obj = scene->getObject(i);
+        
+        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
+            if (obj.isSnow) snowIdx++;
+            else if (obj.isLit) litIdx++;
+            else normalForwardIdx++;
+            continue;
+        }
+
+        VkPipeline pipeline = obj.pipeline->getPipeline();
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+
+        // Descriptor Set binden
+        if (obj.isSnow) {
+            if (snowIdx < _snowDescriptorSets.size()) {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       layout, 0, 1, &_snowDescriptorSets[snowIdx], 0, nullptr);
+            }
+            snowIdx++;
+        } else if (obj.isLit) {
+            if (litIdx < _litDescriptorSets.size()) {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       layout, 0, 1, &_litDescriptorSets[litIdx], 0, nullptr);
+            }
+            litIdx++;
+        } else {
+            size_t setIndex = normalForwardOffset + normalForwardIdx;
+            if (setIndex < _descriptorSets.size()) {
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                       layout, 0, 1, &_descriptorSets[setIndex], 0, nullptr);
+            }
+            normalForwardIdx++;
+        }
+
+        // Vertex Buffer binden
+        VkBuffer vb[] = {obj.vertexBuffer};
+        VkDeviceSize off[] = {0};
+        vkCmdBindVertexBuffers(cmd, 0, 1, vb, off);
+
+        // Push Constants
+        vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+                          0, sizeof(glm::mat4), &obj.modelMatrix);
+
+        // Draw
+        if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
+            vkCmdDraw(cmd, obj.vertexCount, obj.instanceCount, 0, 0);
+        } else {
+            vkCmdDraw(cmd, obj.vertexCount, 1, 0, 0);
+        }
+    }
 }

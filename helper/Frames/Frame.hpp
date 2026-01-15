@@ -9,10 +9,12 @@
 #include "../../Scene.hpp"
 #include "Camera.hpp"
 #include "../initBuffer.hpp"
+#include "../renderToTexture/ReflectionProbe.hpp"
 
 struct UniformBufferObject {
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
+    alignas(16) glm::vec3 cameraPos;
 };
 
 //UBO für deferred Shading
@@ -86,6 +88,10 @@ public:
     void renderDeferredGBufferPass(Scene* scene);
     void renderDeferredLightingPass(Scene* scene);
     void renderForwardObjects(Scene* scene);
+    void renderCubemap(Scene* scene, ReflectionProbe* probe);
+    //Helper: Rendert Objekte für ein Cubemap-Face
+    void renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
+                                 size_t reflectiveObjectIndex);
 
     // Helper Methods
     void renderSingleObject(const RenderObject& obj, size_t normalIdx = 0, 
@@ -98,8 +104,14 @@ public:
     void submitCommandBuffer(uint32_t imageIndex);
 
     // Rendering
-    bool render(Scene* scene) {
+    bool render(Scene* scene, ReflectionProbe* probe = nullptr) {
         waitForFence();
+
+        static uint32_t frameCounter = 0;
+        if (probe&& (frameCounter % scene->getReflectionUpdateInterval() == 0)) {
+            renderCubemap(scene, probe);
+        }
+        frameCounter++;
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(_device, _swapChain->getSwapchain(),

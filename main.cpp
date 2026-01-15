@@ -22,6 +22,8 @@
 #include "helper/Frames/Camera.hpp"
 #include "helper/Compute/Snow.hpp"
 #include "helper/MirrorSystem.hpp"
+#include "helper/renderToTexture/CubemapRenderTarget.hpp"
+#include "helper/renderToTexture/ReflectionProbe.hpp"
 
 int main() {
     InitInstance inst;
@@ -51,9 +53,7 @@ int main() {
     );
     
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
-    if(device == VK_NULL_HANDLE){
-        std::cout<<"AAAAAHHHHHHHHAHAHAHAHAHAHAHAHAHA\n";
-    }
+   
     
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
@@ -206,7 +206,32 @@ int main() {
         "shaders/testapp.frag.spv",
         "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
     scene->setRenderObject(ground);
+
+    ReflectionProbe* reflectionProbe = new ReflectionProbe(
+        device,
+        physicalDevice,
+        commandPool,
+        graphicsQueue,
+        glm::vec3(-2.0f, 2.5f, 0.0f),  // Position (etwas über dem Gnom)
+        512  // Auflösung (256, 512 oder 1024)
+    );
     
+    // Reflektierendes Objekt erstellen (z.B. eine Kugel)
+    glm::mat4 modelReflective = glm::mat4(1.0f);
+    modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 3.5f, 0.0f));
+    modelReflective = glm::scale(modelReflective, glm::vec3(0.5f, 0.5f, 0.5f));
+    
+    RenderObject reflectiveSphere = factory.createReflectiveObject(
+        "./models/sphere.obj",  // Oder ein anderes Modell
+        reflectionProbe,
+        modelReflective,
+        renderPass
+    );
+    scene->setRenderObject(reflectiveSphere);
+    size_t reflectiveIndex = scene->getObjectCount() - 1;
+    
+    scene->markObjectAsReflective(reflectiveIndex);
+    scene->setReflectionUpdateInterval(3);
 
     // Schneeflocken ZULETZT hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
@@ -451,7 +476,7 @@ int main() {
         }
 
         // Render
-        bool recreate = framesInFlight[currentFrame]->render(scene);
+        bool recreate = framesInFlight[currentFrame]->render(scene,reflectionProbe);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();
@@ -489,6 +514,10 @@ int main() {
         if (obj.vertexBuffer != VK_NULL_HANDLE) {
             uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
         }
+    }
+    if(reflectionProbe){
+        reflectionProbe->cleanup();
+        delete reflectionProbe;
     }
 
     // Reflektierte Objekte (teilen sich Ressourcen!)

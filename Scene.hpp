@@ -306,6 +306,29 @@ public:
         }
     }
 
+    //Render To Texture
+    // Markiert ein Objekt als reflektierend (es selbst wird nicht in der Cubemap gerendert)
+    void markObjectAsReflective(size_t index) {
+        _reflectiveObjectIndices.insert(index);
+    }
+
+    bool isReflectiveObject(size_t index) const {
+        return _reflectiveObjectIndices.find(index) != _reflectiveObjectIndices.end();
+    }
+
+    const std::unordered_set<size_t>& getReflectiveObjectIndices() const {
+        return _reflectiveObjectIndices;
+    }
+
+    // Update-Frequenz für Reflexionen (nicht jeden Frame)
+    void setReflectionUpdateInterval(uint32_t interval) {
+        _reflectionUpdateInterval = interval;
+    }
+
+    uint32_t getReflectionUpdateInterval() const {
+        return _reflectionUpdateInterval;
+    }
+
 private:
    
 
@@ -326,6 +349,10 @@ private:
     std::vector<size_t> _mirrorMarkIndices;
     std::vector<size_t> _mirrorBlendIndices;
     std::unordered_set<size_t> _reflectableObjectIndices;
+
+    //Render to texture
+    std::unordered_set<size_t> _reflectiveObjectIndices;
+    uint32_t _reflectionUpdateInterval = 10; // Alle 10 Frames updaten
     
     VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
 };

@@ -389,3 +389,85 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
 
     return obj;
 }
+
+RenderObject ObjectFactory::createReflectiveObject(
+    const char* modelPath,
+    ReflectionProbe* probe,
+    const glm::mat4& modelMatrix,
+    VkRenderPass renderPass)
+{
+
+
+    std::vector<Vertex> vertices = {
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}}
+    };
+    // Pipeline mit Standard Descriptor Layout (UBO + Sampler)
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/renderToTexture.vert.spv",
+        "shaders/renderToTexture.frag.spv",
+        renderPass,
+        _descriptorSetLayout,  // Standard Layout
+        PipelineType::STANDARD,
+        2  // Subpass 2 (Forward Rendering)
+    );
+
+    // Model laden
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+   
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = probe->getCubemapView();    // Cubemap View!
+    obj.textureSampler = probe->getCubemapSampler();   // Cubemap Sampler!
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.instanceCount = 1;
+    obj.texture = nullptr;  // Kein Texture-Objekt, da extern
+
+    std::cout << "Reflective object created with cubemap" << std::endl;
+
+    return obj;
+}
