@@ -134,13 +134,14 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
-
+    //Fliege, die die Kamera darstellt
     glm::mat4 modelCamera = glm::mat4(1.0f);
-  
-    RenderObject cam = factory.createLitObject(
+    RenderObject cam = factory.createGenericObject(
         "./models/fly.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
         "textures/black.png",
-        modelCamera, renderPass);
+        modelCamera, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
         scene->setRenderObject(cam);
         size_t camIndex = scene->getObjectCount()-1;
     
@@ -212,14 +213,15 @@ int main() {
         physicalDevice,
         commandPool,
         graphicsQueue,
-        glm::vec3(-2.0f, 2.5f, 0.0f),  // Position (etwas über dem Gnom)
-        512  // Auflösung (256, 512 oder 1024)
+        glm::vec3(5.0f, 3.5f, 0.0f),  // Position (etwas über dem Gnom)
+        1024  // Auflösung (256, 512 oder 1024)
     );
     
     // Reflektierendes Objekt erstellen (z.B. eine Kugel)
     glm::mat4 modelReflective = glm::mat4(1.0f);
     modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 3.5f, 0.0f));
     modelReflective = glm::scale(modelReflective, glm::vec3(0.5f, 0.5f, 0.5f));
+    //modelReflective = glm::rotate(modelReflective, glm::radians(45.0f), glm::vec3(1.0,1.0,1.0));
     
     RenderObject reflectiveSphere = factory.createReflectiveObject(
         "./models/sphere.obj",  // Oder ein anderes Modell

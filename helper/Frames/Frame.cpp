@@ -133,8 +133,6 @@ void Frame::submitCommandBuffer(uint32_t imageIndex) {
 }
 
 
-// Frame.cpp - recordCommandBuffer - KOMPLETT ERSETZT
-
 void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkResetCommandBuffer(_commandBuffer, 0);
 
@@ -1104,23 +1102,27 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
     UniformBufferObject originalUBO;
     std::memcpy(&originalUBO, _uniformBufferMapped, sizeof(UniformBufferObject));
 
-    // Command Buffer für alle 6 Faces aufzeichnen
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(cmd, &beginInfo);
-
-    // Rendere alle 6 Cubemap-Faces
+    // eigenen Command Buffer für alle 6 Faces  (wahrscheinlich mies ineffizient, vielleicht fällt uns noch was schlaueres ein)
     for (uint32_t face = 0; face < 6; face++) {
-        // Update UBO für diesen Face
+        //beginInfo
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        
+        if (vkBeginCommandBuffer(cmd, &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to begin command buffer for cubemap face!");
+        }
+
+        //UBO für aktuelles face updaten
         UniformBufferObject ubo{};
         ubo.view = views[face];
         ubo.proj = proj;
         ubo.cameraPos = probe->getPosition();
+        
         std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
+        
 
-        // Begin RenderPass für diesen Face
+        // RenderPass für Face
         VkRenderPassBeginInfo rpInfo{};
         rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         rpInfo.renderPass = probe->getRenderPass();
@@ -1128,16 +1130,16 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
         rpInfo.renderArea.offset = {0, 0};
         rpInfo.renderArea.extent = {resolution, resolution};
 
+        // Verschiedene Clear-Farben für Debug
         std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {{0.1f, 0.1f, 0.1f, 1.0f}};
+        clearValues[0].color = {{1.0f, 0.0f, 0.0f, 1.0f}};   
         clearValues[1].depthStencil = {1.0f, 0};
 
-        rpInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        rpInfo.clearValueCount = 2;
         rpInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // Viewport & Scissor
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
@@ -1152,26 +1154,33 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
         scissor.extent = {resolution, resolution};
         vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-        // Rendere alle Objekte (außer dem reflektierenden)
+        // Objekte rendern
         renderObjectsForCubemap(cmd, scene, reflectiveObjectIndex);
 
         vkCmdEndRenderPass(cmd);
+        
+        //Command Buffer beenden
+        if (vkEndCommandBuffer(cmd) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to end command buffer for cubemap face!");
+        }
+
+        // submitten und warten
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &cmd;
+
+        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to submit cubemap face!");
+        }
+        
+        //warten bis Face fertig ist
+        vkQueueWaitIdle(_graphicsQueue);
     }
 
-    vkEndCommandBuffer(cmd);
-
-    // Submit Command Buffer
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmd;
-
-    vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(_graphicsQueue); // Warte auf Fertigstellung
-    //original UBO wiederherstellen
+    // UBO wiederherstellen
     std::memcpy(_uniformBufferMapped, &originalUBO, sizeof(UniformBufferObject));
 }
-
 void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
                                     size_t reflectiveObjectIndex) {
     // Zähler für Descriptor Sets

@@ -45,7 +45,14 @@ bool LoadObj::objLoader(const std::string& filename, std::vector<Vertex>& outVer
                     attrib.vertices[3 * index.vertex_index + 2]
                 };
             }
-
+            if (index.normal_index >= 0) 
+            {
+                vertex.normal = {
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
+                };
+            }
             //Texture-coordinates
             if (index.texcoord_index >= 0) 
             {

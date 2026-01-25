@@ -2,7 +2,8 @@
 #version 450
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec2 inTexCoord;
+layout(location = 1) in vec3 inNormal;     
+layout(location = 2) in vec2 inTexCoord;
 
 layout(binding = 0) uniform UniformBufferObject {
     mat4 view;
@@ -15,15 +16,16 @@ layout(push_constant) uniform PushConstants {
 } push;
 
 layout(location = 0) out vec3 fragWorldPos;
-layout(location = 1) out vec3 fragNormal;
+layout(location = 1) out vec3 fragWorldNormal; 
 
 void main() {
+    // World Position
     vec4 worldPos = push.model * vec4(inPosition, 1.0);
     fragWorldPos = worldPos.xyz;
-
-    mat3 normalMatrix = transpose(inverse(mat3(push.model)));    
-    // Normal im World-Space (vereinfacht, ohne Normal-Input)
-    fragNormal = normalize(normalMatrix * inPosition);
+    
+    // Normale korrekt in World Space transformieren
+    mat3 normalMatrix = transpose(inverse(mat3(push.model)));
+    fragWorldNormal = normalize(normalMatrix * inNormal);
     
     gl_Position = ubo.proj * ubo.view * worldPos;
 }

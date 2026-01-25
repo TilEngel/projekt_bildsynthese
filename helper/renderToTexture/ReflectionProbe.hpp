@@ -36,16 +36,27 @@ public:
         cleanup();
     }
 
-    // Generiert die 6 View-Matrizen für die Cubemap-Faces
+    // KORRIGIERTE View-Matrizen für Vulkan Cubemap
     std::array<glm::mat4, 6> getCubeFaceViews() const {
-        // Wichtig: Korrekte Up-Vektoren für jeden Face!
+        // Vulkan Cubemap Convention (Right-Handed, Y-Down in NDC)
         return {
-            glm::lookAt(_position, _position + glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)), // +X (right)
-            glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)), // -X (left)
-            glm::lookAt(_position, _position + glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec3(0.0f,  0.0f, 1.0f)), // +Y (top)
-            glm::lookAt(_position, _position + glm::vec3( 0.0f,-1.0f, 0.0f), glm::vec3(0.0f,  0.0f,-1.0f)), // -Y (bottom)
-            glm::lookAt(_position, _position + glm::vec3( 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)), // +Z (front)
-            glm::lookAt(_position, _position + glm::vec3( 0.0f, 0.0f,-1.0f), glm::vec3(0.0f, -1.0f, 0.0f))  // -Z (back)
+            // +X (Right)
+            glm::lookAt(_position, _position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            
+            // -X (Left)
+            glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            
+            // +Y (Top) - WICHTIG: Up-Vektor zeigt nach +Z
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+            
+            // -Y (Bottom) - WICHTIG: Up-Vektor zeigt nach -Z
+            glm::lookAt(_position, _position + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+            
+            // +Z (Front)
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            
+            // -Z (Back)
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
         };
     }
 
