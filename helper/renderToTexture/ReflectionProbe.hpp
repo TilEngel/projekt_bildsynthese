@@ -15,15 +15,14 @@ public:
     ReflectionProbe(VkDevice device, 
                    VkPhysicalDevice physicalDevice,
                    VkCommandPool commandPool,
-                   VkQueue graphicsQueue,
                    const glm::vec3& position,
                    uint32_t resolution = 512)
         : _device(device)
         , _physicalDevice(physicalDevice)
         , _commandPool(commandPool)
-        , _graphicsQueue(graphicsQueue)
         , _position(position)
         , _resolution(resolution)
+        , _commandBuffer(VK_NULL_HANDLE)
     {
         _renderTarget = std::make_unique<CubemapRenderTarget>(
             device, physicalDevice, resolution
@@ -82,21 +81,25 @@ public:
     }
 
     void cleanup() {
+        if(_device == VK_NULL_HANDLE){
+            return;
+        }
+        vkDeviceWaitIdle(_device);
         if (_commandBuffer != VK_NULL_HANDLE) {
             vkFreeCommandBuffers(_device, _commandPool, 1, &_commandBuffer);
             _commandBuffer = VK_NULL_HANDLE;
         }
         
         if (_renderTarget) {
-            _renderTarget->cleanup();
+            _renderTarget.reset();
         }
+        _device = VK_NULL_HANDLE;
     }
 
 private:
     VkDevice _device;
     VkPhysicalDevice _physicalDevice;
     VkCommandPool _commandPool;
-    VkQueue _graphicsQueue;
     
     glm::vec3 _position;
     uint32_t _resolution;

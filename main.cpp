@@ -224,7 +224,6 @@ int main() {
         device,
         physicalDevice,
         commandPool,
-        graphicsQueue,
         glm::vec3(5.0f, 2.5f, 0.0f),
         1024  // Auflösung
     );
@@ -502,7 +501,7 @@ int main() {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    // ###### Cleanup ###########
+    // ###### Cleanup in main ###########
     vkDeviceWaitIdle(device);
 
     // 1. Frames zerstören
@@ -532,7 +531,6 @@ int main() {
         }
     }
     if(reflectionProbe){
-        reflectionProbe->cleanup();
         delete reflectionProbe;
     }
 

@@ -1,6 +1,10 @@
 #include "CubemapRenderTarget.hpp"
 
 void CubemapRenderTarget::cleanup() {
+    if(_device == VK_NULL_HANDLE){
+        return;
+    }
+    vkDeviceWaitIdle(_device);
     if (_sampler != VK_NULL_HANDLE) {
         vkDestroySampler(_device, _sampler, nullptr);
         _sampler = VK_NULL_HANDLE;
@@ -9,9 +13,9 @@ void CubemapRenderTarget::cleanup() {
     for (auto fb : _framebuffers) {
         if (fb != VK_NULL_HANDLE) {
             vkDestroyFramebuffer(_device, fb, nullptr);
+            fb = VK_NULL_HANDLE;
         }
     }
-
     if (_renderPass != VK_NULL_HANDLE) {
         vkDestroyRenderPass(_device, _renderPass, nullptr);
         _renderPass = VK_NULL_HANDLE;
@@ -35,6 +39,7 @@ void CubemapRenderTarget::cleanup() {
     for (auto view : _faceViews) {
         if (view != VK_NULL_HANDLE) {
             vkDestroyImageView(_device, view, nullptr);
+            view = VK_NULL_HANDLE;
         }
     }
 
@@ -52,6 +57,7 @@ void CubemapRenderTarget::cleanup() {
         vkFreeMemory(_device, _cubemapMemory, nullptr);
         _cubemapMemory = VK_NULL_HANDLE;
     }
+    _device = VK_NULL_HANDLE;
 }
 
 void CubemapRenderTarget::createCubemapImage() {
