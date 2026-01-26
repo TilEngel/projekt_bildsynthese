@@ -22,6 +22,8 @@
 #include "helper/Frames/Camera.hpp"
 #include "helper/Compute/Snow.hpp"
 #include "helper/MirrorSystem.hpp"
+#include "helper/renderToTexture/CubemapRenderTarget.hpp"
+#include "helper/renderToTexture/ReflectionProbe.hpp"
 
 int main() {
     InitInstance inst;
@@ -51,9 +53,7 @@ int main() {
     );
     
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
-    if(device == VK_NULL_HANDLE){
-        std::cout<<"AAAAAHHHHHHHHAHAHAHAHAHAHAHAHAHA\n";
-    }
+   
     
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
@@ -134,13 +134,14 @@ int main() {
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
 
-
+    //Fliege, die die Kamera darstellt
     glm::mat4 modelCamera = glm::mat4(1.0f);
-  
-    RenderObject cam = factory.createLitObject(
+    RenderObject cam = factory.createGenericObject(
         "./models/fly.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
         "textures/black.png",
-        modelCamera, renderPass);
+        modelCamera, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
         scene->setRenderObject(cam);
         size_t camIndex = scene->getObjectCount()-1;
     
@@ -205,10 +206,43 @@ int main() {
         "shaders/test.vert.spv",
         "shaders/testapp.frag.spv",
         "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(ground);
-    
+    scene->setRenderObject(ground); 
 
-    // Schneeflocken ZULETZT hinzufügen
+    //Tisch unter der reflektierenden Kugel
+    glm::mat4 modelTable = glm::mat4(1.0f);
+    modelTable = glm::translate(modelTable, glm::vec3(5.0f, 1.0f,0.0f));
+    modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
+    RenderObject table = factory.createGenericObject("./models/table.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/table.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+
+    scene->setRenderObject(table);
+    
+    // Reflektierende (magische) Kugel
+    ReflectionProbe* reflectionProbe = new ReflectionProbe(
+        device,
+        physicalDevice,
+        commandPool,
+        glm::vec3(5.0f, 2.5f, 0.0f),
+        1024  // Auflösung
+    );
+    glm::mat4 modelReflective = glm::mat4(1.0f);
+    modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5f, 0.0f));
+    modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
+    
+    RenderObject reflectiveSphere = factory.createReflectiveObject(
+        "./models/sphere.obj",
+        reflectionProbe,
+        modelReflective,
+        renderPass
+    );
+    scene->setRenderObject(reflectiveSphere);
+    size_t reflectiveIndex = scene->getObjectCount() - 1;
+    scene->markObjectAsReflective(reflectiveIndex);
+    scene->setReflectionUpdateInterval(3);
+
+    // Schneeflocken zuletzt hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
         "textures/snowflake.png",
         renderPass,
@@ -407,6 +441,12 @@ int main() {
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
         scene->updateObject(dutchIndex, modelDutch);
 
+        //Kugel schwebt über Tisch
+        modelReflective = glm::mat4(1.0f);
+        modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5+ 0.25*sin(currentTime), 0.0f));
+        modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
+        scene->updateObject(reflectiveIndex, modelReflective);
+
 
         // Compute Shader für Schnee ausführen
         snow->waitForCompute();
@@ -451,7 +491,7 @@ int main() {
         }
 
         // Render
-        bool recreate = framesInFlight[currentFrame]->render(scene);
+        bool recreate = framesInFlight[currentFrame]->render(scene,reflectionProbe);
         if (recreate || window->wasResized()) {
             vkDeviceWaitIdle(device);
             swapChain->recreate();
@@ -461,7 +501,7 @@ int main() {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    // ###### Cleanup ###########
+    // ###### Cleanup in main ###########
     vkDeviceWaitIdle(device);
 
     // 1. Frames zerstören
@@ -490,6 +530,9 @@ int main() {
             uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
         }
     }
+    if(reflectionProbe){
+        delete reflectionProbe;
+    }
 
     // Reflektierte Objekte (teilen sich Ressourcen!)
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
@@ -508,7 +551,7 @@ int main() {
         }
     }
 
-    // 3. Vertex-Buffer UND Memory zerstören
+    //Vertex-Buffer & memory zerstören
     for (const auto& [buffer, memory] : uniqueVertexBuffers) {
         vkDestroyBuffer(device, buffer, nullptr);
         if (memory != VK_NULL_HANDLE) {
@@ -516,7 +559,7 @@ int main() {
         }
     }
 
-    // 4. Texturen zerstören
+    // Texturen zerstören
     for (Texture* tex : uniqueTextures) {
         if (tex) {
             tex->destroy();
@@ -524,7 +567,7 @@ int main() {
         }
     }
 
-    // 5. Pipelines zerstören
+    // Pipelines zerstören
     for (GraphicsPipeline* pipeline : uniquePipelines) {
         if (pipeline) {
             pipeline->destroy();
@@ -532,38 +575,38 @@ int main() {
         }
     }
 
-    // 6. Mirror-System
+    // Mirror-System
    delete mirrorSystem;
 
-    // 7. Snow
+    //Snow
     snow->destroy();
     delete snow;
 
-    // 8. Scene
+    //Scene
     delete scene;
 
-    // 9. Rendering Resources
+    //Rendering Resources
     delete framebuffers;
     delete depthBuffer;
     delete swapChain;
 
-    // 10. RenderPass
+    // RenderPass
     vkDestroyRenderPass(device, renderPass, nullptr);
 
-    // 11. Descriptor Resources
+    //Descriptor Resources
     inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyDescriptorSetLayout(device, lightingDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, litDescriptorSetLayout);
 
-    // 12. Command Pool
+    // Command Pool
     inst.destroyCommandPool(device, commandPool);
 
-    // 13. Device
+    //  Device
     inst.destroyDevice(device);
 
-    // 14. Instance-Level
+    //Instance-Level
     delete surface;
     inst.destroyInstance(instance);
     delete window;

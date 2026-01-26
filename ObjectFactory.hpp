@@ -9,6 +9,7 @@
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Compute/Snow.hpp"
 #include "helper/MirrorSystem.hpp"
+#include "helper/renderToTexture/ReflectionProbe.hpp"
 #include <array>
 
 
@@ -66,6 +67,8 @@ public:
     // Fullscreen Quad für Lighting Pass
     RenderObject createLightingQuad(VkRenderPass renderPass,
                                    VkDescriptorSetLayout lightingLayout);
+
+    RenderObject createReflectiveObject(const char* modelPath, ReflectionProbe* probe, const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
 private:
     VkPhysicalDevice _physicalDevice;

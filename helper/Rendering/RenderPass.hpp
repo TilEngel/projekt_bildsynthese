@@ -5,8 +5,8 @@
 
 class RenderPass {
 public:
-    //Erstellt den RenderPass, wie er nunmal für das Projekt gebraucht wird
-    //mit passenden Attachments, Subpasses, etc
+    //Erstellt den RenderPass, wie er für das Projekt mit deferred Rendering
+    //gebraucht wird mit passenden Attachments, Subpasses, etc
     VkRenderPass createRenderPass(VkDevice device, VkFormat colorFormat, VkFormat depthFormat) {
         // Attachment indices
         enum {

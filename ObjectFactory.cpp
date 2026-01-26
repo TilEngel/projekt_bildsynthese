@@ -48,47 +48,52 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
 
 RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::array<const char*, 6>& cubemapFaces) {
     std::vector<Vertex> vertices = {
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
 
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        // Left face (X-)
+        {{-1.0f, -1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
+        // Right face (X+)
+        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
+        // Front face (Z+)
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
 
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
+        // Top face (Y+)
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f}}
+        // Bottom face (Y-)
+        {{-1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f, -1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}
     };
 
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -126,13 +131,14 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
                                            VkBuffer particleBuffer, 
                                            VkDescriptorSetLayout snowDescriptorSetLayout) {
     std::vector<Vertex> vertices = {
-        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}},
-        {{ 0.1f, -0.1f, 0.0f}, {1.0f, 0.0f}},
-        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
+        // Quad in XY-Ebene, Normale zeigt in +Z
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 0.1f, -0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{ 0.1f,  0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
         
-        {{ 0.1f,  0.1f, 0.0f}, {1.0f, 1.0f}},
-        {{-0.1f,  0.1f, 0.0f}, {0.0f, 1.0f}},
-        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f}}
+        {{ 0.1f,  0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.1f,  0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-0.1f, -0.1f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}}
     };
 
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -253,13 +259,13 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
                                          VkRenderPass renderPass,
                                          PipelineType pipelineType) {
     std::vector<Vertex> vertices = {
-        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
-        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
         
-        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}}
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}
     };
 
     const char* fragShader;
@@ -359,12 +365,12 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
 {
     // Fullscreen quad - vertices generated in shader
     std::vector<Vertex> vertices = {
-        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{ 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ -1.0f,  -1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{1.0f,  1.0f, 0.0f}, {0.0f, 1.0f}},
-        {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}
     };
 
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -386,6 +392,46 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
     obj.pipeline = pipeline;
     obj.modelMatrix = glm::mat4(1.0f);
     obj.instanceCount = 1;
+
+    return obj;
+}
+
+RenderObject ObjectFactory::createReflectiveObject(
+    const char* modelPath,
+    ReflectionProbe* probe,
+    const glm::mat4& modelMatrix,
+    VkRenderPass renderPass)
+{
+    // Pipeline
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/renderToTexture.vert.spv",
+        "shaders/renderToTexture.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::STANDARD,
+        2
+    );
+
+    // Model laden
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
+   
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = probe->getCubemapView();
+    obj.textureSampler = probe->getCubemapSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.instanceCount = 1;
+    obj.texture = nullptr;
+
+    std::cout << "Reflective object created with cubemap" << std::endl;
 
     return obj;
 }
