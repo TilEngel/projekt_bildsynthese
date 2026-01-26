@@ -36,27 +36,26 @@ public:
         cleanup();
     }
 
-    // KORRIGIERTE View-Matrizen für Vulkan Cubemap
+    //View-Matrizen für Cubemap
     std::array<glm::mat4, 6> getCubeFaceViews() const {
-        // Vulkan Cubemap Convention (Right-Handed, Y-Down in NDC)
         return {
-            // +X (Right)
-            glm::lookAt(_position, _position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            // -X
+            glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
             
-            // -X (Left)
-            glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            // +X
+            glm::lookAt(_position, _position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
             
-            // +Y (Top) - WICHTIG: Up-Vektor zeigt nach +Z
-            glm::lookAt(_position, _position + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-            
-            // -Y (Bottom) - WICHTIG: Up-Vektor zeigt nach -Z
+            // -Y Up-Vektor nach -Z
             glm::lookAt(_position, _position + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
             
-            // +Z (Front)
-            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+            // +Y  Up-Vektor nach +Z
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
             
-            // -Z (Back)
-            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
+            // -Z
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+            
+            // +Z
+            glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
         };
     }
 

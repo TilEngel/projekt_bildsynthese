@@ -216,11 +216,21 @@ int main() {
         glm::vec3(5.0f, 3.5f, 0.0f),  // Position (etwas über dem Gnom)
         1024  // Auflösung (256, 512 oder 1024)
     );
+
+    glm::mat4 modelTable = glm::mat4(1.0f);
+    modelTable = glm::translate(modelTable, glm::vec3(5.0f, 1.0f,0.0f));
+    modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
+    RenderObject table = factory.createGenericObject("./models/table.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/wooden_bowl.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+
+    scene->setRenderObject(table);
     
     // Reflektierendes Objekt erstellen (z.B. eine Kugel)
     glm::mat4 modelReflective = glm::mat4(1.0f);
-    modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 3.5f, 0.0f));
-    modelReflective = glm::scale(modelReflective, glm::vec3(0.5f, 0.5f, 0.5f));
+    modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5f, 0.0f));
+    modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
     //modelReflective = glm::rotate(modelReflective, glm::radians(45.0f), glm::vec3(1.0,1.0,1.0));
     
     RenderObject reflectiveSphere = factory.createReflectiveObject(
@@ -433,6 +443,12 @@ int main() {
         modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
         scene->updateObject(dutchIndex, modelDutch);
+
+        //Kugel schwebt über Tisch
+        modelReflective = glm::mat4(1.0f);
+        modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5+ 0.25*sin(currentTime), 0.0f));
+        modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
+        scene->updateObject(reflectiveIndex, modelReflective);
 
 
         // Compute Shader für Schnee ausführen
