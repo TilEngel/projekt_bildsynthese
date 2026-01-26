@@ -87,16 +87,13 @@ public:
     void renderDeferredDepthPass(Scene* scene);
     void renderDeferredGBufferPass(Scene* scene);
     void renderDeferredLightingPass(Scene* scene);
+
     void renderForwardObjects(Scene* scene);
+    //rendert die Cubemap (render-to-texture)
     void renderCubemap(Scene* scene, ReflectionProbe* probe);
-    //Helper: Rendert Objekte für ein Cubemap-Face
+    //Rendert Objekte in den Cubemap Faces
     void renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
                                  size_t reflectiveObjectIndex);
-
-    // Helper Methods
-    void renderSingleObject(const RenderObject& obj, size_t normalIdx = 0, 
-                           size_t snowIdx = 0, size_t litIdx = 0);
-   
 
     // Sync Objects
     void createSyncObjects();

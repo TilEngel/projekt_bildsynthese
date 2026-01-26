@@ -1181,6 +1181,7 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
     // UBO wiederherstellen
     std::memcpy(_uniformBufferMapped, &originalUBO, sizeof(UniformBufferObject));
 }
+
 void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
                                     size_t reflectiveObjectIndex) {
     // Zähler für Descriptor Sets

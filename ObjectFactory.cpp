@@ -402,55 +402,7 @@ RenderObject ObjectFactory::createReflectiveObject(
     const glm::mat4& modelMatrix,
     VkRenderPass renderPass)
 {
-    std::vector<Vertex> vertices = {
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-
-        // Left face (X-)
-        {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-        // Right face (X+)
-        {{ 1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-
-        // Front face (Z+)
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-
-        // Top face (Y+)
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f,  1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f,  1.0f, -1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-
-        // Bottom face (Y-)
-        {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}}
-    };
-    // Pipeline mit Standard Descriptor Layout (UBO + Sampler)
+    // Pipeline
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
@@ -458,27 +410,26 @@ RenderObject ObjectFactory::createReflectiveObject(
         "shaders/renderToTexture.vert.spv",
         "shaders/renderToTexture.frag.spv",
         renderPass,
-        _descriptorSetLayout,  // Standard Layout
+        _descriptorSetLayout,
         PipelineType::STANDARD,
-        2  // Subpass 2 (Forward Rendering)
+        2
     );
 
     // Model laden
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
 
-    std::vector<Vertex> vertices2;
-    _loader.objLoader(modelPath, vertices2);
-
-    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices2);
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
    
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
-    obj.vertexCount = static_cast<uint32_t>(vertices2.size());
-    obj.textureImageView = probe->getCubemapView();    // Cubemap View!
-    obj.textureSampler = probe->getCubemapSampler();   // Cubemap Sampler!
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = probe->getCubemapView();
+    obj.textureSampler = probe->getCubemapSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
     obj.instanceCount = 1;
-    obj.texture = nullptr;  // Kein Texture-Objekt, da extern
+    obj.texture = nullptr;
 
     std::cout << "Reflective object created with cubemap" << std::endl;
 

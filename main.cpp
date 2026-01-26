@@ -206,46 +206,44 @@ int main() {
         "shaders/test.vert.spv",
         "shaders/testapp.frag.spv",
         "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(ground);
+    scene->setRenderObject(ground); 
 
-    ReflectionProbe* reflectionProbe = new ReflectionProbe(
-        device,
-        physicalDevice,
-        commandPool,
-        graphicsQueue,
-        glm::vec3(5.0f, 3.5f, 0.0f),  // Position (etwas über dem Gnom)
-        1024  // Auflösung (256, 512 oder 1024)
-    );
-
+    //Tisch unter der reflektierenden Kugel
     glm::mat4 modelTable = glm::mat4(1.0f);
     modelTable = glm::translate(modelTable, glm::vec3(5.0f, 1.0f,0.0f));
     modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
     RenderObject table = factory.createGenericObject("./models/table.obj",
         "shaders/test.vert.spv",
         "shaders/testapp.frag.spv",
-        "textures/wooden_bowl.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        "textures/table.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
 
     scene->setRenderObject(table);
     
-    // Reflektierendes Objekt erstellen (z.B. eine Kugel)
+    // Reflektierende (magische) Kugel
+    ReflectionProbe* reflectionProbe = new ReflectionProbe(
+        device,
+        physicalDevice,
+        commandPool,
+        graphicsQueue,
+        glm::vec3(5.0f, 2.5f, 0.0f),
+        1024  // Auflösung
+    );
     glm::mat4 modelReflective = glm::mat4(1.0f);
     modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5f, 0.0f));
     modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
-    //modelReflective = glm::rotate(modelReflective, glm::radians(45.0f), glm::vec3(1.0,1.0,1.0));
     
     RenderObject reflectiveSphere = factory.createReflectiveObject(
-        "./models/sphere.obj",  // Oder ein anderes Modell
+        "./models/sphere.obj",
         reflectionProbe,
         modelReflective,
         renderPass
     );
     scene->setRenderObject(reflectiveSphere);
     size_t reflectiveIndex = scene->getObjectCount() - 1;
-    
     scene->markObjectAsReflective(reflectiveIndex);
     scene->setReflectionUpdateInterval(3);
 
-    // Schneeflocken ZULETZT hinzufügen
+    // Schneeflocken zuletzt hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
         "textures/snowflake.png",
         renderPass,
@@ -555,7 +553,7 @@ int main() {
         }
     }
 
-    // 3. Vertex-Buffer UND Memory zerstören
+    //Vertex-Buffer & memory zerstören
     for (const auto& [buffer, memory] : uniqueVertexBuffers) {
         vkDestroyBuffer(device, buffer, nullptr);
         if (memory != VK_NULL_HANDLE) {
@@ -563,7 +561,7 @@ int main() {
         }
     }
 
-    // 4. Texturen zerstören
+    // Texturen zerstören
     for (Texture* tex : uniqueTextures) {
         if (tex) {
             tex->destroy();
@@ -571,7 +569,7 @@ int main() {
         }
     }
 
-    // 5. Pipelines zerstören
+    // Pipelines zerstören
     for (GraphicsPipeline* pipeline : uniquePipelines) {
         if (pipeline) {
             pipeline->destroy();
@@ -579,38 +577,38 @@ int main() {
         }
     }
 
-    // 6. Mirror-System
+    // Mirror-System
    delete mirrorSystem;
 
-    // 7. Snow
+    //Snow
     snow->destroy();
     delete snow;
 
-    // 8. Scene
+    //Scene
     delete scene;
 
-    // 9. Rendering Resources
+    //Rendering Resources
     delete framebuffers;
     delete depthBuffer;
     delete swapChain;
 
-    // 10. RenderPass
+    // RenderPass
     vkDestroyRenderPass(device, renderPass, nullptr);
 
-    // 11. Descriptor Resources
+    //Descriptor Resources
     inst.destroyDescriptorPool(device, descriptorPool);
     inst.destroyDescriptorSetLayout(device, lightingDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, descriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, snowDescriptorSetLayout);
     inst.destroyDescriptorSetLayout(device, litDescriptorSetLayout);
 
-    // 12. Command Pool
+    // Command Pool
     inst.destroyCommandPool(device, commandPool);
 
-    // 13. Device
+    //  Device
     inst.destroyDevice(device);
 
-    // 14. Instance-Level
+    //Instance-Level
     delete surface;
     inst.destroyInstance(instance);
     delete window;

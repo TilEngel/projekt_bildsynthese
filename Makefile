@@ -58,6 +58,8 @@ SRC = \
     helper/Frames/Frame.cpp \
     helper/Texture/CubeMap.cpp\
     helper/Compute/Snow.cpp\
+    helper/renderToTexture/ReflectionProbe.cpp\
+    helper/renderToTexture/CubemapRenderTarget.cpp\
     helper/MirrorSystem.cpp
     
 
