@@ -11,7 +11,7 @@
 #include "helper/MirrorSystem.hpp"
 #include "helper/renderToTexture/ReflectionProbe.hpp"
 #include <array>
-
+#include <random>
 
 class ObjectFactory {
 public:
@@ -70,6 +70,7 @@ public:
 
     RenderObject createReflectiveObject(const char* modelPath, ReflectionProbe* probe, const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
+    RenderObject createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass);
 private:
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;
@@ -82,4 +83,13 @@ private:
 
     InitBuffer _buff;
     LoadObj _loader;
+    std::array<const char*, 6> _graffittiTextures = {
+        "textures/graffitti/161.png",
+        "textures/graffitti/cg1.png",
+        "textures/graffitti/fcknzs.png",
+        "textures/graffitti/hsh.png",
+        "textures/graffitti/ln.png",
+        "textures/graffitti/sonne.png",
+        
+    };
 };

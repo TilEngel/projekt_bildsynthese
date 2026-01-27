@@ -113,7 +113,7 @@ int main() {
 
     // Licht 1 (Beim Zwerg)
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(-2.3f, 3.0f, 0.2f),
+        glm::vec3(1.4f, 4.2f, -19.5f),
         glm::vec3(1.0f, 0.5f, 0.5f),
         5.0f,
         10.0f,
@@ -125,10 +125,10 @@ int main() {
     // Licht 2 (Bei der Lampe)
     //glm::vec3(-8.2f, 12.2f, -6.5f)
     LightSourceObject light2 = factory.createLightSource(
-        glm::vec3(-8.0f, 12.2f, -6.0f),
-        glm::vec3(0.0f, 0.1f, 0.7f),
-        5.0f,
-        300.0f,
+        glm::vec3(-10.0f, 14.0f, -16.0f),
+        glm::vec3(0.7f, 0.7f, 0.7f),
+        3.0f,
+        1000.0f,
         renderPass
     );
     scene->addLightSource(light2);
@@ -148,8 +148,8 @@ int main() {
 
     //Monobloc Gartenstuhl
     glm::mat4 modelChair = glm::mat4(1.0f);
-    modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
-    modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
+    modelChair = glm::translate(modelChair, glm::vec3(2.0f, 0.0f, -20.0f));
+    modelChair = glm::scale(modelChair, glm::vec3(6.0f, 6.0f, 6.0f));
     DeferredRenderObject chair = factory.createDeferredObject(
         "./models/plastic_monobloc_chair.obj",
         "textures/plastic_monobloc_chair.jpg",
@@ -170,8 +170,8 @@ int main() {
 
     //Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
-    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
-    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
+    modelGnome = glm::translate(modelGnome, glm::vec3(2.0f, 2.75f, -20.0f));
+    modelGnome = glm::scale(modelGnome, glm::vec3(6.0f, 6.0f, 6.0f));
     DeferredRenderObject gnome = factory.createDeferredObject(
         "./models/garden_gnome.obj",
         "textures/garden_gnome.jpg",
@@ -181,31 +181,54 @@ int main() {
 
     // Sonnenschirm
     glm::mat4 modelUmbrella = glm::mat4(1.0f);
-    modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
-    modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
+    modelUmbrella = glm::translate(modelUmbrella, glm::vec3(5.0f, 0.0f, -19.0f));
+    modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.08f, 0.08f, 0.08f));
     modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
-    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv",
-        "textures/sonnenschirm.jpg", modelUmbrella, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(umbrella);
+    DeferredRenderObject umbrella = factory.createDeferredObject("./models/sonnenschirm.obj",
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
+    scene->setDeferredRenderObject(umbrella);
     size_t umbrellaIndex = scene->getObjectCount() - 1;
 
     // Lampe
     glm::mat4 modelLamp = glm::mat4(1.0f);
-    modelLamp = glm::translate(modelLamp, glm::vec3(-10.0f, 0.0f, -10.0f));
-    modelLamp = glm::scale(modelLamp, glm::vec3(20.0f, 20.0f, 20.0f));
-    modelLamp = glm::rotate(modelLamp, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
-    DeferredRenderObject lamp = factory.createDeferredObject("./models/desk_lamp.obj",
-        "textures/desk_lamp.jpg", modelLamp, renderPass);
+    modelLamp = glm::translate(modelLamp, glm::vec3(-10.0f, 3.0f, -20.0f));
+    modelLamp = glm::scale(modelLamp, glm::vec3(0.01f, 0.01f, 0.01f));
+    modelLamp = glm::rotate(modelLamp, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    DeferredRenderObject lamp = factory.createDeferredObject("./models/StreetLamp.obj",
+        "textures/mirror.jpg", modelLamp, renderPass);
     scene->setDeferredRenderObject(lamp);
     
+    //Graffitti
+    glm::mat4 modelGraffitti = glm::mat4(1.0f);
+    modelGraffitti = glm::translate(modelGraffitti, glm::vec3(9.0f,2.0f,15.0f));
+    modelGraffitti = glm::rotate(modelGraffitti, glm::radians(180.0f), glm::vec3(1.0f,0.0f,1.0f));
+    RenderObject graffitti = factory.createGraffitti(modelGraffitti, renderPass);
+    scene->setRenderObject(graffitti);
+
+    //barrier
+    glm::mat4 modelBarrier = glm::mat4(1.0f);
+
+    modelBarrier = glm::translate(modelBarrier, glm::vec3(9.6f,0.0f,15.0f));
+    modelBarrier = glm::scale(modelBarrier, glm::vec3(3.0f,3.0f,3.0f));
+    modelBarrier = glm::rotate(modelBarrier, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    modelBarrier = glm::rotate(modelBarrier, glm::radians(4.0f), glm::vec3(1.0f,0.0f,0.0f));
+    RenderObject barrier = factory.createGenericObject(
+        "./models/barrier.obj",
+        "shaders/test.vert.spv",
+        "shaders/testapp.frag.spv",
+        "textures/barrier.jpg",
+        modelBarrier, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+    scene->setRenderObject(barrier);
 
     // Boden
     glm::mat4 modelGround = glm::mat4(1.0f);
-    modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
-    RenderObject ground = factory.createGenericObject("./models/wooden_bowl.obj",
+    modelGround = glm::scale(modelGround, glm::vec3(6.0f, 6.0f, 6.0f));
+    //modelGround = glm::rotate(modelGround, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    modelGround = glm::translate(modelGround, glm::vec3(0.0,-1.12f,0.0f));
+    RenderObject ground = factory.createGenericObject("./models/untitled.obj",
         "shaders/test.vert.spv",
         "shaders/testapp.frag.spv",
-        "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        "textures/street.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
     scene->setRenderObject(ground); 
 
     //Tisch unter der reflektierenden Kugel

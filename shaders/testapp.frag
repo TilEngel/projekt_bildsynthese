@@ -8,6 +8,10 @@ layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    vec3 texColor = texture(tex, texCoord).rgb;
-    outColor = vec4(texColor, 1.0);
+    vec4 texColor = texture(tex, texCoord);
+    //Für transparente Stellen
+    if (texColor.a < 0.1) {
+        discard;
+    }
+    outColor = vec4(texColor);
 }

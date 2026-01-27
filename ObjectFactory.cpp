@@ -435,3 +435,52 @@ RenderObject ObjectFactory::createReflectiveObject(
 
     return obj;
 }
+
+RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass){
+    std::vector<Vertex> vertices = {
+        {{ 1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},  
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}
+        
+    };
+
+    //zufällige Textur auswählen
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> distr(0, _graffittiTextures.size() - 1);
+    size_t randomIndex = distr(gen);
+    const char* texture = _graffittiTextures[randomIndex];
+    
+    //Pipeline erstellen
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/testapp.vert.spv",
+        "shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::STANDARD,2
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice,_device,_commandPool,_graphicsQueue,vertices);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texture);
+
+    //RenderObject
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
+    obj.instanceCount = 1;
+
+    return obj;
+}

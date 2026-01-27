@@ -1012,7 +1012,7 @@ void Frame::updateUniformBuffer(Camera* camera) {
     ubo.proj = glm::perspective(
         glm::radians(camera->getZoom()),
         width / height,
-        0.1f, 100.0f
+        0.1f, 200.0f //near & far - plane
     );
     ubo.proj[1][1] *= -1.0f;
     ubo.cameraPos = camera->getPosition();

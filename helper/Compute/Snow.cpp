@@ -163,14 +163,14 @@ void Snow::createStorageBuffers() {
     std::mt19937 gen(rd());
     
     // Schneeflocken verteilen sich über die Szene
-    std::uniform_real_distribution<float> posX(-2.8f, 0.8f);
-    std::uniform_real_distribution<float> posY(5.0f, 5.5f);  //Starten oben
-    std::uniform_real_distribution<float> posZ(-2.0f, 1.0f);
+    std::uniform_real_distribution<float> posX(1.2f, 8.2f);
+    std::uniform_real_distribution<float> posY(10.0f, 9.0f);  //Starten oben
+    std::uniform_real_distribution<float> posZ(-23.0f,-17.0f);
     
     // Langsame Fallgeschwindigkeit mit leichter Variation
-    std::uniform_real_distribution<float> velX(-0.008f, 0.008f);
-    std::uniform_real_distribution<float> velY(-0.01f, -0.0005f);  //langsam nach unten
-    std::uniform_real_distribution<float> velZ(-0.008f, 0.008f);
+    std::uniform_real_distribution<float> velX(-0.025f, 0.025f);
+    std::uniform_real_distribution<float> velY(-0.0325f, -0.0002f);  //langsam nach unten
+    std::uniform_real_distribution<float> velZ(-0.015f, 0.015f);
 
     for (uint32_t i = 0; i < NUMBER_PARTICLES; ++i) {
         particles[i].position = glm::vec3(posX(gen), posY(gen), posZ(gen));
