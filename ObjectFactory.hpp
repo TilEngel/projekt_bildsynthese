@@ -28,12 +28,9 @@ public:
     
     //erstellt generische Objekte (Keine Beleuchtung, keine sonstigen gimmicks)
     RenderObject createGenericObject(const char* modelPath,
-                                         const char* vertShaderPath,
-                                         const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass,
-                                         PipelineType type, uint32_t subpassIndex);
+                                         VkRenderPass renderPass);
 
     // Neue Methode für deferred gerenderte Objekte
     DeferredRenderObject createDeferredObject(

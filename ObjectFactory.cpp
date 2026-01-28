@@ -6,24 +6,20 @@
 #include <vulkan/vulkan_core.h>
 
 RenderObject ObjectFactory::createGenericObject(const char* modelPath,
-                                         const char* vertShaderPath,
-                                         const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass,
-                                         PipelineType type,
-                                        uint32_t subpassIndex)
+                                         VkRenderPass renderPass)
 {
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
         _depthFormat,
-        vertShaderPath, 
-        fragShaderPath,
+        "./shaders/testapp.vert.spv", 
+        "./shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        type,
-        subpassIndex
+        PipelineType::STANDARD,
+        2
     );
 
     std::vector<Vertex> vertices;

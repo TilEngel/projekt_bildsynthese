@@ -138,10 +138,8 @@ int main() {
     glm::mat4 modelCamera = glm::mat4(1.0f);
     RenderObject cam = factory.createGenericObject(
         "./models/fly.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
         "textures/black.png",
-        modelCamera, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        modelCamera, renderPass);
         scene->setRenderObject(cam);
         size_t camIndex = scene->getObjectCount()-1;
     
@@ -161,10 +159,8 @@ int main() {
     glm::mat4 modelDutch = glm::mat4(1.0f);
     RenderObject dutch = factory.createGenericObject(
         "./models/flying_dutchman.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
         "textures/duck.jpg",
-        modelDutch, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        modelDutch, renderPass);
     scene->setRenderObject(dutch);
     size_t dutchIndex = scene->getObjectCount() - 1;
 
@@ -214,10 +210,8 @@ int main() {
     modelBarrier = glm::rotate(modelBarrier, glm::radians(4.0f), glm::vec3(1.0f,0.0f,0.0f));
     RenderObject barrier = factory.createGenericObject(
         "./models/barrier.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
         "textures/barrier.jpg",
-        modelBarrier, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        modelBarrier, renderPass);
     scene->setRenderObject(barrier);
 
     // Straße
@@ -226,9 +220,7 @@ int main() {
     //modelGround = glm::rotate(modelGround, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
     modelStreet = glm::translate(modelStreet, glm::vec3(0.0,-1.12f,0.0f));
     RenderObject street = factory.createGenericObject("./models/untitled.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/street.jpg", modelStreet, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        "textures/street.jpg", modelStreet, renderPass);
     scene->setRenderObject(street); 
     
 
@@ -239,9 +231,7 @@ int main() {
     modelGround = glm::rotate(modelGround, glm::radians(90.0f), glm::vec3(0.05f,1.0f,0.05f));
     modelGround = glm::translate(modelGround, glm::vec3(0.0,-6.5f,0.0f));
     RenderObject ground = factory.createGenericObject("./models/Desert.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/desert.png", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        "textures/desert.png", modelGround, renderPass);
     scene->setRenderObject(ground); 
 
     //Tisch unter der reflektierenden Kugel
@@ -249,9 +239,7 @@ int main() {
     modelTable = glm::translate(modelTable, glm::vec3(-15.0f, -1.0f,-40.0f));
     modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
     RenderObject table = factory.createGenericObject("./models/table.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/table.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        "textures/table.jpg", modelTable, renderPass);
 
     scene->setRenderObject(table);
 
@@ -272,26 +260,12 @@ int main() {
 
     glm::mat4 model = glm::mat4(1.0f);
 
-    // Position im Kreis
     model = glm::translate(model, glm::vec3(x, center.y, z));
-
-    // Optional: Kaktus schaut zur Mitte
     model = glm::rotate(model, -angle + glm::half_pi<float>(),
                          glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // Basis-Transform anwenden
     model *= baseKaktus;
 
-    RenderObject kaktus = factory.createGenericObject(
-        "./models/cactus.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/cactus.jpg",
-        model,
-        renderPass,
-        PipelineType::STANDARD,
-        static_cast<uint32_t>(SubpassIndex::LIGHTING)
-    );
+    RenderObject kaktus = factory.createGenericObject("./models/cactus.obj","textures/cactus.jpg",model,renderPass);
 
     scene->setRenderObject(kaktus);
 }
