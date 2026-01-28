@@ -53,7 +53,7 @@ public:
     
                        
     //Erstellt Punktlichter 
-    LightSourceObject createLightSource(const glm::vec3& position,
+    LightSourceObject createLightSource(const glm::mat4& model,
                                        const glm::vec3& color,
                                        float intensity,
                                        float radius,

@@ -168,11 +168,12 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
     return obj;
 }
 
-LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
+LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
                                                 const glm::vec3& color,
                                                 float intensity,
                                                 float radius,
                                                 VkRenderPass renderPass) {
+    glm::vec3 position = glm::vec3(model[3]);
     LightSourceObject light;
     light.position = position;
     light.color = color;
@@ -199,7 +200,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
                               "textures/white.png");
     
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 modelMatrix = model;
     modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f));
     
     light.renderObject.vertexBuffer = vertexBuffer;
