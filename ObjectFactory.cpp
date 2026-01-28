@@ -396,11 +396,7 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
     return obj;
 }
 
-RenderObject ObjectFactory::createReflectiveObject(
-    const char* modelPath,
-    ReflectionProbe* probe,
-    const glm::mat4& modelMatrix,
-    VkRenderPass renderPass)
+RenderObject ObjectFactory::createReflectiveObject(const char* modelPath,ReflectionProbe* probe,const glm::mat4& modelMatrix,VkRenderPass renderPass)
 {
     // Pipeline
     GraphicsPipeline* pipeline = new GraphicsPipeline(
