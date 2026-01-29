@@ -22,6 +22,6 @@ CubeMap                 helper/Texture/CubeMap, skybox-Shader, Erstellung in mai
 MipMaps                 helper/Texture/Texture 
 Mehrere Pipelines       ObjectFactory erzeugt für jedes Objekt eine Pipeline
 Deferred Shading        Objekte xy werden deferred gerendert, shaders/depth_only, gbuffer & lighting Shader, RenderPass & GraphicsPipeline
-Spiegelung der Szene    
+Spiegelung der Szene    Die "magische" Kugel im Kaktuskreis verwendet render-to-texture helper/renderToTexture/..
 Compute Shader          In Szene für Schnee verwendet, helper/Compute/Snow, snow-Shader, Erstellung in main.cpp
 Stencil Buffer          In Szene für Spiegel verwendet, helper/Mirrorsystem, Erstellung in main.cpp

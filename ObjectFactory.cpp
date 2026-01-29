@@ -181,7 +181,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
     light.radius = radius;
     
     std::vector<Vertex> sphereVertices;
-    _loader.objLoader("models/teapot.obj", sphereVertices);
+    _loader.objLoader("models/lightbulb.obj", sphereVertices);
     
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
@@ -198,10 +198,9 @@ LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
                                                     _commandPool, _graphicsQueue, sphereVertices);
     
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
-                              "textures/white.png");
+                              "textures/lightbulb.jpg");
     
     glm::mat4 modelMatrix = model;
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f));
     
     light.renderObject.vertexBuffer = vertexBuffer;
     light.renderObject.vertexCount = static_cast<uint32_t>(sphereVertices.size());
