@@ -11,7 +11,7 @@
 #include "helper/MirrorSystem.hpp"
 #include "helper/renderToTexture/ReflectionProbe.hpp"
 #include <array>
-
+#include <random>
 
 class ObjectFactory {
 public:
@@ -28,12 +28,9 @@ public:
     
     //erstellt generische Objekte (Keine Beleuchtung, keine sonstigen gimmicks)
     RenderObject createGenericObject(const char* modelPath,
-                                         const char* vertShaderPath,
-                                         const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass,
-                                         PipelineType type, uint32_t subpassIndex);
+                                         VkRenderPass renderPass);
 
     // Neue Methode für deferred gerenderte Objekte
     DeferredRenderObject createDeferredObject(
@@ -56,7 +53,7 @@ public:
     
                        
     //Erstellt Punktlichter 
-    LightSourceObject createLightSource(const glm::vec3& position,
+    LightSourceObject createLightSource(const glm::mat4& model,
                                        const glm::vec3& color,
                                        float intensity,
                                        float radius,
@@ -70,6 +67,7 @@ public:
 
     RenderObject createReflectiveObject(const char* modelPath, ReflectionProbe* probe, const glm::mat4& modelMatrix, VkRenderPass renderPass);
 
+    RenderObject createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass);
 private:
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;
@@ -82,4 +80,13 @@ private:
 
     InitBuffer _buff;
     LoadObj _loader;
+    std::array<const char*, 6> _graffittiTextures = {
+        "textures/graffitti/161.png",
+        "textures/graffitti/cg1.png",
+        "textures/graffitti/fcknzs.png",
+        "textures/graffitti/hsh.png",
+        "textures/graffitti/ln.png",
+        "textures/graffitti/sonne.png",
+        
+    };
 };

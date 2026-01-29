@@ -6,24 +6,20 @@
 #include <vulkan/vulkan_core.h>
 
 RenderObject ObjectFactory::createGenericObject(const char* modelPath,
-                                         const char* vertShaderPath,
-                                         const char* fragShaderPath,
                                          const char* texturePath,
                                          const glm::mat4& modelMatrix, 
-                                         VkRenderPass renderPass,
-                                         PipelineType type,
-                                        uint32_t subpassIndex)
+                                         VkRenderPass renderPass)
 {
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
         _colorFormat,
         _depthFormat,
-        vertShaderPath, 
-        fragShaderPath,
+        "./shaders/testapp.vert.spv", 
+        "./shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        type,
-        subpassIndex
+        PipelineType::STANDARD,
+        2
     );
 
     std::vector<Vertex> vertices;
@@ -172,11 +168,12 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
     return obj;
 }
 
-LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
+LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
                                                 const glm::vec3& color,
                                                 float intensity,
                                                 float radius,
                                                 VkRenderPass renderPass) {
+    glm::vec3 position = glm::vec3(model[3]);
     LightSourceObject light;
     light.position = position;
     light.color = color;
@@ -184,7 +181,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
     light.radius = radius;
     
     std::vector<Vertex> sphereVertices;
-    _loader.objLoader("models/teapot.obj", sphereVertices);
+    _loader.objLoader("models/lightbulb.obj", sphereVertices);
     
     GraphicsPipeline* pipeline = new GraphicsPipeline(
         _device,
@@ -201,10 +198,9 @@ LightSourceObject ObjectFactory::createLightSource(const glm::vec3& position,
                                                     _commandPool, _graphicsQueue, sphereVertices);
     
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, 
-                              "textures/white.png");
+                              "textures/lightbulb.jpg");
     
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), position);
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.02f));
+    glm::mat4 modelMatrix = model;
     
     light.renderObject.vertexBuffer = vertexBuffer;
     light.renderObject.vertexCount = static_cast<uint32_t>(sphereVertices.size());
@@ -396,11 +392,7 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
     return obj;
 }
 
-RenderObject ObjectFactory::createReflectiveObject(
-    const char* modelPath,
-    ReflectionProbe* probe,
-    const glm::mat4& modelMatrix,
-    VkRenderPass renderPass)
+RenderObject ObjectFactory::createReflectiveObject(const char* modelPath,ReflectionProbe* probe,const glm::mat4& modelMatrix,VkRenderPass renderPass)
 {
     // Pipeline
     GraphicsPipeline* pipeline = new GraphicsPipeline(
@@ -432,6 +424,55 @@ RenderObject ObjectFactory::createReflectiveObject(
     obj.texture = nullptr;
 
     std::cout << "Reflective object created with cubemap" << std::endl;
+
+    return obj;
+}
+
+RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass){
+    std::vector<Vertex> vertices = {
+        {{ 1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+
+        {{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+        {{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},  
+        {{ 1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}
+        
+    };
+
+    //zufällige Textur auswählen
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> distr(0, _graffittiTextures.size() - 1);
+    size_t randomIndex = distr(gen);
+    const char* texture = _graffittiTextures[randomIndex];
+    
+    //Pipeline erstellen
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "shaders/testapp.vert.spv",
+        "shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::STANDARD,2
+    );
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice,_device,_commandPool,_graphicsQueue,vertices);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texture);
+
+    //RenderObject
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
+    obj.instanceCount = 1;
 
     return obj;
 }

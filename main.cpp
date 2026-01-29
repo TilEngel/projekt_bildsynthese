@@ -25,9 +25,210 @@
 #include "helper/renderToTexture/CubemapRenderTarget.hpp"
 #include "helper/renderToTexture/ReflectionProbe.hpp"
 
+size_t streetIndex;
+size_t barrierIndex;
+size_t graffittiIndex;
+size_t kastenIndex;
+size_t busIndex;
+
+void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory factory){
+    // Skybox
+    std::array<const char*, 6> skyboxFaces = {
+        "textures/skybox/right.jpg",
+        "textures/skybox/left.jpg",
+        "textures/skybox/top.jpg",
+        "textures/skybox/bottom.jpg",
+        "textures/skybox/front.jpg",
+        "textures/skybox/back.jpg"
+    };
+    RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
+    scene->setRenderObject(skybox);
+
+    //Monobloc Gartenstuhl
+    glm::mat4 modelChair = glm::mat4(1.0f);
+    modelChair = glm::translate(modelChair, glm::vec3(2.0f, -0.8f, -20.0f));
+    modelChair = glm::scale(modelChair, glm::vec3(6.0f, 6.0f, 6.0f));
+    DeferredRenderObject chair = factory.createDeferredObject(
+        "./models/plastic_monobloc_chair.obj", "textures/plastic_monobloc_chair.jpg",modelChair, renderPass);
+    scene->setDeferredRenderObject(chair);
+    size_t chairIndex = scene->getObjectCount() - 1;
+
+    //Gartenzwerg
+    glm::mat4 modelGnome = glm::mat4(1.0f);
+    modelGnome = glm::translate(modelGnome, glm::vec3(2.0f, 1.95f, -20.0f));
+    modelGnome = glm::scale(modelGnome, glm::vec3(6.0f, 6.0f, 6.0f));
+    DeferredRenderObject gnome = factory.createDeferredObject(
+        "./models/garden_gnome.obj","textures/garden_gnome.jpg", modelGnome, renderPass);
+    scene->setDeferredRenderObject(gnome);
+    size_t gnomeIndex = scene->getObjectCount() - 1;
+
+    // Lampe
+    glm::mat4 modelLamp = glm::mat4(1.0f);
+    modelLamp = glm::translate(modelLamp, glm::vec3(-6.0f, 2.8f, -20.0f));
+    modelLamp = glm::scale(modelLamp, glm::vec3(0.01f, 0.01f, 0.01f));
+    modelLamp = glm::rotate(modelLamp, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    DeferredRenderObject lamp = factory.createDeferredObject("./models/StreetLamp.obj",
+        "textures/mirror.jpg", modelLamp, renderPass);
+    scene->setDeferredRenderObject(lamp);
+
+    //Normal beleuchtete Counterparts
+        //Gartenzwerg
+    glm::mat4 modelGnome2 = glm::mat4(1.0f);
+    modelGnome2 = glm::translate(modelGnome2, glm::vec3(8.0f, 1.95f, -20.0f));
+    modelGnome2 = glm::scale(modelGnome2, glm::vec3(6.0f, 6.0f, 6.0f));
+    RenderObject gnome2 = factory.createLitObject(
+        "./models/garden_gnome.obj", "textures/garden_gnome.jpg",modelGnome2, renderPass);
+    scene->setRenderObject(gnome2);
+
+        //Monobloc Gartenstuhl
+    glm::mat4 modelChair2 = glm::mat4(1.0f);
+    modelChair2 = glm::translate(modelChair2, glm::vec3(8.0f, -0.8f, -20.0f));
+    modelChair2 = glm::scale(modelChair2, glm::vec3(6.0f, 6.0f, 6.0f));
+    RenderObject chair2 = factory.createLitObject(
+        "./models/plastic_monobloc_chair.obj","textures/plastic_monobloc_chair.jpg",modelChair2, renderPass);
+    scene->setRenderObject(chair2);
+
+        // Lampe
+    glm::mat4 modelLamp2 = glm::mat4(1.0f);
+    modelLamp2 = glm::translate(modelLamp2, glm::vec3(16.0f, 2.8f, -20.0f));
+    modelLamp2 = glm::scale(modelLamp2, glm::vec3(0.01f, 0.01f, 0.01f));
+    modelLamp2 = glm::rotate(modelLamp2, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    RenderObject lamp2 = factory.createLitObject("./models/StreetLamp.obj",
+        "textures/mirror.jpg", modelLamp2, renderPass);
+    scene->setRenderObject(lamp2);
+
+
+    // Sonnenschirm
+    glm::mat4 modelUmbrella = glm::mat4(1.0f);
+    modelUmbrella = glm::translate(modelUmbrella, glm::vec3(5.0f, -1.0f, -19.0f));
+    modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.08f, 0.08f, 0.08f));
+    modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
+    DeferredRenderObject umbrella = factory.createDeferredObject("./models/sonnenschirm.obj",
+        "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
+    scene->setDeferredRenderObject(umbrella);
+    size_t umbrellaIndex = scene->getObjectCount() - 1;
+
+    //Schnee
+    glm::mat4 modelSnow = glm::mat4(1.0f);
+    modelSnow = glm::translate(modelSnow, glm::vec3(5.0f,0.0f,-20.0f));
+    modelSnow = glm::scale(modelSnow, glm::vec3(6.0f,2.0f,6.0f));
+    modelSnow = glm::rotate(modelSnow, glm::radians(8.0f), glm::vec3(0.0f,0.0f,1.0f));
+    DeferredRenderObject snowPatch = factory.createDeferredObject("./models/snow.obj",
+        "./textures/white.png", modelSnow,renderPass);
+    scene->setDeferredRenderObject(snowPatch);
+
+    //Bierchen
+    glm::mat4 modelBeer = glm::mat4(1.0f);
+    modelBeer = glm::translate(modelBeer, glm::vec3(3.5f, 0.0f, -20.0f));
+    modelBeer = glm::rotate(modelBeer, glm::radians(-90.0f), glm::vec3(2.0f,0.0f,1.0f));
+    modelBeer = glm::scale(modelBeer, glm::vec3(0.08f, 0.08f, 0.08f));
+    DeferredRenderObject beer = factory.createDeferredObject(
+        "./models/beer.obj","textures/beer.jpg", modelBeer, renderPass);
+    scene->setDeferredRenderObject(beer);
+
+    //Kasten am Straßenrand
+    glm::mat4 modelKasten = glm::mat4(1.0f);
+    modelKasten = glm::translate(modelKasten, glm::vec3(65.0f,0.0f,12.0f));
+    modelKasten = glm::scale(modelKasten, glm::vec3(5.0f,4.0f,4.0f));
+    DeferredRenderObject kasten = factory.createDeferredObject("./models/utility_box.obj",
+         "./textures/utility_box.jpg", modelKasten, renderPass);
+    scene->setDeferredRenderObject(kasten);
+    kastenIndex= scene->getObjectCount()-1;
+    
+    //Graffitti
+    glm::mat4 modelGraffitti = glm::mat4(1.0f);
+    modelGraffitti = glm::translate(modelGraffitti, glm::vec3(55.0f,1.8f,6.0f));
+    modelGraffitti = glm::rotate(modelGraffitti, glm::radians(180.0f), glm::vec3(1.0f,0.0f,1.0f));
+    RenderObject graffitti = factory.createGraffitti(modelGraffitti, renderPass);
+    scene->setRenderObject(graffitti);
+    graffittiIndex = scene->getObjectCount()-1;
+
+    //Sprühdosen
+    glm::mat4 modelDosen = glm::mat4(1.0f);
+    modelDosen = glm::translate(modelDosen, glm::vec3(53.0f, 0.25f, 7.0f));
+    modelDosen = glm::scale(modelDosen, glm::vec3(4.0f,4.0f,4.0f));
+    modelDosen = glm::rotate(modelDosen, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    DeferredRenderObject dosen = factory.createDeferredObject("./models/dosen.obj", "./textures/dosen.jpg", modelDosen,renderPass);
+    scene->setDeferredRenderObject(dosen);
+
+    //barrier
+    glm::mat4 modelBarrier = glm::mat4(1.0f);
+    modelBarrier = glm::translate(modelBarrier, glm::vec3(55.6f,0.0f,5.0f));
+    modelBarrier = glm::scale(modelBarrier, glm::vec3(3.0f,3.0f,3.0f));
+    modelBarrier = glm::rotate(modelBarrier, glm::radians(-90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    modelBarrier = glm::rotate(modelBarrier, glm::radians(4.0f), glm::vec3(1.0f,0.0f,0.0f));
+    DeferredRenderObject barrier = factory.createDeferredObject("./models/barrier.obj",
+        "textures/barrier.jpg",modelBarrier, renderPass);
+    scene->setDeferredRenderObject(barrier);
+    barrierIndex = scene->getObjectCount()-1;
+
+    //bus
+    glm::mat4 modelBus = glm::mat4(1.0f);
+    modelBus = glm::translate(modelBus, glm::vec3(45.0f,0.0f,0.0f));
+    modelBus = glm::scale(modelBus, glm::vec3(0.015f,0.015f,0.015f));
+    modelBus = glm::rotate(modelBus, glm::radians(-90.0f), glm::vec3(1.0f,0.1f,0.1f));
+    DeferredRenderObject bus = factory.createDeferredObject("./models/bus.obj", "./textures/bus.jpg", modelBus, renderPass);
+    scene->setDeferredRenderObject(bus);
+    busIndex= scene->getObjectCount()-2;
+
+    // Straße
+    glm::mat4 modelStreet = glm::mat4(1.0f);
+    modelStreet = glm::scale(modelStreet, glm::vec3(12.0f, 6.0f, 6.0f));
+    modelStreet = glm::translate(modelStreet, glm::vec3(0.0,-1.12f,0.0f));
+    RenderObject street = factory.createGenericObject("./models/untitled.obj",
+        "textures/street.jpg", modelStreet, renderPass);
+    scene->setRenderObject(street); 
+    streetIndex = scene->getObjectCount()-1;
+
+    //Wüste
+    glm::mat4 modelGround = glm::mat4(1.0f);
+    modelGround = glm::rotate(modelGround, glm::radians(90.0f), glm::vec3(0.005f,1.0f,0.005f));
+    modelGround = glm::translate(modelGround, glm::vec3(0.0,-2.0f,0.0f));
+    modelGround = glm::scale(modelGround, glm::vec3(1.2f, 0.3f, 1.0f));
+    RenderObject ground = factory.createGenericObject("./models/Desert.obj",
+        "textures/desert.png", modelGround, renderPass);
+    scene->setRenderObject(ground); 
+
+    //Tisch unter der reflektierenden Kugel
+    glm::mat4 modelTable = glm::mat4(1.0f);
+    modelTable = glm::translate(modelTable, glm::vec3(-15.0f, -1.5f,-40.0f));
+    modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
+    RenderObject table = factory.createGenericObject("./models/table.obj",
+        "textures/table.jpg", modelTable, renderPass);
+    scene->setRenderObject(table);
+
+    //Kakteen
+    glm::mat4 baseKaktus = glm::mat4(1.0);
+    baseKaktus = glm::scale(baseKaktus, glm::vec3(0.05f,0.05f,0.05f)); 
+    baseKaktus = glm::rotate(baseKaktus, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f)); 
+    int kaktusCount = 7;
+    float radius = 8.0f;
+    glm::vec3 center(-15.0f, -2.0f, -40.0f);
+    
+    for (int i = 0; i < kaktusCount; ++i) {
+
+        float angle = glm::two_pi<float>() * i / kaktusCount;
+
+        float x = center.x + radius * cos(angle);
+        float z = center.z + radius * sin(angle);
+
+        glm::mat4 model = glm::mat4(1.0f);
+
+        model = glm::translate(model, glm::vec3(x, center.y, z));
+        model = glm::rotate(model, -angle + glm::half_pi<float>(),
+                            glm::vec3(0.0f, 1.0f, 0.0f));
+        model *= baseKaktus;
+
+        RenderObject kaktus = factory.createGenericObject("./models/cactus.obj","textures/cactus.jpg",model,renderPass);
+
+        scene->setRenderObject(kaktus);
+    }
+}
+
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
+    
     Window* window = new Window();
     
     Camera* camera = new Camera(glm::vec3(-2.0f, 4.0f, 4.0f),
@@ -99,148 +300,87 @@ int main() {
                          swapChain->getImageFormat(), depthBuffer->getImageFormat(),
                          descriptorSetLayout, litDescriptorSetLayout);
 
-    // Skybox
-    std::array<const char*, 6> skyboxFaces = {
-        "textures/skybox/right.jpg",
-        "textures/skybox/left.jpg",
-        "textures/skybox/top.jpg",
-        "textures/skybox/bottom.jpg",
-        "textures/skybox/front.jpg",
-        "textures/skybox/back.jpg"
-    };
-    RenderObject skybox = factory.createSkybox(renderPass, skyboxFaces);
-    scene->setRenderObject(skybox);
 
-    // Licht 1 (Beim Zwerg)
+    //"Nicht besondere" Objekte zeichnen (alle sind besonders :3)
+    buildStaticObjects(scene, renderPass, factory);
+
+    // Licht 1 (Bei der Lampe)
+    glm::mat4 modelLight1 = glm::translate(glm::mat4(1.0), glm::vec3(-6.0f,14.0f,-16.0f));
     LightSourceObject light1 = factory.createLightSource(
-        glm::vec3(-2.3f, 3.0f, 0.2f),
-        glm::vec3(1.0f, 0.5f, 0.5f),
-        5.0f,
+        modelLight1,
+        glm::vec3(0.7f, 0.7f, 0.7f),
+        3.0f,
         10.0f,
         renderPass
     );
     scene->addLightSource(light1);
-    scene->setRenderObject(light1.renderObject);
 
-    // Licht 2 (Bei der Lampe)
-    //glm::vec3(-8.2f, 12.2f, -6.5f)
+    // Licht 2 (Fliegt herum)
+    glm::mat4 modelLight2 = glm::translate(glm::mat4(1.0), glm::vec3(8.0f,5.0f,20.0f));
     LightSourceObject light2 = factory.createLightSource(
-        glm::vec3(-8.0f, 12.2f, -6.0f),
-        glm::vec3(0.0f, 0.1f, 0.7f),
+        modelLight2,
+        glm::vec3(0.5f, 0.0f, 0.5f),
+        3.0f,
         5.0f,
-        300.0f,
         renderPass
     );
     scene->addLightSource(light2);
     scene->setRenderObject(light2.renderObject);
+    size_t lightIndex = scene->getObjectCount()-1;
+    size_t lightLightIndex = scene->getLightCount()-1;
+
+    // Licht 3 (Bei der rechten Lampe)
+    glm::mat4 modelLight3 = glm::translate(glm::mat4(1.0), glm::vec3(16.0f,14.0f,-16.0f));
+    LightSourceObject light3 = factory.createLightSource(
+        modelLight3,
+        glm::vec3(0.7f, 0.7f, 0.7f),
+        3.0f,
+        20.0f,
+        renderPass
+    );
+    scene->addLightSource(light3);
+
+    // Licht 4 (Beim Unfall)
+    glm::mat4 modelLight4 = glm::translate(glm::mat4(1.0), glm::vec3(8.0f,5.0f,20.0f));
+    LightSourceObject light4 = factory.createLightSource(
+        modelLight4,
+        glm::vec3(0.0f, 0.5f, 0.5f),
+        5.0f,
+        8.0f,
+        renderPass
+    );
+    scene->addLightSource(light4);
+    scene->setRenderObject(light4.renderObject);
+    size_t light4Index = scene->getObjectCount()-1;
+    size_t lightLight4Index = scene->getLightCount()-1;
 
     //Fliege, die die Kamera darstellt
     glm::mat4 modelCamera = glm::mat4(1.0f);
     RenderObject cam = factory.createGenericObject(
         "./models/fly.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
         "textures/black.png",
-        modelCamera, renderPass,PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
+        modelCamera, renderPass);
         scene->setRenderObject(cam);
         size_t camIndex = scene->getObjectCount()-1;
     
 
-    //Monobloc Gartenstuhl
-    glm::mat4 modelChair = glm::mat4(1.0f);
-    modelChair = glm::translate(modelChair, glm::vec3(-2.0f, 0.92f, 0.0f));
-    modelChair = glm::scale(modelChair, glm::vec3(3.0f, 3.0f, 3.0f));
-    DeferredRenderObject chair = factory.createDeferredObject(
-        "./models/plastic_monobloc_chair.obj",
-        "textures/plastic_monobloc_chair.jpg",
-        modelChair, renderPass);
-    scene->setDeferredRenderObject(chair);
-    size_t chairIndex = scene->getObjectCount() - 1;
-
-    // //Fliegender Holländer
-    glm::mat4 modelDutch = glm::mat4(1.0f);
-    RenderObject dutch = factory.createGenericObject(
-        "./models/flying_dutchman.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/duck.jpg",
-        modelDutch, renderPass, PipelineType::STANDARD, static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(dutch);
-    size_t dutchIndex = scene->getObjectCount() - 1;
-
-    //Gartenzwerg
-    glm::mat4 modelGnome = glm::mat4(1.0f);
-    modelGnome = glm::translate(modelGnome, glm::vec3(-2.0f, 2.25f, 0.0f));
-    modelGnome = glm::scale(modelGnome, glm::vec3(3.0f, 3.0f, 3.0f));
-    DeferredRenderObject gnome = factory.createDeferredObject(
-        "./models/garden_gnome.obj",
-        "textures/garden_gnome.jpg",
-        modelGnome, renderPass);
-    scene->setDeferredRenderObject(gnome);
-    size_t gnomeIndex = scene->getObjectCount() - 1;
-
-    // Sonnenschirm
-    glm::mat4 modelUmbrella = glm::mat4(1.0f);
-    modelUmbrella = glm::translate(modelUmbrella, glm::vec3(-1.0f, 0.3f, 0.0f));
-    modelUmbrella = glm::scale(modelUmbrella, glm::vec3(0.04f, 0.04f, 0.04f));
-    modelUmbrella = glm::rotate(modelUmbrella, glm::radians(-100.0f), glm::vec3(1.0f,0.0f,0.0f));
-    RenderObject umbrella = factory.createGenericObject("./models/sonnenschirm.obj", "shaders/test.vert.spv", "shaders/testapp.frag.spv",
-        "textures/sonnenschirm.jpg", modelUmbrella, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(umbrella);
-    size_t umbrellaIndex = scene->getObjectCount() - 1;
-
-    // Lampe
-    glm::mat4 modelLamp = glm::mat4(1.0f);
-    modelLamp = glm::translate(modelLamp, glm::vec3(-10.0f, 0.0f, -10.0f));
-    modelLamp = glm::scale(modelLamp, glm::vec3(20.0f, 20.0f, 20.0f));
-    modelLamp = glm::rotate(modelLamp, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
-    DeferredRenderObject lamp = factory.createDeferredObject("./models/desk_lamp.obj",
-        "textures/desk_lamp.jpg", modelLamp, renderPass);
-    scene->setDeferredRenderObject(lamp);
-    
-
-    // Boden
-    glm::mat4 modelGround = glm::mat4(1.0f);
-    modelGround = glm::scale(modelGround, glm::vec3(20.0f, 10.0f, 20.0f));
-    RenderObject ground = factory.createGenericObject("./models/wooden_bowl.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/wooden_bowl.jpg", modelGround, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-    scene->setRenderObject(ground); 
-
-    //Tisch unter der reflektierenden Kugel
-    glm::mat4 modelTable = glm::mat4(1.0f);
-    modelTable = glm::translate(modelTable, glm::vec3(5.0f, 1.0f,0.0f));
-    modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
-    RenderObject table = factory.createGenericObject("./models/table.obj",
-        "shaders/test.vert.spv",
-        "shaders/testapp.frag.spv",
-        "textures/table.jpg", modelTable, renderPass,PipelineType::STANDARD,static_cast<uint32_t>(SubpassIndex::LIGHTING));
-
-    scene->setRenderObject(table);
-    
     // Reflektierende (magische) Kugel
     ReflectionProbe* reflectionProbe = new ReflectionProbe(
         device,
         physicalDevice,
         commandPool,
-        glm::vec3(5.0f, 2.5f, 0.0f),
+        glm::vec3(-15.0f, 0.0f, -40.0f),
         1024  // Auflösung
     );
     glm::mat4 modelReflective = glm::mat4(1.0f);
-    modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5f, 0.0f));
-    modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
-    
+    modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f, 0.5f, -40.0f));
+    modelReflective = glm::scale(modelReflective, glm::vec3(0.33f, 0.33f, 0.33f));
     RenderObject reflectiveSphere = factory.createReflectiveObject(
-        "./models/sphere.obj",
-        reflectionProbe,
-        modelReflective,
-        renderPass
-    );
+        "./models/sphere.obj",reflectionProbe, modelReflective,renderPass);
     scene->setRenderObject(reflectiveSphere);
     size_t reflectiveIndex = scene->getObjectCount() - 1;
     scene->markObjectAsReflective(reflectiveIndex);
-    scene->setReflectionUpdateInterval(3);
+    scene->setReflectionUpdateInterval(5);
 
     // Schneeflocken zuletzt hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
@@ -255,27 +395,31 @@ int main() {
     MirrorSystem* mirrorSystem = new MirrorSystem(device, &factory, renderPass);
     // Spiegel 1: Hinter dem Gnom
     MirrorConfig mirror1;
-    mirror1.position = glm::vec3(-2.0f, 1.5f, -3.0f);
+    mirror1.position = glm::vec3(45.0f, 2.0f, -17.0f);
     mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f); //zur Kamera zeigend
-    mirror1.scale = glm::vec3(1.5f, 2.5f, 0.1f);
+    mirror1.scale = glm::vec3(10.0f, 3.0f, 0.1f);
     mirrorSystem->addMirror(scene, mirror1);
     
     // Spiegel 2: Rechts
-    MirrorConfig mirror2;
-    mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
-    mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f); //nach links zeigend
-    mirror2.scale = glm::vec3(3.5f, 4.5f, 0.1f);
-    mirrorSystem->addMirror(scene, mirror2);
+    // MirrorConfig mirror2;
+    // mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
+    // mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f); //nach links zeigend
+    // mirror2.scale = glm::vec3(3.5f, 4.5f, 0.1f);
+    // mirrorSystem->addMirror(scene, mirror2);
     
     // Objekte markieren, die gespiegelt werden sollen
-    mirrorSystem->addReflectableObject(gnomeIndex);
-    mirrorSystem->addReflectableObject(chairIndex);
-    mirrorSystem->addReflectableObject(umbrellaIndex);
-    mirrorSystem->addReflectableObject(camIndex);
-    scene->markObjectAsReflectable(gnomeIndex);
-    scene->markObjectAsReflectable(chairIndex);
-    scene->markObjectAsReflectable(umbrellaIndex);
-    scene->markObjectAsReflectable(camIndex);
+     mirrorSystem->addReflectableObject(streetIndex);
+     mirrorSystem->addReflectableObject(barrierIndex);
+     mirrorSystem->addReflectableObject(graffittiIndex);
+     mirrorSystem->addReflectableObject(camIndex);
+     mirrorSystem->addReflectableObject(kastenIndex);
+     mirrorSystem->addReflectableObject(busIndex);
+    scene->markObjectAsReflectable(streetIndex);
+    scene->markObjectAsReflectable(barrierIndex);
+    scene->markObjectAsReflectable(graffittiIndex);
+     scene->markObjectAsReflectable(camIndex);
+     scene->markObjectAsReflectable(kastenIndex);
+     scene->markObjectAsReflectable(busIndex);
     
     // Reflexionen erstellen
     mirrorSystem->createReflections(scene);
@@ -422,7 +566,7 @@ int main() {
         }
 
         //Tastatur-Input
-        modelCamera = camera->checkKeyboard(window, deltaTime);
+        modelCamera = camera->checkKeyboard(window, deltaTime*5);
         if (window->getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             firstMouse = true;
@@ -430,21 +574,31 @@ int main() {
         scene->updateObject(camIndex,modelCamera);
         mirrorSystem->updateReflections(scene, camIndex);
 
-        //Schiff animation
-        dutchAngle += deltaTime * glm::radians(5.0f);
-        float radius = 60.0f;
+        //Lichter animation
+        dutchAngle += deltaTime * glm::radians(40.0f);
+        float radius = 6.0f;
         float circleX = radius * cos(dutchAngle);
         float circleY = radius * sin(dutchAngle);
-        modelDutch = glm::mat4(1.0f);
-        modelDutch = glm::translate(modelDutch, glm::vec3(circleX, -10.0f, circleY));
-        modelDutch = glm::rotate(modelDutch, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-        modelDutch = glm::scale(modelDutch, glm::vec3(2.0f, 2.0f, 2.0f));
-        scene->updateObject(dutchIndex, modelDutch);
+
+        modelLight2 = glm::mat4(1.0);
+        modelLight2 = glm::translate(modelLight2, glm::vec3(5+ circleX, 5.0f, -19+circleY));
+        modelLight2 = glm::rotate(modelLight2, -1.75f - dutchAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+        modelLight2 = glm::rotate(modelLight2, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        modelLight2 = glm::scale(modelLight2, glm::vec3(10.0f,10.0f,10.0f));
+        scene->updateObject(lightIndex,modelLight2);
+        scene->updateLightPosition(lightLightIndex,glm::vec3(modelLight2[3]));
+
+        modelLight4 = glm::mat4(1.0);
+        modelLight4 = glm::translate(modelLight4, glm::vec3(55+ circleX*2, 2.0f, 9.0f));
+        modelLight4 = glm::rotate(modelLight4, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        modelLight4 = glm::scale(modelLight4, glm::vec3(10.0f,10.0f,10.0f));
+        scene->updateObject(light4Index,modelLight4);
+        scene->updateLightPosition(lightLight4Index,glm::vec3(modelLight4[3]));
 
         //Kugel schwebt über Tisch
         modelReflective = glm::mat4(1.0f);
-        modelReflective = glm::translate(modelReflective, glm::vec3(5.0f, 2.5+ 0.25*sin(currentTime), 0.0f));
-        modelReflective = glm::scale(modelReflective, glm::vec3(0.25f, 0.25f, 0.25f));
+        modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f,  0.25*sin(currentTime), -40.0f));
+        modelReflective = glm::scale(modelReflective, glm::vec3(0.33f, 0.33f, 0.33f));
         scene->updateObject(reflectiveIndex, modelReflective);
 
 
