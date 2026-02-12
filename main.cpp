@@ -562,7 +562,7 @@ int main() {
 
         camera->processMouseMovement(xoffset, yoffset);
         if (window->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
-            deltaTime *= 5;
+            deltaTime *= 5; //fünffache Geschwindigkeit
         }
 
         //Tastatur-Input
