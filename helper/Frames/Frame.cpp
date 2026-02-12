@@ -178,9 +178,8 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
-    // ============================================
-    // SUBPASS 0: DEPTH PREPASS
-    // ============================================    
+ 
+    // SUBPASS 0: depth prepass  
     size_t deferredDescriptorIdx = 0;  // Zähler für deferred descriptor sets
     
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
@@ -212,9 +211,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         deferredDescriptorIdx++;
     }
 
-    // ============================================
-    // SUBPASS 1: G-BUFFER PASS
-    // ============================================
+    // SUBPASS 1: gbuffer pass
     vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
@@ -257,13 +254,11 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         
         deferredDescriptorIdx++;
     }
-    // ============================================
-    // SUBPASS 2: LIGHTING + FORWARD RENDERING
-    // ============================================
+    // SUBPASS 2: lighting & forward-rendering
     vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
-    // 1. LIGHTING QUAD
+    // lighting quad
     if (scene->hasLightingQuad() && !_lightingDescriptorSets.empty()) {
         
         const auto& lightingQuad = scene->getLightingQuad();
@@ -284,7 +279,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         }
     }
 
-    // 2. FORWARD OBJECTS (normale, snow, lit)
+    // forward objekte (normale, snow, lit)
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
  
@@ -359,7 +354,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         }
     }
 
-    // 3. MIRROR SYSTEM (bleibt vorerst auskommentiert bis Basics funktionieren)
+    //  Spiegel system
     normalForwardIdx = 0;
     const auto& mirrorMarkIndices = scene->getMirrorMarkIndices();
     const auto& mirrorBlendIndices = scene->getMirrorBlendIndices();
@@ -416,10 +411,9 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
 
-    // ========================================
-    // PASS 3: Gespiegelte Objekte rendern (nur wo Stencil == 1)
+
+    // Gespiegelte Objekte rendern (nur wo Stencil == 1)
     // Diese werden "hinter" der Spiegelebene gerendert
-    // ========================================
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
     const auto& reflObj = scene->getReflectedObject(i);
     
@@ -431,7 +425,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineHandle);
     VkPipelineLayout pipelineLayout = reflObj.pipeline->getPipelineLayout();
 
-    // WICHTIG: Stencil Reference auf 1 setzen
+    //Stencil Reference auf 1 setzen
     vkCmdSetStencilReference(_commandBuffer, VK_STENCIL_FACE_FRONT_AND_BACK, 1);
 
     //DescriptorSet vom Original-Objekt mit korrektem Offset
@@ -516,10 +510,9 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
     }
 
-    // ========================================
-    // PASS 4: Transparenten Spiegel rendern (MIRROR_BLEND)
+    // Transparenten Spiegel rendern (MIRROR_BLEND)
     // Dieser wird über die Reflexionen gerendert
-    // ========================================
+
     normalForwardIdx = 0;
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         if (!scene->isMirrorObject(i) || scene->isLitObject(i) || scene->isSnowObject(i)) {
@@ -603,7 +596,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
 
     size_t descriptorSetIndex = 0;
     
-    // 1. DEFERRED OBJECTS (2 descriptor sets pro object)
+    // deferred Objects (2 descriptor sets pro object)
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
         const auto& depthObj = scene->getDepthPassObject(i);
         const auto& gbufferObj = scene->getGBufferPassObject(i);
@@ -657,7 +650,7 @@ void Frame::updateDescriptorSet(Scene* scene) {
         descriptorSetIndex++;
     }
     
-    // 2. NORMAL FORWARD OBJECTS
+    // Normale forward objekte
     for (size_t i = 0; i < scene->getObjectCount(); ++i) {
         const auto& obj = scene->getObject(i);
         
@@ -829,9 +822,8 @@ void Frame::allocateLitDescriptorSets(VkDescriptorPool descriptorPool,
     }
 }
 
-// ============================================
-// LIGHTING DESCRIPTOR SETS
-// ============================================
+
+//Lighting Descriptor Sets
 
 void Frame::allocateLightingDescriptorSets(VkDescriptorPool descriptorPool, 
                                           VkDescriptorSetLayout descriptorSetLayout, 

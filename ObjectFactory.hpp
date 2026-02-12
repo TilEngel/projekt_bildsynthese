@@ -66,7 +66,7 @@ public:
                                    VkDescriptorSetLayout lightingLayout);
 
     RenderObject createReflectiveObject(const char* modelPath, ReflectionProbe* probe, const glm::mat4& modelMatrix, VkRenderPass renderPass);
-
+    //Erstellt ein 2D Viereck mit zufälliger Graffitti-Textur
     RenderObject createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass);
 private:
     VkPhysicalDevice _physicalDevice;
