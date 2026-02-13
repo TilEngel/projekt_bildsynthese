@@ -83,12 +83,7 @@ public:
     void allocateCommandBuffer(VkCommandPool commandPool);
     void recordCommandBuffer(Scene* scene, uint32_t imageIndex);
 
-    // Deferred Rendering Passes
-    void renderDeferredDepthPass(Scene* scene);
-    void renderDeferredGBufferPass(Scene* scene);
-    void renderDeferredLightingPass(Scene* scene);
-
-    void renderForwardObjects(Scene* scene);
+    
     //rendert die Cubemap (render-to-texture)
     void renderCubemap(Scene* scene, ReflectionProbe* probe);
     //Rendert Objekte in den Cubemap Faces

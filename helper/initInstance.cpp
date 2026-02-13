@@ -23,8 +23,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     VkDebugUtilsMessageTypeFlagsEXT type,
     const VkDebugUtilsMessengerCallbackDataEXT* data,
     void* userData) {
-
-    std::cerr << "[VALIDATION] " << data->pMessage << std::endl;
+    if(userData != nullptr) {} //Keine Ahnung, Funktion muss den Parameter haben. Irgendwie benutzen, damit es keine warning gibt
+    std::cerr << "[VALIDATION] " << data->pMessage << "\n Severity: "<< severity << "\n Type: "<< type << std::endl;
     return VK_FALSE;
 }
 

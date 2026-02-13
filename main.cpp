@@ -51,7 +51,6 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     DeferredRenderObject chair = factory.createDeferredObject(
         "./models/plastic_monobloc_chair.obj", "textures/plastic_monobloc_chair.jpg",modelChair, renderPass);
     scene->setDeferredRenderObject(chair);
-    size_t chairIndex = scene->getObjectCount() - 1;
 
     //Gartenzwerg
     glm::mat4 modelGnome = glm::mat4(1.0f);
@@ -60,7 +59,6 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     DeferredRenderObject gnome = factory.createDeferredObject(
         "./models/garden_gnome.obj","textures/garden_gnome.jpg", modelGnome, renderPass);
     scene->setDeferredRenderObject(gnome);
-    size_t gnomeIndex = scene->getObjectCount() - 1;
 
     // Lampe
     glm::mat4 modelLamp = glm::mat4(1.0f);
@@ -106,7 +104,6 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     DeferredRenderObject umbrella = factory.createDeferredObject("./models/sonnenschirm.obj",
         "textures/sonnenschirm.jpg", modelUmbrella, renderPass);
     scene->setDeferredRenderObject(umbrella);
-    size_t umbrellaIndex = scene->getObjectCount() - 1;
 
     //Schnee
     glm::mat4 modelSnow = glm::mat4(1.0f);
@@ -562,7 +559,7 @@ int main() {
 
         camera->processMouseMovement(xoffset, yoffset);
         if (window->getKey(GLFW_KEY_Q) == GLFW_PRESS) {
-            deltaTime *= 5;
+            deltaTime *= 5; //fünffache Geschwindigkeit
         }
 
         //Tastatur-Input
