@@ -18,7 +18,6 @@ public:
                    const glm::vec3& position,
                    uint32_t resolution = 512)
         : _device(device)
-        , _physicalDevice(physicalDevice)
         , _commandPool(commandPool)
         , _position(position)
         , _resolution(resolution)
@@ -98,7 +97,6 @@ public:
 
 private:
     VkDevice _device;
-    VkPhysicalDevice _physicalDevice;
     VkCommandPool _commandPool;
     
     glm::vec3 _position;

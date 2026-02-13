@@ -1180,7 +1180,6 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
     size_t normalForwardIdx = 0;
     size_t snowIdx = 0;
     size_t litIdx = 0;
-    size_t deferredDescriptorIdx = 0;
     
     size_t normalForwardOffset = scene->getDeferredObjectCount() * 2;
 

@@ -10,6 +10,7 @@
 
 #include <vulkan/vulkan.h>
 
+//Postition und geschw. der einzelnen Schneeflocken
 struct alignas(32) Particle {
     alignas(16) glm::vec3 position;
     alignas(16) glm::vec3 velocity;
@@ -17,12 +18,19 @@ struct alignas(32) Particle {
 
 const uint32_t NUMBER_PARTICLES = 256;
 
+/**
+ * Verwaltet Partikelsimulation mit Compute-Shader,
+ * um Schneeflocken in der Szene darzustellen
+ */
 class Snow {
 public:
     Snow(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t queueIndex);
     
+    //Gibt CommandBuffer mit Compute-Operationen zurück
     VkCommandBuffer getCommandBuffer() { return _commandBuffer; }
+    //Aktueller Buffer mit Partikelpositionen
     VkBuffer getCurrentBuffer() { return _currBuffer; }
+    //Gibt Fence für synchonisierung zurück
     VkFence getComputeFence() { return _computeFence; } 
     void waitForCompute();
     void destroy();
@@ -50,16 +58,26 @@ private:
     VkCommandBuffer _commandBuffer = VK_NULL_HANDLE;
 
     VkFence _computeFence = VK_NULL_HANDLE;
+    //Erstellt Fence für synchro
     void createComputeFence();
-
+    //Erstellt DSL für StorageBuffers
     void createDescriptorSetLayout();
+    //Erstellt PipelineLO für comp-shader
     void createPipelineLayout();
+    //läd comp-shader und erstellt Pipeline
     void createPipeline();
+    //Erstellt SBs mit rndm Werten für Schneeflocken
     void createStorageBuffers();
+    // Erstellt DP für Storage Buffer Bindings
     void createDescriptorPool();
+    //Allokiert DS aus Pool
     void allocateDescriptorSet();
+    //Verbindet SBs mit DSs
     void updateDescriptorSet();
+    //Erstellt CP für compute-Befehle
     void createCommandPool();
+    //allokiert CB aus Pool
     void allocateCommandBuffer();
+    //Zeichnet Compute-Befehle in CB auf
     void recordCommandBuffer();
 };
