@@ -26,9 +26,11 @@ void main() {
    // Position des Partikels holen
     vec3 particlePos = part[gl_InstanceIndex].position;
     
-    // Billboard: Quad soll immer zur Kamera zeigen
-    // Vereinfachte Version: Quad bleibt im Weltkoordinatensystem
-    vec3 worldPos = inPosition + particlePos;
+    //Schnee soll immer zur Kamera zeigen
+    vec3 cameraRight = vec3(ubo.view[0][0], ubo.view[1][0], ubo.view[2][0]);
+    vec3 cameraUp = vec3(ubo.view[0][1], ubo.view[1][1], ubo.view[2][1]);
+
+    vec3 worldPos = particlePos + (cameraRight * inPosition.x) + (cameraUp * inPosition.y);
     
     gl_Position = ubo.proj * ubo.view * vec4(worldPos, 1.0);
     texCoord = inTexCoord;

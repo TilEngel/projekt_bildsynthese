@@ -72,16 +72,25 @@ TARGET = projekt
 # -----------------------------
 .PHONY: all clean run
 all: $(TARGET)
-$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv shaders/mirror.frag.spv helper/Texture/Texture.hpp shaders/test.vert.spv shaders/skybox.vert.spv shaders/skybox.frag.spv shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv shaders/lit.vert.spv shaders/lit.frag.spv shaders/depth_only.frag.spv shaders/depth_only.vert.spv shaders/gbuffer.frag.spv shaders/gbuffer.vert.spv shaders/lighting.frag.spv shaders/lighting.vert.spv shaders/renderToTexture.vert.spv shaders/renderToTexture.frag.spv
+$(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv \   #standart Shader
+    shaders/mirror.frag.spv\                                            #Spiegel (stencil)
+    shaders/skybox.vert.spv shaders/skybox.frag.spv \                   #Skybox
+    shaders/snow.vert.spv shaders/snow.frag.spv shaders/snow.comp.spv \     #Schnee (compute)
+    shaders/lit.vert.spv shaders/lit.frag.spv \                         #Beleuchtete Objekte
+    shaders/depth_only.frag.spv shaders/depth_only.vert.spv \           #deferred
+    shaders/gbuffer.frag.spv shaders/gbuffer.vert.spv \                 #deferred
+    shaders/lighting.frag.spv shaders/lighting.vert.spv \               #deferred
+    shaders/renderToTexture.vert.spv shaders/renderToTexture.frag.spv   #Spiegelung (render To texture)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDFLAGS)
 
 # build Ordner erstellen
 $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-# ------------------------------------------------------------
+
+# -----------------------------------
 # Shader compilation
-# ------------------------------------------------------------
+# ------------------------------------------
 
 %.vert.spv: %.vert
 	glslangValidator -V $< -o $@

@@ -1,5 +1,5 @@
 # projekt_bildsynthese
-##Anleitung zum Starten des Projekts:
+## Anleitung zum Starten des Projekts:
     Bauen mit dem Makefile -> Starten mit ./projekt
 
 ## Beschreibung der Szene:
