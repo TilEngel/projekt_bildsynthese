@@ -73,6 +73,7 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
         //Gartenzwerg
     glm::mat4 modelGnome2 = glm::mat4(1.0f);
     modelGnome2 = glm::translate(modelGnome2, glm::vec3(8.0f, 1.95f, -20.0f));
+    //modelGnome2 = glm::translate(modelGnome2, glm::vec3(-10.0f, 0.95f, -40.0f));
     modelGnome2 = glm::scale(modelGnome2, glm::vec3(6.0f, 6.0f, 6.0f));
     RenderObject gnome2 = factory.createLitObject(
         "./models/garden_gnome.obj", "textures/garden_gnome.jpg",modelGnome2, renderPass);
@@ -194,6 +195,16 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
         "textures/table.jpg", modelTable, renderPass);
     scene->setRenderObject(table);
 
+    //Horse (with no name)
+    glm::mat4 modelHorse = glm::mat4(1.0f);
+    modelHorse = glm::translate(modelHorse,glm::vec3(-20.0f, -1.5f, -45.0f));
+    modelHorse = glm::rotate(modelHorse, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+    modelHorse = glm::rotate(modelHorse, glm::radians(37.0f), glm::vec3(0.0f,0.0f,1.0f));
+    modelHorse = glm::scale(modelHorse, glm::vec3(0.004f,0.004f,0.004f));
+    RenderObject horse = factory.createGenericObject("./models/horse.obj",
+        "textures/horse.jpg", modelHorse, renderPass);
+    scene->setRenderObject(horse);
+
     //Kakteen
     glm::mat4 baseKaktus = glm::mat4(1.0);
     baseKaktus = glm::scale(baseKaktus, glm::vec3(0.05f,0.05f,0.05f)); 
@@ -222,8 +233,8 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     }
     //Objekt mit Tessellation-Shader
     // glm::mat4 modelTess = glm::mat4(1.0f);
-    // modelTess = glm::translate(modelTess, glm::vec3(0.0f, 2.0f, 0.0f));
-    // modelTess = glm::scale(modelTess, glm::vec3(6.0f, 6.0f, 6.0f));
+    // modelTess = glm::translate(modelTess, glm::vec3(0.0f, 1.5f, 0.0f));
+    // modelTess = glm::scale(modelTess, glm::vec3(0.0001f, 0.0001f, 0.0001f));
     // //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
     // RenderObject tessObject = factory.createTessellatedObject(
     //     "./models/garden_gnome.obj",
@@ -606,7 +617,7 @@ int main() {
         //Fisch schwebt über Tisch
         modelReflective = glm::mat4(1.0f);
         modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f, 1.0 + 0.4*sin(currentTime), -40.0f));
-        modelReflective = glm::rotate(modelReflective, currentTime*0.5f, glm::vec3(0.0f,1.0f,0.0f)); 
+        //modelReflective = glm::rotate(modelReflective, currentTime*0.5f, glm::vec3(0.0f,1.0f,0.0f)); 
         modelReflective = glm::rotate(modelReflective, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
         modelReflective = glm::scale(modelReflective, glm::vec3(0.07f, 0.07f, 0.07f));
         scene->updateObject(reflectiveIndex, modelReflective);

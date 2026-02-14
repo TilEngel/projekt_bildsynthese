@@ -1,24 +1,25 @@
 #include "ReflectionProbe.hpp"
 
 std::array<glm::mat4, 6> ReflectionProbe::getCubeFaceViews() const {
+    // Vulkan Cubemap Standard: +X, -X, +Y, -Y, +Z, -Z
     return {
-        // -X
+        // Face 0: +X (right)
         glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
         
-        // +X
+        // Face 1: -X (left)
         glm::lookAt(_position, _position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
         
-        // -Y Up-Vektor nach -Z
-        glm::lookAt(_position, _position + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
-        
-        // +Y  Up-Vektor nach +Z
+        // Face 2: +Y (up)
         glm::lookAt(_position, _position + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
         
-        // -Z
-        glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        // Face 3: -Y (down)
+        glm::lookAt(_position, _position + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
         
-        // +Z
-        glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+        // Face 4: +Z (forward)
+        glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        
+        // Face 5: -Z (backward)
+        glm::lookAt(_position, _position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
     };
 }
 

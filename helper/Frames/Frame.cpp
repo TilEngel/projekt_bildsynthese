@@ -1094,10 +1094,13 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
             break;
         }
     }
-    //origina UBO sichern
+    //origina UBOs sichern
     UniformBufferObject originalUBO;
     std::memcpy(&originalUBO, _uniformBufferMapped, sizeof(UniformBufferObject));
-
+    LitUniformBufferObject originalLitUBO;
+    if (_litUniformBufferMapped) {
+        std::memcpy(&originalLitUBO, _litUniformBufferMapped, sizeof(LitUniformBufferObject));
+    }
     // eigenen Command Buffer für alle 6 Faces  (wahrscheinlich mies ineffizient, vielleicht fällt uns noch was schlaueres ein)
     for (uint32_t face = 0; face < 6; face++) {
         //beginInfo
@@ -1116,7 +1119,21 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
         ubo.cameraPos = probe->getPosition();
         
         std::memcpy(_uniformBufferMapped, &ubo, sizeof(ubo));
-        
+
+        //auch für lit Objekte
+        if (_litUniformBufferMapped) {
+            LitUniformBufferObject litUbo{};
+            litUbo.view = views[face];
+            litUbo.proj = proj;
+            litUbo.viewPos = probe->getPosition();
+            litUbo.numLights = originalLitUBO.numLights;  // <- Lichter beibehalten
+            // Lichter kopieren
+            for (int i = 0; i < litUbo.numLights; i++) {
+                litUbo.lights[i] = originalLitUBO.lights[i];
+            }
+            
+            std::memcpy(_litUniformBufferMapped, &litUbo, sizeof(litUbo));
+        }
 
         // RenderPass für Face
         VkRenderPassBeginInfo rpInfo{};
@@ -1176,6 +1193,9 @@ void Frame::renderCubemap(Scene* scene, ReflectionProbe* probe) {
 
     // UBO wiederherstellen
     std::memcpy(_uniformBufferMapped, &originalUBO, sizeof(UniformBufferObject));
+    if (_litUniformBufferMapped) {
+        std::memcpy(_litUniformBufferMapped, &originalLitUBO, sizeof(LitUniformBufferObject));
+    }
 }
 
 void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene, 
