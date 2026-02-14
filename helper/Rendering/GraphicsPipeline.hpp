@@ -17,7 +17,8 @@ enum class PipelineType {
     DEPTH_ONLY,        // Depth prepass (subpass 0)
     GBUFFER,          // G-Buffer generation (subpass 1)
     LIGHTING,          // Deferred lighting (subpass 2)
-    SKYBOX              //Extra für die Skybox
+    SKYBOX,              //Extra für die Skybox
+    TESSELLATION
 };
 
 enum class SubpassIndex {
@@ -64,7 +65,7 @@ public:
     VkDevice getDevice() const { return _device; }
     VkFormat getColorFormat() const { return _colorFormat; }
     VkFormat getDepthFormat() const { return _depthFormat; }
-
+    PipelineType getPipelineType() const {return _pipelineType;}
 private:
     VkDevice _device;
     VkFormat _colorFormat;

@@ -476,3 +476,39 @@ RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass
 
     return obj;
 }
+
+RenderObject ObjectFactory::createTessellatedObject(const char* modelPath,
+                                                    const char* texturePath,
+                                                    const glm::mat4& modelMatrix,
+                                                    VkRenderPass renderPass) {
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "./shaders/tessellation.vert.spv",
+        "./shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::TESSELLATION,
+        2  // Subpass
+    );
+
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, 
+                                                     _commandPool, _graphicsQueue, vertices);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
+
+    return obj;
+}

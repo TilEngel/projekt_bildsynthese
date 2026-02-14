@@ -220,6 +220,17 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
 
         scene->setRenderObject(kaktus);
     }
+    glm::mat4 modelTess = glm::mat4(1.0f);
+    modelTess = glm::translate(modelTess, glm::vec3(0.0f, 2.0f, 0.0f));
+    modelTess = glm::scale(modelTess, glm::vec3(6.0f, 6.0f, 6.0f));
+    //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
+    RenderObject tessObject = factory.createTessellatedObject(
+        "./models/garden_gnome.obj",
+        "textures/garden_gnome.jpg",
+        modelTess,
+        renderPass
+    );
+    scene->setRenderObject(tessObject);
 }
 
 int main() {

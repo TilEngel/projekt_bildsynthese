@@ -41,7 +41,12 @@ void GraphicsPipeline::createPipelineLayout() {
         throw std::runtime_error("Device is NULL!");
     }
     VkPushConstantRange pushRange{};
-    pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    if (_pipelineType == PipelineType::TESSELLATION) {
+        pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | 
+                               VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+    } else {
+        pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    }
     pushRange.offset = 0;
     pushRange.size = sizeof(glm::mat4); // model matrix
 
@@ -65,22 +70,48 @@ void GraphicsPipeline::createPipeline() {
     VkShaderModule vertModule = createShaderModule(_device, vertCode);
     VkShaderModule fragModule = createShaderModule(_device, fragCode);
 
-    // Vertex Shader Stage
+    // Shader Stages
+    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+    
     VkPipelineShaderStageCreateInfo vertStage{};
     vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertStage.module = vertModule;
     vertStage.pName = "main";
+    shaderStages.push_back(vertStage);
 
-    // Fragment Shader Stage
+    VkShaderModule tescModule = VK_NULL_HANDLE;
+    VkShaderModule teseModule = VK_NULL_HANDLE;
+    
+    // Tessellation Shaders hinzufügen falls TESSELLATION Pipeline
+    if (_pipelineType == PipelineType::TESSELLATION) {
+        auto tescCode = readFile("shaders/tessellation.tesc.spv");
+        auto teseCode = readFile("shaders/tessellation.tese.spv");
+        
+        tescModule = createShaderModule(_device, tescCode);
+        teseModule = createShaderModule(_device, teseCode);
+        
+        VkPipelineShaderStageCreateInfo tescStage{};
+        tescStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        tescStage.stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        tescStage.module = tescModule;
+        tescStage.pName = "main";
+        shaderStages.push_back(tescStage);
+        
+        VkPipelineShaderStageCreateInfo teseStage{};
+        teseStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        teseStage.stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        teseStage.module = teseModule;
+        teseStage.pName = "main";
+        shaderStages.push_back(teseStage);
+    }
+
     VkPipelineShaderStageCreateInfo fragStage{};
     fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragStage.module = fragModule;
     fragStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo stages[] = { vertStage, fragStage };
-
+    shaderStages.push_back(fragStage);
     //Vertex Input
     VkVertexInputBindingDescription binding{};
     binding.binding = 0;
@@ -95,8 +126,8 @@ void GraphicsPipeline::createPipeline() {
 
     attributes[1].binding = 0;
     attributes[1].location = 1;
-    attributes[1].format = VK_FORMAT_R32G32_SFLOAT;
-    attributes[1].offset = offsetof(Vertex, tex);
+    attributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributes[1].offset = offsetof(Vertex, normal);
 
     attributes[2].binding =0;
     attributes[2].location = 2;
@@ -113,8 +144,20 @@ void GraphicsPipeline::createPipeline() {
     // Input Assembly
     VkPipelineInputAssemblyStateCreateInfo assembly{};
     assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    if (_pipelineType == PipelineType::TESSELLATION) {
+        assembly.topology = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;  // WICHTIG!
+    } else {
+        assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    }
     assembly.primitiveRestartEnable = VK_FALSE;
+
+    // Tessellation State (nur wenn Tessellation aktiv)
+    VkPipelineTessellationStateCreateInfo tessInfo{};
+    if (_pipelineType == PipelineType::TESSELLATION) {
+        tessInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+        tessInfo.patchControlPoints = 3;  // 3 für Triangles
+        std::cout << "Tessellation state: patchControlPoints = 3" << std::endl;
+    }
 
     //Viewport State
     VkPipelineViewportStateCreateInfo viewport{};
@@ -132,6 +175,13 @@ void GraphicsPipeline::createPipeline() {
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
     switch (_pipelineType) {
+        case PipelineType::TESSELLATION: //evtl useless
+            // Tessellation: Normaler Depth Test
+            depthStencil.depthTestEnable = VK_TRUE;
+            depthStencil.depthWriteEnable = VK_TRUE;
+            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+            depthStencil.stencilTestEnable = VK_FALSE;
+            break;
         case PipelineType::DEPTH_ONLY: 
             // Depth Prepass: Nur Depth schreiben, kein Color Output
             depthStencil.depthTestEnable = VK_TRUE;
@@ -315,11 +365,11 @@ void GraphicsPipeline::createPipeline() {
     dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamic.pDynamicStates = dynamicStates.data();
 
-    // Pipeline Erstellen
+    // Pipeline erstellen
     VkGraphicsPipelineCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    info.stageCount = 2;
-    info.pStages = stages;
+    info.stageCount = static_cast<uint32_t>(shaderStages.size());
+    info.pStages = shaderStages.data();
     info.pVertexInputState = &vertexInput;
     info.pInputAssemblyState = &assembly;
     info.pViewportState = &viewport;
@@ -328,16 +378,22 @@ void GraphicsPipeline::createPipeline() {
     info.pDepthStencilState = &depthStencil;
     info.pColorBlendState = &colorBlending;
     info.pDynamicState = &dynamic;
+    
+    if (_pipelineType == PipelineType::TESSELLATION) {
+        info.pTessellationState = &tessInfo;  //tessellation hinzufügen
+    }
+    
     info.layout = _pipelineLayout;
     info.renderPass = _renderPass;
-    info.subpass = _subpassIndex; 
+    info.subpass = _subpassIndex;
 
     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &info, nullptr, &_graphicsPipeline)
         != VK_SUCCESS)
         throw std::runtime_error("Failed to create graphics pipeline!");
-
     vkDestroyShaderModule(_device, vertModule, nullptr);
     vkDestroyShaderModule(_device, fragModule, nullptr);
+    if (tescModule != VK_NULL_HANDLE) vkDestroyShaderModule(_device, tescModule, nullptr);
+    if (teseModule != VK_NULL_HANDLE) vkDestroyShaderModule(_device, teseModule, nullptr);
 
     std::cout << "\n=== PIPELINE CREATED ===" << std::endl;
     std::cout << "Type: ";
@@ -347,6 +403,10 @@ void GraphicsPipeline::createPipeline() {
         case PipelineType::GBUFFER: std::cout << "GBUFFER"; break;
         case PipelineType::LIGHTING: std::cout << "LIGHTING"; break;
         case PipelineType::SKYBOX: std::cout << "SKYBOX"; break;
+        case PipelineType::TESSELLATION: std::cout << "TESSELLATION"; break;
+        case PipelineType::MIRROR_MARK: std::cout << "MIRROR_MARK"; break;
+        case PipelineType::MIRROR_REFLECT: std::cout << "MIRROR_REFLECT"; break;
+        case PipelineType::MIRROR_BLEND: std::cout << "MIRROR_BLEND"; break;
         default: std::cout << "UNKNOWN"; break;
     }
     std::cout << std::endl;
