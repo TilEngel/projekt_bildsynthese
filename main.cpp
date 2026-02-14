@@ -220,6 +220,18 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
 
         scene->setRenderObject(kaktus);
     }
+    //Objekt mit Tessellation-Shader
+    // glm::mat4 modelTess = glm::mat4(1.0f);
+    // modelTess = glm::translate(modelTess, glm::vec3(0.0f, 2.0f, 0.0f));
+    // modelTess = glm::scale(modelTess, glm::vec3(6.0f, 6.0f, 6.0f));
+    // //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
+    // RenderObject tessObject = factory.createTessellatedObject(
+    //     "./models/garden_gnome.obj",
+    //     "textures/garden_gnome.jpg",
+    //     modelTess,
+    //     renderPass
+    // );
+    // scene->setRenderObject(tessObject);
 }
 
 int main() {
@@ -361,19 +373,18 @@ int main() {
         size_t camIndex = scene->getObjectCount()-1;
     
 
-    // Reflektierende (magische) Kugel
+    // Reflektierender (magischer) Fisch
     ReflectionProbe* reflectionProbe = new ReflectionProbe(
         device,
         physicalDevice,
         commandPool,
-        glm::vec3(-15.0f, 0.0f, -40.0f),
+        glm::vec3(-15.0f, 1.0f, -40.0f),
         1024  // Auflösung
     );
     glm::mat4 modelReflective = glm::mat4(1.0f);
     modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f, 0.5f, -40.0f));
-    modelReflective = glm::scale(modelReflective, glm::vec3(0.33f, 0.33f, 0.33f));
     RenderObject reflectiveSphere = factory.createReflectiveObject(
-        "./models/sphere.obj",reflectionProbe, modelReflective,renderPass);
+        "./models/fish_zwei.obj",reflectionProbe, modelReflective,renderPass);
     scene->setRenderObject(reflectiveSphere);
     size_t reflectiveIndex = scene->getObjectCount() - 1;
     scene->markObjectAsReflective(reflectiveIndex);
@@ -592,10 +603,12 @@ int main() {
         scene->updateObject(light4Index,modelLight4);
         scene->updateLightPosition(lightLight4Index,glm::vec3(modelLight4[3]));
 
-        //Kugel schwebt über Tisch
+        //Fisch schwebt über Tisch
         modelReflective = glm::mat4(1.0f);
-        modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f,  0.25*sin(currentTime), -40.0f));
-        modelReflective = glm::scale(modelReflective, glm::vec3(0.33f, 0.33f, 0.33f));
+        modelReflective = glm::translate(modelReflective, glm::vec3(-15.0f, 1.0 + 0.4*sin(currentTime), -40.0f));
+        modelReflective = glm::rotate(modelReflective, currentTime*0.5f, glm::vec3(0.0f,1.0f,0.0f)); 
+        modelReflective = glm::rotate(modelReflective, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+        modelReflective = glm::scale(modelReflective, glm::vec3(0.07f, 0.07f, 0.07f));
         scene->updateObject(reflectiveIndex, modelReflective);
 
 

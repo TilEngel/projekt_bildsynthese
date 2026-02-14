@@ -225,9 +225,20 @@ VkDevice InitInstance::createLogicalDevice(
 #ifdef __APPLE__
     //extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
 #endif
-
+    //Features prüfen
+    VkPhysicalDeviceFeatures supportedFeatures{};
+    vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
+    
+    if (!supportedFeatures.tessellationShader) {
+        std::cerr << "WARNING: Tessellation shaders not supported on this device!" << std::endl;
+        // Optional: throw std::runtime_error("Tessellation not supported!");
+    } else {
+        std::cout << "Tessellation shaders supported!" << std::endl;
+    }
+    //Features aktivieren
     VkPhysicalDeviceFeatures features{};
     features.samplerAnisotropy = VK_TRUE;
+    features.tessellationShader = VK_TRUE;
 
     VkDeviceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
