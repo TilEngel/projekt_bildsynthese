@@ -20,10 +20,10 @@ layout(binding = 0) uniform UniformBufferObject {
 void main() {
     if (gl_InvocationID == 0) {
         // ERSTMAL SEHR NIEDRIGE WERTE ZUM TESTEN
-        gl_TessLevelOuter[0] = 1.0;
-        gl_TessLevelOuter[1] = 1.0;
-        gl_TessLevelOuter[2] = 1.0;
-        gl_TessLevelInner[0] = 1.0;
+        gl_TessLevelOuter[0] = 2.0;
+        gl_TessLevelOuter[1] = 2.0;
+        gl_TessLevelOuter[2] = 2.0;
+        gl_TessLevelInner[0] = 2.0;
     }
     
     // Pass-through

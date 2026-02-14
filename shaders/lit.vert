@@ -1,6 +1,8 @@
+//lit.vert
 #version 450
 
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
 
 layout(location = 0) out vec3 FragPos;
@@ -20,7 +22,7 @@ layout(push_constant) uniform PushMod {
 
 void main() {
     FragPos = vec3(pushModel.model * vec4(aPos, 1.0));
-    Normal = mat3(transpose(inverse(pushModel.model))) * normalize(aPos); 
+    Normal = mat3(transpose(inverse(pushModel.model))) * aNormal; 
     TexCoord = aTexCoord;
     
     gl_Position = ubo.proj * ubo.view * vec4(FragPos, 1.0);
