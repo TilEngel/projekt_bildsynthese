@@ -70,9 +70,9 @@ public:
         if (direction == RIGHT)
             _position += _right * velocity;
         if (direction == UP)
-            _position += _up * velocity;
+            _position += glm::vec3(0.0f,1.0f,0.0f)*velocity;
         if (direction == DOWN)
-            _position -= _up * velocity;
+            _position -=  glm::vec3(0.0f,1.0f,0.0f)*velocity;
         
         updateModelMatrix();
     }
@@ -152,6 +152,6 @@ private:
         _model = glm::rotate(_model, glm::radians(-_yaw), glm::vec3(0.0f,0.0f,1.0f));
         _model = glm::rotate(_model, glm::radians(-_pitch), glm::vec3(1.0f,0.0f,0.0f));
         
-        _model = glm::scale(_model, glm::vec3(0.01,0.01,0.01));
+        _model = glm::scale(_model, glm::vec3(0.02,0.02,0.02));
     }
 };

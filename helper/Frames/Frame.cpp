@@ -311,10 +311,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
             else normalForwardIdx++;
             continue;
         }
-        if (obj.pipeline && obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
-            std::cout << "Rendering tessellated object " << i 
-                      << " with " << obj.vertexCount << " vertices" << std::endl;
-        }
+        // if (obj.pipeline && obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+        //     std::cout << "Rendering tessellated object " << i 
+        //               << " with " << obj.vertexCount << " vertices" << std::endl;
+        // }
 
         VkPipeline pipeline = obj.pipeline->getPipeline();
         vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);

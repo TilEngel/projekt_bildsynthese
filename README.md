@@ -4,7 +4,7 @@
 
 ## Beschreibung der Szene:
 Die Zwergen-Brüder hatten mit ihrem Bus einen Unfall. Während sie jetzt auf den
-Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste und betreiben Vandalismus.
+Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welches ihnen der magische Fisch hergezaubert hat) und betreiben Vandalismus.
 
 --- 
 
@@ -46,6 +46,7 @@ Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste und be
 | Gartenzwerg | [Poly Haven - Garden Gnome](https://polyhaven.com/a/garden_gnome) |
 | Glühbirne | [Poly Haven - LED Lightbulb](https://polyhaven.com/a/lightbulb_led) |
 | Tisch | [Poly Haven - Chinese Tea Table](https://polyhaven.com/a/chinese_tea_table) |
+| Fisch | [Free3D - Fish V1](https://free3d.com/3d-model/fish-v1--996288.html) |
 | Stromkasten | [Poly Haven - Utility Box](https://polyhaven.com/a/utility_box_01) |
 | Sprühdosen | [Poly Haven - Spray Paint Bottles](https://polyhaven.com/a/spray_paint_bottles_02) |
 | Absperrung | [Poly Haven - Concrete Road Barrier](https://polyhaven.com/a/concrete_road_barrier_02) |

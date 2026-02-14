@@ -1,8 +1,9 @@
-//renderToTexture.frag (Vereinfacht - ohne Licht-Array)
+//renderToTexture.frag
 #version 450
 
 layout(location = 0) in vec3 fragWorldPos;
 layout(location = 1) in vec3 fragWorldNormal;
+layout(location = 2) in vec2 fragTexCoord;
 
 layout(binding = 0) uniform UniformBufferObject {
     mat4 view;
@@ -23,14 +24,14 @@ void main() {
     float metallic = 0.9;
     float roughness = 0.1;
     
-    //Einfaches Ambient
+    // Einfaches Ambient
     vec3 ambient = 0.15 * baseColor;
     
-    //Reflexion
+    // Reflexion
     vec3 reflectDir = reflect(-viewDir, normal);
     vec3 reflectionColor = texture(cubemapSampler, reflectDir).rgb;
     
-    //Fresnel
+    // Fresnel
     float F0 = mix(0.04, 0.95, metallic);
     float fresnel = F0 + (1.0 - F0) * pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0);
     fresnel *= (1.0 - roughness * 0.5);
