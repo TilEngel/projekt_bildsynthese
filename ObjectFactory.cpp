@@ -118,6 +118,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::arr
     obj.textureSampler = cubemap->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = glm::mat4(1.0f);
+    obj.cubemap = cubemap;
 
     return obj;
 }

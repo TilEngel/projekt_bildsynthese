@@ -33,18 +33,13 @@ public:
     }
 
     ~CubeMap() {
-        if (_textureSampler != VK_NULL_HANDLE)
-            vkDestroySampler(_device, _textureSampler, nullptr);
-        if (_textureImageView != VK_NULL_HANDLE)
-            vkDestroyImageView(_device, _textureImageView, nullptr);
-        if (_textureImage != VK_NULL_HANDLE)
-            vkDestroyImage(_device, _textureImage, nullptr);
-        if (_textureImageMemory != VK_NULL_HANDLE)
-            vkFreeMemory(_device, _textureImageMemory, nullptr);
+        destroy();
     }
 
     VkImageView getImageView() const { return _textureImageView; }
     VkSampler getSampler() const { return _textureSampler; }
+
+    void destroy();
 
 private:
     VkPhysicalDevice _physicalDevice;

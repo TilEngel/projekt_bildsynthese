@@ -124,23 +124,28 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
                                          const MirrorData& mirror) {
     const auto& originalObj = scene->getObject(objectIndex);
     
-    // Reflexionsmatrix berechnen
+    // Guard: Objekt muss eine gültige Pipeline haben
+    if (!originalObj.pipeline) {
+        std::cerr << "MirrorSystem: Object " << objectIndex 
+                  << " has no pipeline, skipping reflection." << std::endl;
+        return;
+    }
+    
+    // Guard: Objekt muss einen gültigen Vertex Buffer haben
+    if (originalObj.vertexBuffer == VK_NULL_HANDLE || originalObj.vertexCount == 0) {
+        std::cerr << "MirrorSystem: Object " << objectIndex 
+                  << " has no vertex buffer, skipping reflection." << std::endl;
+        return;
+    }
+
     glm::mat4 reflectionMatrix = calculateReflectionMatrix(
         mirror.position, mirror.normal);
     
-    // Gespiegelte Transformationsmatrix
     glm::mat4 reflectedMatrix = reflectionMatrix * originalObj.modelMatrix;
     
-    // Neues gespiegeltes RenderObject erstellen
-    // Hier müssen wir die Original-Parameter des Objekts kennen
-    // Das ist eine Limitierung - in einer vollständigen Implementierung
-    // würde man diese Informationen im RenderObject speichern
-    
-    // Für jetzt: Erstelle eine Kopie und ändere nur die Matrix
     RenderObject reflectedObj = originalObj;
     reflectedObj.modelMatrix = reflectedMatrix;
     
-    // Pipeline für gespiegelte Objekte verwenden
     GraphicsPipeline* reflectedPipeline = new GraphicsPipeline(
         _device,
         originalObj.pipeline->getColorFormat(),
@@ -154,7 +159,7 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
     );
     
     reflectedObj.pipeline = reflectedPipeline;
-    
+   
     scene->addReflectedObject(reflectedObj, objectIndex);
 }
 

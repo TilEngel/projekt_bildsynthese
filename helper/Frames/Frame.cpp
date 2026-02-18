@@ -871,7 +871,7 @@ void Frame::updateLightingDescriptorSet(VkImageView gBufferNormalView,VkImageVie
     imageInfos[1].sampler = VK_NULL_HANDLE;
     
     // Binding 1: Depth Input Attachment
-    imageInfos[2].imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    imageInfos[2].imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
     imageInfos[2].imageView = depthView;
     imageInfos[2].sampler = VK_NULL_HANDLE;
 

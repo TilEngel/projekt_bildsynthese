@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "helper/Rendering/GraphicsPipeline.hpp"
 #include "helper/Texture/Texture.hpp"
+#include "helper/Texture/CubeMap.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <unordered_set>
@@ -34,6 +35,7 @@ struct RenderObject {
     VkImageView textureImageView = VK_NULL_HANDLE;
     VkSampler textureSampler = VK_NULL_HANDLE;
     Texture* texture = nullptr;
+    class CubeMap* cubemap = nullptr; //nur für Skybox
     GraphicsPipeline* pipeline = nullptr;
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     VkBuffer instanceBuffer = VK_NULL_HANDLE;

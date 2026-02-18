@@ -10,7 +10,7 @@ void CubemapRenderTarget::cleanup() {
         _sampler = VK_NULL_HANDLE;
     }
 
-    for (auto fb : _framebuffers) {
+    for (auto& fb : _framebuffers) {
         if (fb != VK_NULL_HANDLE) {
             vkDestroyFramebuffer(_device, fb, nullptr);
             fb = VK_NULL_HANDLE;
@@ -21,22 +21,7 @@ void CubemapRenderTarget::cleanup() {
         _renderPass = VK_NULL_HANDLE;
     }
 
-    if (_depthView != VK_NULL_HANDLE) {
-        vkDestroyImageView(_device, _depthView, nullptr);
-        _depthView = VK_NULL_HANDLE;
-    }
-
-    if (_depthImage != VK_NULL_HANDLE) {
-        vkDestroyImage(_device, _depthImage, nullptr);
-        _depthImage = VK_NULL_HANDLE;
-    }
-
-    if (_depthMemory != VK_NULL_HANDLE) {
-        vkFreeMemory(_device, _depthMemory, nullptr);
-        _depthMemory = VK_NULL_HANDLE;
-    }
-
-    for (auto view : _faceViews) {
+    for (auto& view : _faceViews) {
         if (view != VK_NULL_HANDLE) {
             vkDestroyImageView(_device, view, nullptr);
             view = VK_NULL_HANDLE;
@@ -56,6 +41,20 @@ void CubemapRenderTarget::cleanup() {
     if (_cubemapMemory != VK_NULL_HANDLE) {
         vkFreeMemory(_device, _cubemapMemory, nullptr);
         _cubemapMemory = VK_NULL_HANDLE;
+    }
+    if (_depthView != VK_NULL_HANDLE) {
+        vkDestroyImageView(_device, _depthView, nullptr);
+        _depthView = VK_NULL_HANDLE;
+    }
+
+    if (_depthImage != VK_NULL_HANDLE) {
+        vkDestroyImage(_device, _depthImage, nullptr);
+        _depthImage = VK_NULL_HANDLE;
+    }
+
+    if (_depthMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(_device, _depthMemory, nullptr);
+        _depthMemory = VK_NULL_HANDLE;
     }
     _device = VK_NULL_HANDLE;
 }

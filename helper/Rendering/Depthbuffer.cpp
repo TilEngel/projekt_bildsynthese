@@ -45,7 +45,7 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
     imgInfo.arrayLayers = 1;
     imgInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imgInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imgInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imgInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
     imgInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imgInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
@@ -98,6 +98,11 @@ void DepthBuffer::createDepthImageView()
     if (vkCreateImageView(_device, &viewInfo, nullptr, &_depthImageView) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create depth image view!");
     }
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    
+    if (vkCreateImageView(_device, &viewInfo, nullptr, &_depthOnlyImageView) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create depth-only image view!");
+    }
 }
 
 // depth buffer resources zerstören
@@ -116,5 +121,9 @@ void DepthBuffer::cleanupDepthRessources()
     if (_depthImageMemory != VK_NULL_HANDLE) {
         vkFreeMemory(_device, _depthImageMemory, nullptr);
         _depthImageMemory = VK_NULL_HANDLE;
+    }
+    if (_depthOnlyImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(_device, _depthOnlyImageView, nullptr);
+        _depthOnlyImageView = VK_NULL_HANDLE;
     }
 }

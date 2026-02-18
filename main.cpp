@@ -661,7 +661,7 @@ int main() {
             framesInFlight[currentFrame]->updateLightingDescriptorSet(
                 framebuffers->getGBufferNormalView(),
                 framebuffers->getGBufferAlbedoView(),
-                depthBuffer->getImageView()
+                depthBuffer->getDepthOnlyImageView()
             );
         }
 
@@ -739,6 +739,22 @@ int main() {
         if (tex) {
             tex->destroy();
             delete tex;
+        }
+    }
+    // CubeMap
+    std::set<CubeMap*> uniqueCubemaps;
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const RenderObject& obj = scene->getObject(i);
+        if (obj.cubemap) {
+            std::cout << "Found cubemap at object " << i << std::endl;
+            uniqueCubemaps.insert(obj.cubemap);
+        }
+    }
+    std::cout << "Destroying " << uniqueCubemaps.size() << " cubemaps" << std::endl;
+    for (CubeMap* cm : uniqueCubemaps) {
+        if (cm) {
+            cm->destroy();
+            delete cm;
         }
     }
 
