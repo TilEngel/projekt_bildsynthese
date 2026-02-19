@@ -1228,9 +1228,9 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
             continue;
         }
 
-        VkPipeline pipeline = obj.pipeline->getPipeline();
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-        VkPipelineLayout layout = obj.pipeline->getPipelineLayout();
+        GraphicsPipeline* activePipeline = obj.cubemapPipeline ? obj.cubemapPipeline : obj.pipeline;
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, activePipeline->getPipeline());
+        VkPipelineLayout layout = activePipeline->getPipelineLayout();
 
         // Descriptor Set binden
         if (obj.isSnow) {

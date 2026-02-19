@@ -245,6 +245,34 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     // scene->setRenderObject(tessObject);
 }
 
+// Speicher für alle Cubemap-Pipelines
+std::vector<GraphicsPipeline*> g_cubemapPipelines;
+
+GraphicsPipeline* createCubemapPipeline(
+    VkDevice device,
+    VkFormat colorFormat,
+    VkFormat depthFormat,
+    VkRenderPass cubemapRenderPass,
+    VkDescriptorSetLayout layout,
+    const char* vertShader,
+    const char* fragShader)
+{
+    auto* p = new GraphicsPipeline(
+        device,
+        colorFormat,
+        depthFormat,
+        vertShader,
+        fragShader,
+        cubemapRenderPass,
+        layout,
+        PipelineType::STANDARD,
+        0  // subpass 0
+    );
+    g_cubemapPipelines.push_back(p);
+    return p;
+}
+
+
 int main() {
     InitInstance inst;
     Scene* scene = new Scene();
@@ -400,6 +428,28 @@ int main() {
     size_t reflectiveIndex = scene->getObjectCount() - 1;
     scene->markObjectAsReflective(reflectiveIndex);
     scene->setReflectionUpdateInterval(5);
+
+VkRenderPass cubemapRP = reflectionProbe->getRenderPass();
+VkFormat colorFmt = swapChain->getImageFormat();
+VkFormat depthFmt = depthBuffer->getImageFormat();
+
+for (size_t i = 0; i < scene->getObjectCount(); i++) {
+    RenderObject& obj = scene->getObjectMutable(i);
+    
+    if (obj.isDeferred) continue;
+    if (obj.isSnow) continue;
+    if (scene->isMirrorObject(i)) continue;
+    if (i == reflectiveIndex) continue;
+    if (obj.pipeline == nullptr) continue;
+
+    VkDescriptorSetLayout layout = obj.isLit ? litDescriptorSetLayout : descriptorSetLayout;
+
+    obj.cubemapPipeline = createCubemapPipeline(
+        device, colorFmt, depthFmt, cubemapRP, layout,
+        obj.pipeline->getVertexShaderPath(),
+        obj.pipeline->getFragmentShaderPath()
+    );
+}
 
     // Schneeflocken zuletzt hinzufügen
     RenderObject snowflakes = factory.createSnowflake(
@@ -758,6 +808,10 @@ int main() {
     delete snow;
 
     //Scene
+    for (GraphicsPipeline* p : g_cubemapPipelines) {
+        if (p) { p->destroy(); delete p; }
+    }
+    g_cubemapPipelines.clear();
     delete scene;
 
     //Rendering Resources

@@ -147,7 +147,7 @@ void Texture::copyBufferToImage() {
     barrierToTransfer.image = _textureImage;
     barrierToTransfer.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     barrierToTransfer.subresourceRange.baseMipLevel = 0;
-    barrierToTransfer.subresourceRange.levelCount = 1;
+    barrierToTransfer.subresourceRange.levelCount = _mipLevels;
     barrierToTransfer.subresourceRange.baseArrayLayer = 0;
     barrierToTransfer.subresourceRange.layerCount = 1;
     barrierToTransfer.srcAccessMask = 0; // as oldLayout is undefined
