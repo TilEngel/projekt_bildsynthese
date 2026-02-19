@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #ifndef NDEBUG
-static const bool enableValidationLayers = false;
+static const bool enableValidationLayers = true;
 #endif
 
 static const std::vector<const char*> validationLayers = {

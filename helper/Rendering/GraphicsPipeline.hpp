@@ -66,6 +66,9 @@ public:
     VkFormat getColorFormat() const { return _colorFormat; }
     VkFormat getDepthFormat() const { return _depthFormat; }
     PipelineType getPipelineType() const {return _pipelineType;}
+    const char* getVertexShaderPath() const { return _vertexShaderPath; }
+    const char* getFragmentShaderPath() const { return _fragmentShaderPath; }
+
 private:
     VkDevice _device;
     VkFormat _colorFormat;

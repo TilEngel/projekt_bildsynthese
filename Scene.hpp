@@ -35,6 +35,7 @@ struct RenderObject {
     VkSampler textureSampler = VK_NULL_HANDLE;
     Texture* texture = nullptr;
     GraphicsPipeline* pipeline = nullptr;
+    GraphicsPipeline* cubemapPipeline = nullptr;
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     VkBuffer instanceBuffer = VK_NULL_HANDLE;
     uint32_t instanceCount = 1;
