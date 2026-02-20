@@ -1220,12 +1220,21 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
         }
 
         const auto& obj = scene->getObject(i);
-        
-        if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
-            if (obj.isSnow) snowIdx++;
-            else if (obj.isLit) litIdx++;
-            else normalForwardIdx++;
-            continue;
+
+        // Pipeline-Typ prüfen und inkompatible überspringen
+        if (obj.pipeline != nullptr) {
+            PipelineType pt = obj.pipeline->getPipelineType();
+            if (pt == PipelineType::MIRROR_MARK   ||
+                pt == PipelineType::MIRROR_BLEND  ||
+                pt == PipelineType::MIRROR_REFLECT||
+                pt == PipelineType::LIGHTING      ||
+                pt == PipelineType::SKYBOX) {     // Skybox auch skippen - macht in Cubemap keinen Sinn
+                // Index trotzdem hochzählen!
+                if (obj.isSnow) snowIdx++;
+                else if (obj.isLit) litIdx++;
+                else normalForwardIdx++;
+                continue;
+            }
         }
 
         GraphicsPipeline* activePipeline = obj.cubemapPipeline ? obj.cubemapPipeline : obj.pipeline;

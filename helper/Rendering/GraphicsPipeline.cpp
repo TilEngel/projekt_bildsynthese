@@ -1,10 +1,10 @@
-#include "GraphicsPipeline.hpp"
-
+#include "GraphicsPipeline.hpp" 
 #include <stdexcept>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <array>
+#include <vulkan/vulkan_core.h>
 
 // Helper: SPIR-V file lesen
 static std::vector<char> readFile(const std::string& filename) {
@@ -257,7 +257,7 @@ void GraphicsPipeline::createPipeline() {
             break;
         default:
             depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_FALSE;
+            depthStencil.depthWriteEnable = VK_TRUE;        //evtl. problematisch
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
