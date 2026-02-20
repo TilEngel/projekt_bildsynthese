@@ -257,7 +257,7 @@ void GraphicsPipeline::createPipeline() {
             break;
         default:
             depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_TRUE;
+            depthStencil.depthWriteEnable = VK_FALSE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencil.stencilTestEnable = VK_FALSE;
             break;

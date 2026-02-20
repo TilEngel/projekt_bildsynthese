@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 #ifndef NDEBUG
 static const bool enableValidationLayers = true;
@@ -319,7 +320,7 @@ VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice d
     ubo.binding = 0;
     ubo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     ubo.descriptorCount = 1;
-    ubo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    ubo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
     // Binding 1: Combined Image Sampler
     VkDescriptorSetLayoutBinding sampler{};

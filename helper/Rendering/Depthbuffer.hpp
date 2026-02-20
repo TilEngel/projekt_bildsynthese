@@ -23,6 +23,10 @@ public:
         return _depthImageView;
     }
 
+    VkImageView getDepthOnlyView() { 
+        return _depthOnlyView; 
+    }
+
     void recreate(VkExtent2D extent) {
         cleanupDepthRessources();
         createDepthImage(extent);
@@ -37,6 +41,8 @@ private:
     VkImage _depthImage = VK_NULL_HANDLE;
     VkDeviceMemory _depthImageMemory = VK_NULL_HANDLE;
     VkImageView _depthImageView = VK_NULL_HANDLE;
+
+    VkImageView _depthOnlyView = VK_NULL_HANDLE;
 
 
     // create depth image with memory

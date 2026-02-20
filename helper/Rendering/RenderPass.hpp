@@ -2,6 +2,7 @@
 #include <vulkan/vulkan_core.h>
 #include <array>
 #include <stdexcept>
+#include <iostream>
 
 class RenderPass {
 public:
@@ -86,7 +87,7 @@ public:
         lightingInputs[1].attachment = kAttachment_GBUFFER_ALBEDO;
         lightingInputs[1].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         lightingInputs[2].attachment = kAttachment_DEPTH;
-        lightingInputs[2].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        lightingInputs[2].layout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
 
         // Back buffer output reference
         VkAttachmentReference backBufferRef{};
@@ -112,7 +113,7 @@ public:
        //read-only depth attachment reference für Subpass 2
         VkAttachmentReference depthReadRef{};
         depthReadRef.attachment = kAttachment_DEPTH;
-        depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
 
         //Lighting Pass
         subpasses[kSubpass_LIGHTING].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
