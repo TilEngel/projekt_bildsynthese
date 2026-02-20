@@ -108,6 +108,10 @@ void DepthBuffer::createDepthImageView()
 // depth buffer resources zerstören
 void DepthBuffer::cleanupDepthRessources()
 {
+    if (_depthOnlyImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(_device, _depthOnlyImageView, nullptr);
+        _depthOnlyImageView = VK_NULL_HANDLE;
+    }
     if (_depthImageView != VK_NULL_HANDLE) {
         vkDestroyImageView(_device, _depthImageView, nullptr);
         _depthImageView = VK_NULL_HANDLE;
@@ -122,8 +126,5 @@ void DepthBuffer::cleanupDepthRessources()
         vkFreeMemory(_device, _depthImageMemory, nullptr);
         _depthImageMemory = VK_NULL_HANDLE;
     }
-    if (_depthOnlyImageView != VK_NULL_HANDLE) {
-        vkDestroyImageView(_device, _depthOnlyImageView, nullptr);
-        _depthOnlyImageView = VK_NULL_HANDLE;
-    }
+    
 }

@@ -94,7 +94,6 @@ public:
         }
         _device = VK_NULL_HANDLE;
     }
-
 private:
     VkDevice _device;
     VkCommandPool _commandPool;

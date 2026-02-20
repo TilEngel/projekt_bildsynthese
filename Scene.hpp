@@ -82,26 +82,29 @@ public:
     
     //Deferred Objekt hinzufügen
     void setDeferredRenderObject(DeferredRenderObject& deferredObj) {
-    // Depth Pass Object
-    deferredObj.depthPass.isDeferred = true;
-    _objects.push_back(deferredObj.depthPass);
-    size_t depthIndex = _objects.size() - 1;
-    
-    // G-Buffer Pass Object
-    deferredObj.gbufferPass.isDeferred = true;
-    _objects.push_back(deferredObj.gbufferPass);
-    size_t gbufferIndex = _objects.size() - 1;
-    
-    
-    // Speichere die Indices
-    DeferredObjectInfo info;
-    info.depthPassIndex = depthIndex;
-    info.gbufferPassIndex = gbufferIndex;
-    _deferredObjectInfos.push_back(info);
-    
-    _deferredObjectIndices.push_back(depthIndex);
-    _deferredObjectIndices.push_back(gbufferIndex);
-}
+        // Depth Pass Object
+        deferredObj.depthPass.isDeferred = true;
+        _objects.push_back(deferredObj.depthPass);
+        size_t depthIndex = _objects.size() - 1;
+
+        std::cout << "Nach push_back depthPass memory: " 
+              << _objects[depthIndex].vertexBufferMemory << std::endl;
+
+        // G-Buffer Pass Object
+        deferredObj.gbufferPass.isDeferred = true;
+        _objects.push_back(deferredObj.gbufferPass);
+        size_t gbufferIndex = _objects.size() - 1;
+        
+        
+        // Speichere die Indices
+        DeferredObjectInfo info;
+        info.depthPassIndex = depthIndex;
+        info.gbufferPassIndex = gbufferIndex;
+        _deferredObjectInfos.push_back(info);
+        
+        _deferredObjectIndices.push_back(depthIndex);
+        _deferredObjectIndices.push_back(gbufferIndex);
+    }
     
     void addLightSource(const LightSourceObject& light) {
         if (_lights.size() >= 4) {

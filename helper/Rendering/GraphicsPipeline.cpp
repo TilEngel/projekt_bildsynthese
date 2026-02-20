@@ -179,7 +179,7 @@ void GraphicsPipeline::createPipeline() {
             // Tessellation: Normaler Depth Test
             depthStencil.depthTestEnable = VK_TRUE;
             depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencil.stencilTestEnable = VK_FALSE;
             break;
         case PipelineType::DEPTH_ONLY: 
@@ -251,7 +251,7 @@ void GraphicsPipeline::createPipeline() {
             
         case PipelineType::SKYBOX:
             depthStencil.depthTestEnable = VK_TRUE;
-            depthStencil.depthWriteEnable = VK_FALSE;
+            depthStencil.depthWriteEnable =VK_TRUE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
             depthStencil.stencilTestEnable = VK_FALSE;
             break;

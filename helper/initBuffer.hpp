@@ -49,4 +49,5 @@ public:
 
     int getTexWidth() const;
     int getTexHeight() const;
+    VkDeviceMemory getVertexBufferMemory() const { return _vertexBufferMemory; }
 };

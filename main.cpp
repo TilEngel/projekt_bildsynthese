@@ -232,17 +232,17 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
         scene->setRenderObject(kaktus);
     }
     //Objekt mit Tessellation-Shader
-    // glm::mat4 modelTess = glm::mat4(1.0f);
-    // modelTess = glm::translate(modelTess, glm::vec3(0.0f, 1.5f, 0.0f));
-    // modelTess = glm::scale(modelTess, glm::vec3(0.0001f, 0.0001f, 0.0001f));
-    // //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
-    // RenderObject tessObject = factory.createTessellatedObject(
-    //     "./models/garden_gnome.obj",
-    //     "textures/garden_gnome.jpg",
-    //     modelTess,
-    //     renderPass
-    // );
-    // scene->setRenderObject(tessObject);
+    glm::mat4 modelTess = glm::mat4(1.0f);
+    modelTess = glm::translate(modelTess, glm::vec3(0.0f, 1.5f, 0.0f));
+    modelTess = glm::scale(modelTess, glm::vec3(3.0001f, 3.0001f, 3.0001f));
+    //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
+    RenderObject tessObject = factory.createTessellatedObject(
+        "./models/garden_gnome.obj",
+        "textures/garden_gnome.jpg",
+        modelTess,
+        renderPass
+    );
+    scene->setRenderObject(tessObject);
 }
 
 int main() {
@@ -679,12 +679,22 @@ int main() {
     // ###### Cleanup in main ###########
     vkDeviceWaitIdle(device);
 
-    // 1. Frames zerstören
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+    const RenderObject& obj = scene->getObject(i);
+    if (obj.vertexBufferMemory == VK_NULL_HANDLE && obj.vertexBuffer != VK_NULL_HANDLE) {
+        std::cout << "Object " << i << " has vertexBuffer but no vertexBufferMemory!" << std::endl;
+    }
+}
+    if(reflectionProbe){
+        delete reflectionProbe;
+    }
+
+    //Frames zerstören
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         delete framesInFlight[i];
     }
 
-    // 2. Sammle unique Ressourcen
+    // ammle unique Ressourcen
     std::set<GraphicsPipeline*> uniquePipelines;
     std::set<Texture*> uniqueTextures;
     std::map<VkBuffer, VkDeviceMemory> uniqueVertexBuffers;  // Buffer + Memory
@@ -692,7 +702,11 @@ int main() {
     // Normale Objekte
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const RenderObject& obj = scene->getObject(i);
-        
+        if (obj.vertexBuffer != VK_NULL_HANDLE && 
+            obj.vertexBufferMemory != VK_NULL_HANDLE) {  // nur wenn Memory gesetzt!
+            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+        }
+
         if (obj.texture) {
             uniqueTextures.insert(obj.texture);
         }
@@ -700,19 +714,15 @@ int main() {
         if (obj.pipeline) {
             uniquePipelines.insert(obj.pipeline);
         }
-        
-        if (obj.vertexBuffer != VK_NULL_HANDLE) {
-            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
-        }
-    }
-    if(reflectionProbe){
-        delete reflectionProbe;
+       
     }
 
-    // Reflektierte Objekte (teilen sich Ressourcen!)
+    // Reflektierte Objekte (teilen sich Ressourcen)
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
         const RenderObject& obj = scene->getReflectedObject(i);
-        
+        if (obj.vertexBuffer != VK_NULL_HANDLE && obj.vertexBufferMemory != VK_NULL_HANDLE) {
+            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+        }
         if (obj.texture) {
             uniqueTextures.insert(obj.texture);
         }
@@ -721,9 +731,7 @@ int main() {
             uniquePipelines.insert(obj.pipeline);
         }
         
-        if (obj.vertexBuffer != VK_NULL_HANDLE) {
-            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
-        }
+        
     }
 
     //Vertex-Buffer & memory zerstören

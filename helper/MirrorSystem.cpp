@@ -155,7 +155,7 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
         _renderPass,
         scene->getDescriptorSetLayout(),
         PipelineType::MIRROR_REFLECT,
-        2
+        3
     );
     
     reflectedObj.pipeline = reflectedPipeline;

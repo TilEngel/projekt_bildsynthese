@@ -19,7 +19,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         renderPass,
         _descriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     std::vector<Vertex> vertices;
@@ -31,12 +31,15 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
     obj.pipeline = pipeline;
     obj.modelMatrix = modelMatrix;
     obj.texture = tex;
+
+    
 
     return obj;
 }
@@ -101,7 +104,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::arr
         renderPass,
         _descriptorSetLayout,
         PipelineType::SKYBOX,
-        2
+        3
     );
 
     InitBuffer buff;
@@ -113,6 +116,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::arr
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = cubemap->getImageView();
     obj.textureSampler = cubemap->getSampler();
@@ -147,7 +151,7 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         renderPass,
         snowDescriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
@@ -156,6 +160,7 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
@@ -192,7 +197,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD,2
+        PipelineType::STANDARD,3
     );
    
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -204,6 +209,7 @@ LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
     glm::mat4 modelMatrix = model;
     
     light.renderObject.vertexBuffer = vertexBuffer;
+    light.renderObject.vertexBufferMemory = _buff.getVertexBufferMemory();
     light.renderObject.vertexCount = static_cast<uint32_t>(sphereVertices.size());
     light.renderObject.textureImageView = tex->getImageView();
     light.renderObject.textureSampler = tex->getSampler();
@@ -229,7 +235,7 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         renderPass,
         _litDescriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
     
     std::vector<Vertex> vertices;
@@ -241,6 +247,7 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
     
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
@@ -281,7 +288,7 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         renderPass,
         _descriptorSetLayout,
         pipelineType,
-        2
+        3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(
@@ -292,6 +299,7 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
@@ -310,6 +318,8 @@ DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,c
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
                                                      _commandPool, _graphicsQueue, vertices);
 
+    VkDeviceMemory vertexBufferMemory = _buff.getVertexBufferMemory();
+    std::cout << "vertexBufferMemory: " << vertexBufferMemory << std::endl;
     // Load texture
     Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
 
@@ -325,9 +335,11 @@ DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,c
     );
 
     deferredObj.depthPass.vertexBuffer = vertexBuffer;
+    deferredObj.depthPass.vertexBufferMemory= vertexBufferMemory;
     deferredObj.depthPass.vertexCount = static_cast<uint32_t>(vertices.size());
     deferredObj.depthPass.textureImageView = tex->getImageView();
     deferredObj.depthPass.textureSampler = tex->getSampler();
+    deferredObj.depthPass.texture = tex;
     deferredObj.depthPass.pipeline = depthPipeline;
     deferredObj.depthPass.modelMatrix = modelMatrix;
     deferredObj.depthPass.instanceCount = 1;
@@ -345,14 +357,20 @@ DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,c
     );
 
     deferredObj.gbufferPass.vertexBuffer = vertexBuffer;
+    deferredObj.gbufferPass.vertexBufferMemory =VK_NULL_HANDLE;
     deferredObj.gbufferPass.vertexCount = static_cast<uint32_t>(vertices.size());
     deferredObj.gbufferPass.textureImageView = tex->getImageView();
     deferredObj.gbufferPass.textureSampler = tex->getSampler();
+    deferredObj.gbufferPass.texture= tex;
     deferredObj.gbufferPass.pipeline = gbufferPipeline;
     deferredObj.gbufferPass.modelMatrix = modelMatrix;
     deferredObj.gbufferPass.instanceCount = 1;
     deferredObj.gbufferPass.isDeferred =true;
-
+// Debug:
+std::cout << "depthPass.vertexBufferMemory: " 
+          << deferredObj.depthPass.vertexBufferMemory << std::endl;
+std::cout << "gbufferPass.vertexBufferMemory: " 
+          << deferredObj.gbufferPass.vertexBufferMemory << std::endl;
     return deferredObj;
 }
 
@@ -385,6 +403,7 @@ RenderObject ObjectFactory::createLightingQuad(VkRenderPass renderPass,
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.pipeline = pipeline;
     obj.modelMatrix = glm::mat4(1.0f);
@@ -405,7 +424,7 @@ RenderObject ObjectFactory::createReflectiveObject(const char* modelPath,Reflect
         renderPass,
         _descriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     // Model laden
@@ -416,6 +435,7 @@ RenderObject ObjectFactory::createReflectiveObject(const char* modelPath,Reflect
    
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = probe->getCubemapView();
     obj.textureSampler = probe->getCubemapSampler();
@@ -457,7 +477,7 @@ RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD,2
+        PipelineType::STANDARD,3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice,_device,_commandPool,_graphicsQueue,vertices);
@@ -467,6 +487,7 @@ RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass
     //RenderObject
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();
@@ -491,7 +512,7 @@ RenderObject ObjectFactory::createTessellatedObject(const char* modelPath,
         renderPass,
         _descriptorSetLayout,
         PipelineType::TESSELLATION,
-        2  // Subpass
+        3  // Subpass
     );
 
     std::vector<Vertex> vertices;
@@ -504,6 +525,7 @@ RenderObject ObjectFactory::createTessellatedObject(const char* modelPath,
 
     RenderObject obj{};
     obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = _buff.getVertexBufferMemory();
     obj.vertexCount = static_cast<uint32_t>(vertices.size());
     obj.textureImageView = tex->getImageView();
     obj.textureSampler = tex->getSampler();

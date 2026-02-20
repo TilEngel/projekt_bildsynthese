@@ -20,6 +20,7 @@ public:
             kSubpass_DEPTH = 0,
             kSubpass_GBUFFER = 1,
             kSubpass_LIGHTING = 2,
+            kSubpass_FORWARD = 3,
         };
         std::cout<<"Attachments\n";
         //----attachments
@@ -28,11 +29,11 @@ public:
         // Back buffer 
         attachments[kAttachment_BACK].format = colorFormat;
         attachments[kAttachment_BACK].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[kAttachment_BACK].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[kAttachment_BACK].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         attachments[kAttachment_BACK].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[kAttachment_BACK].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        attachments[kAttachment_BACK].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachments[kAttachment_BACK].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         //Depth buffer (mit stencil für spiegel)
@@ -43,7 +44,7 @@ public:
         attachments[kAttachment_DEPTH].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachments[kAttachment_DEPTH].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[kAttachment_DEPTH].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+        attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         //GBuffer 1: Normal & metallic
         attachments[kAttachment_GBUFFER_NORMAL].format = VK_FORMAT_R32G32B32A32_SFLOAT;
@@ -88,12 +89,16 @@ public:
         lightingInputs[2].attachment = kAttachment_DEPTH;
         lightingInputs[2].layout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
 
+        //Forward objekte
+        VkAttachmentReference depthWriteRef{};
+        depthWriteRef.attachment = kAttachment_DEPTH;
+        depthWriteRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         // Back buffer output reference
         VkAttachmentReference backBufferRef{};
         backBufferRef.attachment = kAttachment_BACK;
         backBufferRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         //--- subpasses
-        std::array<VkSubpassDescription, 3> subpasses{};
+        std::array<VkSubpassDescription, 4> subpasses{};
         std::cout<<"Subpasses\n";
       
         //Depth Prepass
@@ -122,8 +127,14 @@ public:
         subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
         subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = &depthReadRef;
 
+        //Forward pass
+        subpasses[kSubpass_FORWARD].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpasses[kSubpass_FORWARD].colorAttachmentCount = 1;
+        subpasses[kSubpass_FORWARD].pColorAttachments = &backBufferRef;
+        subpasses[kSubpass_FORWARD].pDepthStencilAttachment = &depthWriteRef;
+
         // ---SubPpass dependencies
-        std::array<VkSubpassDependency, 3> dependencies{};
+        std::array<VkSubpassDependency, 4> dependencies{};
         std::cout<<"Dependencies \n";
 
         // External -> Depth Prepass
@@ -152,8 +163,18 @@ public:
         dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         dependencies[2].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
         dependencies[2].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-        std::cout<<"2 Done\n";
-        
+
+        // Lighting -> Forward
+        dependencies[3].srcSubpass = kSubpass_LIGHTING;
+        dependencies[3].dstSubpass = kSubpass_FORWARD;
+        dependencies[3].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        dependencies[3].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | 
+                                        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[3].srcAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+        dependencies[3].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+                                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependencies[3].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+                
         //----Create renderPass
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;

@@ -59,7 +59,7 @@ private:
     //Cubemap ressourcen
     VkImage _cubemapImage = VK_NULL_HANDLE;
     VkDeviceMemory _cubemapMemory = VK_NULL_HANDLE;
-    std::array<VkImageView, 6> _faceViews;
+    std::array<VkImageView, 6> _faceViews ={};
     VkImageView _cubemapView = VK_NULL_HANDLE;
     VkSampler _sampler = VK_NULL_HANDLE;
     //depth Kram
@@ -67,7 +67,7 @@ private:
     VkDeviceMemory _depthMemory = VK_NULL_HANDLE;
     VkImageView _depthView = VK_NULL_HANDLE;
     //RenderPass & Framebuffers
-    std::array<VkFramebuffer, 6> _framebuffers;
+    std::array<VkFramebuffer, 6> _framebuffers= {};
     VkRenderPass _renderPass = VK_NULL_HANDLE;
 
     //Erstellt Cubemap-Image mit 6 Array-Layers

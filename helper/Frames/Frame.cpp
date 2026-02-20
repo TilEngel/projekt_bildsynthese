@@ -178,13 +178,16 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     scissor.extent = _swapChain->getExtent();
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
 
- 
+    
     // SUBPASS 0: depth prepass  
     size_t deferredDescriptorIdx = 0;  // Zähler für deferred descriptor sets
     
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
         const auto& obj = scene->getDepthPassObject(i);
-        
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             deferredDescriptorIdx++;  // Auch bei skip hochzählen!
             continue;
@@ -204,7 +207,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout,pushStages, 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
         
@@ -220,7 +223,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
     for (size_t i = 0; i < scene->getDeferredObjectCount(); ++i) {
         const auto& obj = scene->getGBufferPassObject(i);
-        
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             std::cout << "  [GBUFFER] Skipping object " << i << " (invalid)" << std::endl;
             deferredDescriptorIdx++;
@@ -245,7 +251,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout, pushStages, 
                         0, sizeof(glm::mat4), &obj.modelMatrix);
         
       
@@ -280,6 +286,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     }
 
     // forward objekte (normale, snow, lit)
+    vkCmdNextSubpass(_commandBuffer,VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
  
@@ -293,7 +300,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
-        
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
         // Skip deferred objects - die wurden schon gerendert
         if (obj.isDeferred) {
             continue;
@@ -348,7 +358,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout, pushStages, 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
 
         if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
@@ -385,7 +395,11 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         }
         
         const auto& obj = scene->getObject(i);
-        
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
+
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             normalForwardIdx++;
             continue;
@@ -410,7 +424,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+                          pushStages, 0, sizeof(glm::mat4), &obj.modelMatrix);
 
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
@@ -420,7 +434,10 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     // Diese werden "hinter" der Spiegelebene gerendert
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
     const auto& reflObj = scene->getReflectedObject(i);
-    
+    VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+    if (reflObj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+        pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+    }
     if (reflObj.vertexCount == 0 || reflObj.vertexBuffer == VK_NULL_HANDLE) {
         continue;
     }
@@ -509,7 +526,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
     vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                      VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
+                      pushStages, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
 
     vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
     }
@@ -541,7 +558,11 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         }
         
         const auto& obj = scene->getObject(i);
-        
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
+
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             normalForwardIdx++;
             continue;
@@ -566,7 +587,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+                          pushStages, 0, sizeof(glm::mat4), &obj.modelMatrix);
 
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
@@ -1209,17 +1230,18 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
 
     // Rendere alle normalen Forward Objects
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        const auto& obj = scene->getObject(i);
         // Skip: Reflektierendes Objekt, Deferred, Mirrors
         if (i == reflectiveObjectIndex || 
             scene->isDeferredObject(i) || 
-            scene->isMirrorObject(i)) {
+            scene->isMirrorObject(i) ||
+            obj.pipeline->getPipelineType()==PipelineType::TESSELLATION) {
             if (!scene->isSnowObject(i) && !scene->isLitObject(i) && !scene->isDeferredObject(i)) {
                 normalForwardIdx++;
             }
             continue;
         }
 
-        const auto& obj = scene->getObject(i);
         
         if (obj.vertexCount == 0 || obj.vertexBuffer == VK_NULL_HANDLE) {
             if (obj.isSnow) snowIdx++;
@@ -1227,6 +1249,7 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
             else normalForwardIdx++;
             continue;
         }
+        
 
         VkPipeline pipeline = obj.pipeline->getPipeline();
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
@@ -1260,9 +1283,12 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
         vkCmdBindVertexBuffers(cmd, 0, 1, vb, off);
 
         // Push Constants
-        vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_VERTEX_BIT, 
-                          0, sizeof(glm::mat4), &obj.modelMatrix);
-
+        VkShaderStageFlags pushStages = VK_SHADER_STAGE_VERTEX_BIT;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) {
+            pushStages |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        }
+        vkCmdPushConstants(cmd, layout, pushStages,
+                        0, sizeof(glm::mat4), &obj.modelMatrix);
         // Draw
         if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
             vkCmdDraw(cmd, obj.vertexCount, obj.instanceCount, 0, 0);
