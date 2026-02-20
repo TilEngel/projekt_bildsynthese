@@ -711,7 +711,7 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
             framesInFlight[currentFrame]->updateLightingDescriptorSet(
                 framebuffers->getGBufferNormalView(),
                 framebuffers->getGBufferAlbedoView(),
-                depthBuffer->getImageView()
+                depthBuffer->getDepthOnlyView()
             );
         }
 

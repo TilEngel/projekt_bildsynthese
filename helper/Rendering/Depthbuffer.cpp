@@ -98,6 +98,23 @@ void DepthBuffer::createDepthImageView()
     if (vkCreateImageView(_device, &viewInfo, nullptr, &_depthImageView) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create depth image view!");
     }
+
+    // Depth-only view für Input Attachment (kein Stencil!)
+    VkImageViewCreateInfo depthOnlyInfo{};
+    depthOnlyInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    depthOnlyInfo.image = _depthImage;
+    depthOnlyInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    depthOnlyInfo.format = _depthImageFormat;
+    depthOnlyInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;  // NUR DEPTH
+    depthOnlyInfo.subresourceRange.baseMipLevel = 0;
+    depthOnlyInfo.subresourceRange.levelCount = 1;
+    depthOnlyInfo.subresourceRange.baseArrayLayer = 0;
+    depthOnlyInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(_device, &depthOnlyInfo, nullptr, &_depthOnlyView) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create depth-only image view!");
+    }
+
 }
 
 // depth buffer resources zerstören
@@ -116,5 +133,9 @@ void DepthBuffer::cleanupDepthRessources()
     if (_depthImageMemory != VK_NULL_HANDLE) {
         vkFreeMemory(_device, _depthImageMemory, nullptr);
         _depthImageMemory = VK_NULL_HANDLE;
+    }
+    if (_depthOnlyView != VK_NULL_HANDLE) {
+        vkDestroyImageView(_device, _depthOnlyView, nullptr);
+        _depthOnlyView = VK_NULL_HANDLE;
     }
 }
