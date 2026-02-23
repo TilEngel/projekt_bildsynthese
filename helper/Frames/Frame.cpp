@@ -4,6 +4,7 @@
 #include <array>
 #include <cstring>
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -162,6 +163,25 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
+    // Barriere
+    VkImageMemoryBarrier swapBarrier{};
+    swapBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    swapBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    swapBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    swapBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    swapBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    swapBarrier.image = _swapChain->getImage(imageIndex);
+    swapBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    swapBarrier.srcAccessMask = 0;
+    swapBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    vkCmdPipelineBarrier(
+        _commandBuffer,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        0, 0, nullptr, 0, nullptr, 1, &swapBarrier
+    );
+
     vkCmdBeginRenderPass(_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport{};
@@ -280,6 +300,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     }
 
     // forward objekte (normale, snow, lit)
+    vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
  
@@ -1221,24 +1242,15 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
 
         const auto& obj = scene->getObject(i);
 
-        // Pipeline-Typ prüfen und inkompatible überspringen
-        if (obj.pipeline != nullptr) {
-            PipelineType pt = obj.pipeline->getPipelineType();
-            if (pt == PipelineType::MIRROR_MARK   ||
-                pt == PipelineType::MIRROR_BLEND  ||
-                pt == PipelineType::MIRROR_REFLECT||
-                pt == PipelineType::LIGHTING      ||
-                pt == PipelineType::SKYBOX) {     // Skybox auch skippen - macht in Cubemap keinen Sinn
-                // Index trotzdem hochzählen!
-                if (obj.isSnow) snowIdx++;
-                else if (obj.isLit) litIdx++;
-                else normalForwardIdx++;
-                continue;
-            }
+        GraphicsPipeline* activePipeline = obj.cubemapPipeline;
+        if (!activePipeline) {
+            // Kein Cubemap-Pipeline -> überspringen
+            if (obj.isSnow) snowIdx++;
+            else if (obj.isLit) litIdx++;
+            else normalForwardIdx++;
+            continue;
         }
-
-        GraphicsPipeline* activePipeline = obj.cubemapPipeline ? obj.cubemapPipeline : obj.pipeline;
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, activePipeline->getPipeline());
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, activePipeline->getPipeline()); 
         VkPipelineLayout layout = activePipeline->getPipelineLayout();
 
         // Descriptor Set binden

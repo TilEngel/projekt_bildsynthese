@@ -19,7 +19,7 @@ RenderObject ObjectFactory::createGenericObject(const char* modelPath,
         renderPass,
         _descriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     std::vector<Vertex> vertices;
@@ -101,7 +101,7 @@ RenderObject ObjectFactory::createSkybox(VkRenderPass renderPass, const std::arr
         renderPass,
         _descriptorSetLayout,
         PipelineType::SKYBOX,
-        2
+        3
     );
 
     InitBuffer buff;
@@ -146,7 +146,7 @@ RenderObject ObjectFactory::createSnowflake(const char* texturePath,
         renderPass,
         snowDescriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices);
@@ -191,7 +191,8 @@ LightSourceObject ObjectFactory::createLightSource(const glm::mat4& model,
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD,2
+        PipelineType::STANDARD,
+        3
     );
    
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device,
@@ -228,7 +229,7 @@ RenderObject ObjectFactory::createLitObject(const char* modelPath,
         renderPass,
         _litDescriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
     
     std::vector<Vertex> vertices;
@@ -280,7 +281,7 @@ RenderObject ObjectFactory::createMirror(const glm::mat4& modelMatrix,
         renderPass,
         _descriptorSetLayout,
         pipelineType,
-        2
+        3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(
@@ -404,7 +405,7 @@ RenderObject ObjectFactory::createReflectiveObject(const char* modelPath,Reflect
         renderPass,
         _descriptorSetLayout,
         PipelineType::STANDARD,
-        2
+        3
     );
 
     // Model laden
@@ -456,7 +457,8 @@ RenderObject ObjectFactory::createGraffitti(glm::mat4& modelMatrix, VkRenderPass
         "shaders/testapp.frag.spv",
         renderPass,
         _descriptorSetLayout,
-        PipelineType::STANDARD,2
+        PipelineType::STANDARD,
+        3
     );
 
     VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice,_device,_commandPool,_graphicsQueue,vertices);
@@ -490,7 +492,7 @@ RenderObject ObjectFactory::createTessellatedObject(const char* modelPath,
         renderPass,
         _descriptorSetLayout,
         PipelineType::TESSELLATION,
-        2  // Subpass
+        3  // Subpass
     );
 
     std::vector<Vertex> vertices;

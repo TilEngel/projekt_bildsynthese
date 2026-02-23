@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 #include "../initBuffer.hpp"
 
 //Erstellt depth image 
@@ -45,7 +46,7 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
     imgInfo.arrayLayers = 1;
     imgInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imgInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imgInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+    imgInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     imgInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imgInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
