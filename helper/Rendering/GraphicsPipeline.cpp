@@ -203,6 +203,8 @@ void GraphicsPipeline::createPipeline() {
             depthStencil.depthTestEnable = VK_FALSE;
             depthStencil.depthWriteEnable = VK_FALSE;
             depthStencil.stencilTestEnable = VK_FALSE;
+            vertexInput.vertexBindingDescriptionCount = 0;
+            vertexInput.vertexAttributeDescriptionCount = 0;
             break;
         
         case PipelineType::MIRROR_MARK:

@@ -4,6 +4,7 @@
 #include <array>
 #include <cstring>
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -1221,24 +1222,15 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
 
         const auto& obj = scene->getObject(i);
 
-        // Pipeline-Typ prüfen und inkompatible überspringen
-        if (obj.pipeline != nullptr) {
-            PipelineType pt = obj.pipeline->getPipelineType();
-            if (pt == PipelineType::MIRROR_MARK   ||
-                pt == PipelineType::MIRROR_BLEND  ||
-                pt == PipelineType::MIRROR_REFLECT||
-                pt == PipelineType::LIGHTING      ||
-                pt == PipelineType::SKYBOX) {     // Skybox auch skippen - macht in Cubemap keinen Sinn
-                // Index trotzdem hochzählen!
-                if (obj.isSnow) snowIdx++;
-                else if (obj.isLit) litIdx++;
-                else normalForwardIdx++;
-                continue;
-            }
+        GraphicsPipeline* activePipeline = obj.cubemapPipeline;
+        if (!activePipeline) {
+            // Kein Cubemap-Pipeline -> überspringen
+            if (obj.isSnow) snowIdx++;
+            else if (obj.isLit) litIdx++;
+            else normalForwardIdx++;
+            continue;
         }
-
-        GraphicsPipeline* activePipeline = obj.cubemapPipeline ? obj.cubemapPipeline : obj.pipeline;
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, activePipeline->getPipeline());
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, activePipeline->getPipeline()); 
         VkPipelineLayout layout = activePipeline->getPipelineLayout();
 
         // Descriptor Set binden

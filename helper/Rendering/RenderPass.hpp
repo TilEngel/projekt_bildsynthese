@@ -44,7 +44,7 @@ public:
         attachments[kAttachment_DEPTH].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachments[kAttachment_DEPTH].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         attachments[kAttachment_DEPTH].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;;
+        attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // war vorher nicht READ_ONLY
 
         //GBuffer 1: Normal & metallic
         attachments[kAttachment_GBUFFER_NORMAL].format = VK_FORMAT_R32G32B32A32_SFLOAT;
@@ -87,7 +87,7 @@ public:
         lightingInputs[1].attachment = kAttachment_GBUFFER_ALBEDO;
         lightingInputs[1].layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         lightingInputs[2].attachment = kAttachment_DEPTH;
-        lightingInputs[2].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // war vorher READ_ONLY
+        lightingInputs[2].layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
         // Back buffer output reference
         VkAttachmentReference backBufferRef{};
@@ -113,7 +113,7 @@ public:
        //read-only depth attachment reference für Subpass 2
         VkAttachmentReference depthReadRef{};
         depthReadRef.attachment = kAttachment_DEPTH;
-        depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; // war vorher READ_ONLY
+        depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
         //Lighting Pass
         subpasses[kSubpass_LIGHTING].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -148,9 +148,9 @@ public:
         //GBuffer -> Lighting
         dependencies[2].srcSubpass = kSubpass_GBUFFER;
         dependencies[2].dstSubpass = kSubpass_LIGHTING;
-        dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependencies[2].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         dependencies[2].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[2].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
         dependencies[2].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
         std::cout<<"2 Done\n";
