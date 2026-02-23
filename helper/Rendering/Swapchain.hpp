@@ -30,6 +30,10 @@ public:
         return _images.size();
     }
 
+    VkImage getImage(size_t index) {
+        return _images.at(index);
+    }
+
     VkFormat getImageFormat() {
         return _imageFormat;
     }
