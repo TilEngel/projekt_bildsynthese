@@ -69,7 +69,11 @@ public:
     //Erstellt ein 2D Viereck mit zufälliger Graffitti-Textur
     RenderObject createGraffitti(glm::mat4& modelMatrix, VkRenderPass renderPass);
 
+    //Objekt, dass mit tessellation-Shader gerendert wird
     RenderObject createTessellatedObject(const char* modelPath, const char* texturePath, const glm::mat4& modelMatrix, VkRenderPass renderPass);
+
+    //Vergleichsobjekt zu tessellation
+    RenderObject createPolygonLineObject(const char* modelPath,const char* texturePath,const glm::mat4& modelMatrix, VkRenderPass renderPass);
 private:
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;

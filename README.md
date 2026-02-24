@@ -34,6 +34,7 @@ Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welch
 | **Spiegelung der Szene** | Magische Kugel im Kaktuskreis verwendet Render-to-Texture<br>Implementierung: `helper/renderToTexture/` |
 | **Compute Shader** | Schnee-Simulation<br>Implementierung: `helper/Compute/Snow`, snow-Shader, Erstellung in `main.cpp` |
 | **Stencil Buffer** | Spiegel-System<br>Implementierung: `helper/MirrorSystem`, Erstellung in `main.cpp` |
+| **Tessellation** | Die obere Kugel des Schneemanns ist tesselliert, die untere nicht (beides das gleiche Modell) <br>Implementierung: `shaders/tessellation`, Kleinigkeiten in `Frame.cpp` und `GraphicsPipeline.cpp` |
 
 ---
 
@@ -58,3 +59,4 @@ Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welch
 | Bus | [Free3D - Tourist Bus](https://free3d.com/3d-model/tourist-bus-with-open-top-v2--502214.html) |
 | Bier | [Free3D - Beer Bottle](https://free3d.com/3d-model/-oz-beer-bottle-v1--386973.html) |
 | Kaktus | [Free3D - Cactus](https://free3d.com/3d-model/-cactus-v1--424886.html) |
+| Zauberhut | [Free3D - WizardHat V2](https://free3d.com/3d-model/wizardhat-v2--336163.html) |

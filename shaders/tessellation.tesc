@@ -1,11 +1,12 @@
+//tessellation Control shader
 #version 450
 layout(vertices = 3) out;
 
-layout(location = 0) in vec3 inNormal[];
-layout(location = 1) in vec2 inTexCoord[];
+layout(location = 1) in vec3 inNormal[];
+layout(location = 0) in vec2 inTexCoord[];
 
-layout(location = 0) out vec3 outNormal[];
-layout(location = 1) out vec2 outTexCoord[];
+layout(location = 1) out vec3 outNormal[];
+layout(location = 0) out vec2 outTexCoord[];
 
 layout(push_constant) uniform PushConstants {
     mat4 model;
@@ -18,12 +19,12 @@ layout(binding = 0) uniform UniformBufferObject {
 } ubo;
 
 void main() {
+    //Wie stark soll tesseliert (heißt das so?) werden?
     if (gl_InvocationID == 0) {
-        // ERSTMAL SEHR NIEDRIGE WERTE ZUM TESTEN
-        gl_TessLevelOuter[0] = 2.0;
-        gl_TessLevelOuter[1] = 2.0;
-        gl_TessLevelOuter[2] = 2.0;
-        gl_TessLevelInner[0] = 2.0;
+        gl_TessLevelOuter[0] = 6.0;
+        gl_TessLevelOuter[1] = 6.0;
+        gl_TessLevelOuter[2] = 6.0;
+        gl_TessLevelInner[0] = 6.0;
     }
     
     // Pass-through
