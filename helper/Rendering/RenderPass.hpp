@@ -79,6 +79,11 @@ public:
         depthWriteRef.attachment = kAttachment_DEPTH;
         depthWriteRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+        //Depth Read Reference (nötig für deferred)
+        VkAttachmentReference depthReadRef{};
+        depthReadRef.attachment = kAttachment_DEPTH;
+        depthReadRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
         //GBuffer output reference
         std::array<VkAttachmentReference, 2> gBufferRefs{};
         gBufferRefs[0].attachment = kAttachment_GBUFFER_NORMAL;
@@ -122,7 +127,7 @@ public:
         subpasses[kSubpass_LIGHTING].pInputAttachments = lightingInputs.data();
         subpasses[kSubpass_LIGHTING].colorAttachmentCount = 1;
         subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
-        subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = nullptr;
+        subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = &depthReadRef;
 
         // Subpass 3: Forward - Depth wieder beschreibbar
         subpasses[kSubpass_FORWARD].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;

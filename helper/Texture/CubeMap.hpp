@@ -43,6 +43,8 @@ public:
             vkFreeMemory(_device, _textureImageMemory, nullptr);
     }
 
+    void destroy();
+
     VkImageView getImageView() const { return _textureImageView; }
     VkSampler getSampler() const { return _textureSampler; }
 

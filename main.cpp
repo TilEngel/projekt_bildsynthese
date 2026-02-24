@@ -31,7 +31,7 @@ size_t graffittiIndex;
 size_t kastenIndex;
 size_t busIndex;
 
-void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory factory){
+void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& factory){
     // Skybox
     std::array<const char*, 6> skyboxFaces = {
         "textures/skybox/right.jpg",
@@ -739,6 +739,17 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
     std::set<Texture*> uniqueTextures;
     std::map<VkBuffer, VkDeviceMemory> uniqueVertexBuffers;  // Buffer + Memory
 
+    //Hilfsfunktion für Buffer + Memory
+    auto insertUniqueBuffer = [&](VkBuffer buf, VkDeviceMemory mem) {
+        if (buf == VK_NULL_HANDLE) return;
+        auto it = uniqueVertexBuffers.find(buf);
+        if (it == uniqueVertexBuffers.end()) {
+            uniqueVertexBuffers[buf] = mem;
+        } else if (it->second == VK_NULL_HANDLE && mem != VK_NULL_HANDLE) {
+            it->second = mem;
+        }
+    }; 
+
     // Normale Objekte
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const RenderObject& obj = scene->getObject(i);
@@ -750,9 +761,14 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         if (obj.pipeline) {
             uniquePipelines.insert(obj.pipeline);
         }
-        
+
+        if (obj.cubemap) {
+            obj.cubemap->destroy();
+            delete obj.cubemap;
+        }
+
         if (obj.vertexBuffer != VK_NULL_HANDLE) {
-            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+            insertUniqueBuffer(obj.vertexBuffer, obj.vertexBufferMemory);
         }
     }
     if(reflectionProbe){
@@ -770,17 +786,35 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         if (obj.pipeline) {
             uniquePipelines.insert(obj.pipeline);
         }
+
+        if (obj.cubemap) {
+            obj.cubemap->destroy();
+            delete obj.cubemap;
+        }
         
         if (obj.vertexBuffer != VK_NULL_HANDLE) {
-            uniqueVertexBuffers[obj.vertexBuffer] = obj.vertexBufferMemory;
+            insertUniqueBuffer(obj.vertexBuffer, obj.vertexBufferMemory);
         }
     }
 
     //Vertex-Buffer & memory zerstören
     for (const auto& [buffer, memory] : uniqueVertexBuffers) {
-        vkDestroyBuffer(device, buffer, nullptr);
         if (memory != VK_NULL_HANDLE) {
             vkFreeMemory(device, memory, nullptr);
+        }
+        vkDestroyBuffer(device, buffer, nullptr);
+    }
+
+    // LightingQuad separat destroyen (nicht in _objects enthalten)
+    if (scene->hasLightingQuad()) {
+        const RenderObject& lq = scene->getLightingQuad();
+        if (lq.vertexBuffer != VK_NULL_HANDLE)
+            vkDestroyBuffer(device, lq.vertexBuffer, nullptr);
+        if (lq.vertexBufferMemory != VK_NULL_HANDLE)
+            vkFreeMemory(device, lq.vertexBufferMemory, nullptr);
+        if (lq.pipeline) {
+            lq.pipeline->destroy();
+            delete lq.pipeline;
         }
     }
 
@@ -831,6 +865,14 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
 
     // Command Pool
     inst.destroyCommandPool(device, commandPool);
+
+    // DEBUG
+    // std::cout << "=== CLEANUP STATS ===" << std::endl;
+    // std::cout << "Unique pipelines: " << uniquePipelines.size() << std::endl;
+    // std::cout << "Unique textures: " << uniqueTextures.size() << std::endl;
+    // std::cout << "Unique vertex buffers: " << uniqueVertexBuffers.size() << std::endl;
+    // std::cout << "Deferred objects: " << scene->getDeferredObjectCount() << std::endl;
+    // std::cout << "Total objects: " << scene->getObjectCount() << std::endl;
 
     //  Device
     inst.destroyDevice(device);
