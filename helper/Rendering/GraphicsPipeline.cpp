@@ -341,7 +341,9 @@ void GraphicsPipeline::createPipeline() {
     }else if (_pipelineType == PipelineType::LIGHTING) {
         rasterizer.cullMode = VK_CULL_MODE_NONE;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
+    } else if (_pipelineType == PipelineType::TESSELLATION) {
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     } else {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
