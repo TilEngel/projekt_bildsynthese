@@ -177,7 +177,7 @@ private:
     // Helper
     InitBuffer _buff;
 
-    // liefert nötige ShaderStageFlag
+    // liefert nötige ShaderStageFlag (Extrawurst falls Tessellation)
     VkShaderStageFlags getPushStageFlags(const GraphicsPipeline* pipeline) const {
         if (pipeline && pipeline->getPipelineType() == PipelineType::TESSELLATION) {
             return VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;

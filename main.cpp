@@ -109,10 +109,10 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     //Schnee
     glm::mat4 modelSnow = glm::mat4(1.0f);
     modelSnow = glm::translate(modelSnow, glm::vec3(5.0f,0.0f,-20.0f));
-    modelSnow = glm::scale(modelSnow, glm::vec3(6.0f,2.0f,6.0f));
+    modelSnow = glm::scale(modelSnow, glm::vec3(6.0f,2.0f,10.0f));
     modelSnow = glm::rotate(modelSnow, glm::radians(8.0f), glm::vec3(0.0f,0.0f,1.0f));
     DeferredRenderObject snowPatch = factory.createDeferredObject("./models/snow.obj",
-        "./textures/white.png", modelSnow,renderPass);
+        "./textures/snow.jpg", modelSnow,renderPass);
     scene->setDeferredRenderObject(snowPatch);
 
     //Bierchen
@@ -233,16 +233,32 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory fac
     }
     //Objekt mit Tessellation-Shader
     glm::mat4 modelTess = glm::mat4(1.0f);
-    modelTess = glm::translate(modelTess, glm::vec3(0.0f, 1.5f, 0.0f));
-    modelTess = glm::scale(modelTess, glm::vec3(3.0f, 3.0f, 3.0f));
+    modelTess = glm::translate(modelTess, glm::vec3(3.2f, 2.0f, -24.0f));
+    //modelTess = glm::scale(modelTess, glm::vec3(3.0f, 3.0f, 3.0f));
     //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
     RenderObject tessObject = factory.createTessellatedObject(
-        "./models/garden_gnome.obj",
-        "textures/garden_gnome.jpg",
+        "./models/sphere.obj",
+        "textures/snow.jpg",
         modelTess,
         renderPass
     );
     scene->setRenderObject(tessObject);
+
+    //Objekt zum Vergleich mit tessellation
+    glm::mat4 modelLine = glm::mat4(1.0f);
+    modelLine = glm::translate(modelLine, glm::vec3(3.0f,-0.5f,-24.0f));
+    RenderObject lineObject = factory.createPolygonLineObject("./models/sphere.obj", "textures/snow.jpg",
+        modelLine, renderPass);
+    scene->setRenderObject(lineObject);
+
+    //Hut für den Schneemann
+    glm::mat4 modelHat = glm::mat4(1.0f);
+    modelHat = glm::translate(modelHat, glm::vec3(4.6f,6.8f,-25.0f));
+    modelHat = glm::scale(modelHat, glm::vec3(0.1f,0.1f,0.1f));
+    modelHat = glm::rotate(modelHat, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.1f));
+    RenderObject hat = factory.createGenericObject("./models/wizardHat.obj", "textures/wizardHat.jpg",
+        modelHat, renderPass);
+    scene->setRenderObject(hat);
 }
 
 // Speicher für alle Cubemap-Pipelines

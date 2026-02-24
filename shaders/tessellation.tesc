@@ -1,3 +1,4 @@
+//tessellation Control shader
 #version 450
 layout(vertices = 3) out;
 
@@ -18,11 +19,12 @@ layout(binding = 0) uniform UniformBufferObject {
 } ubo;
 
 void main() {
+    //Wie stark soll tesseliert (heißt das so?) werden?
     if (gl_InvocationID == 0) {
-        gl_TessLevelOuter[0] = 8.0;
-        gl_TessLevelOuter[1] = 8.0;
-        gl_TessLevelOuter[2] = 8.0;
-        gl_TessLevelInner[0] = 8.0;
+        gl_TessLevelOuter[0] = 6.0;
+        gl_TessLevelOuter[1] = 6.0;
+        gl_TessLevelOuter[2] = 6.0;
+        gl_TessLevelInner[0] = 6.0;
     }
     
     // Pass-through

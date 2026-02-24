@@ -18,7 +18,8 @@ enum class PipelineType {
     GBUFFER,          // G-Buffer generation (subpass 1)
     LIGHTING,          // Deferred lighting (subpass 2)
     SKYBOX,              //Extra für die Skybox
-    TESSELLATION
+    TESSELLATION,
+    LINE
 };
 
 enum class SubpassIndex {
