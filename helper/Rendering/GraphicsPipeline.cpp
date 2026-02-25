@@ -341,7 +341,13 @@ void GraphicsPipeline::createPipeline() {
     }else if (_pipelineType == PipelineType::LIGHTING) {
         rasterizer.cullMode = VK_CULL_MODE_NONE;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
+    } else if (_pipelineType == PipelineType::TESSELLATION) {
+        rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    }else if(_pipelineType == PipelineType::LINE){
+        rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+    
     } else {
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;

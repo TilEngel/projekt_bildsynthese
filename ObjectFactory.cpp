@@ -539,3 +539,41 @@ RenderObject ObjectFactory::createTessellatedObject(const char* modelPath,
 
     return obj;
 }
+
+RenderObject ObjectFactory::createPolygonLineObject(const char* modelPath,
+                                         const char* texturePath,
+                                         const glm::mat4& modelMatrix, 
+                                         VkRenderPass renderPass)
+{
+    GraphicsPipeline* pipeline = new GraphicsPipeline(
+        _device,
+        _colorFormat,
+        _depthFormat,
+        "./shaders/testapp.vert.spv", 
+        "./shaders/testapp.frag.spv",
+        renderPass,
+        _descriptorSetLayout,
+        PipelineType::LINE,
+        3
+    );
+
+    std::vector<Vertex> vertices;
+    _loader.objLoader(modelPath, vertices);
+
+    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+    VkBuffer vertexBuffer = _buff.createVertexBuffer(_physicalDevice, _device, _commandPool, _graphicsQueue, vertices, vertexBufferMemory);
+
+    Texture* tex = new Texture(_physicalDevice, _device, _commandPool, _graphicsQueue, texturePath);
+
+    RenderObject obj{};
+    obj.vertexBuffer = vertexBuffer;
+    obj.vertexBufferMemory = vertexBufferMemory;
+    obj.vertexCount = static_cast<uint32_t>(vertices.size());
+    obj.textureImageView = tex->getImageView();
+    obj.textureSampler = tex->getSampler();
+    obj.pipeline = pipeline;
+    obj.modelMatrix = modelMatrix;
+    obj.texture = tex;
+
+    return obj;
+}

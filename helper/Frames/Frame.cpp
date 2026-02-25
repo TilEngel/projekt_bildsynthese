@@ -224,7 +224,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout, getPushStageFlags(obj.pipeline), 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
         
@@ -265,7 +265,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout, getPushStageFlags(obj.pipeline), 
                         0, sizeof(glm::mat4), &obj.modelMatrix);
         
       
@@ -369,7 +369,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         VkBuffer vb[] = {obj.vertexBuffer};
         VkDeviceSize off[] = {0};
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vb, off);
-        vkCmdPushConstants(_commandBuffer, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(_commandBuffer, layout, getPushStageFlags(obj.pipeline), 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
 
         if (obj.instanceCount > 1 && obj.instanceBuffer != VK_NULL_HANDLE) {
@@ -431,7 +431,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+                          getPushStageFlags(obj.pipeline), 0, sizeof(glm::mat4), &obj.modelMatrix);
 
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
@@ -530,7 +530,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
     vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                      VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &reflObj.modelMatrix);
+                      getPushStageFlags(reflObj.pipeline), 0, sizeof(glm::mat4), &reflObj.modelMatrix);
 
     vkCmdDraw(_commandBuffer, reflObj.vertexCount, 1, 0, 0);
     }
@@ -587,7 +587,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         vkCmdBindVertexBuffers(_commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdPushConstants(_commandBuffer, pipelineLayout, 
-                          VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &obj.modelMatrix);
+                          getPushStageFlags(obj.pipeline), 0, sizeof(glm::mat4), &obj.modelMatrix);
 
         vkCmdDraw(_commandBuffer, obj.vertexCount, 1, 0, 0);
     }
@@ -1281,7 +1281,7 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
         vkCmdBindVertexBuffers(cmd, 0, 1, vb, off);
 
         // Push Constants
-        vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_VERTEX_BIT, 
+        vkCmdPushConstants(cmd, layout, getPushStageFlags(activePipeline), 
                           0, sizeof(glm::mat4), &obj.modelMatrix);
 
         // Draw

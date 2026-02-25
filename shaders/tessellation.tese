@@ -1,13 +1,13 @@
-//tessellation.tese
+//tessellation evaluation Shader
 #version 450
 
 layout(triangles, equal_spacing, ccw) in;
 
-layout(location = 0) in vec3 inNormal[];
-layout(location = 1) in vec2 inTexCoord[];
+layout(location = 1) in vec3 inNormal[];
+layout(location = 0) in vec2 inTexCoord[];
 
-layout(location = 0) out vec3 fragNormal;
-layout(location = 1) out vec2 fragTexCoord;
+layout(location = 1) out vec3 fragNormal;
+layout(location = 0) out vec2 fragTexCoord;
 
 layout(push_constant) uniform PushConstants {
     mat4 model;
@@ -29,16 +29,15 @@ void main() {
                gl_TessCoord.y * p1 + 
                gl_TessCoord.z * p2;
     
-    // Displacement (optional - für Bump/Height mapping)
     vec3 normal = normalize(gl_TessCoord.x * inNormal[0] +
                            gl_TessCoord.y * inNormal[1] +
                            gl_TessCoord.z * inNormal[2]);
     
-    // Hier könntest du Height-Map basiertes Displacement hinzufügen:
-    // pos += normal * texture(heightMap, texCoord).r * displacementScale;
-    
-    gl_Position = ubo.proj * ubo.view * pc.model * vec4(pos, 1.0);
-    
+    //einfaches Displacement. Wer braucht schon Height-Maps?
+    float displacement = sin(pos.x * 5.0) * cos(pos.y * 5.0) * 0.1;
+    pos += normal * displacement;
+
+gl_Position = ubo.proj * ubo.view * pc.model * vec4(pos, 1.0);
     fragNormal = normalize(mat3(pc.model) * normal);
     fragTexCoord = gl_TessCoord.x * inTexCoord[0] +
                    gl_TessCoord.y * inTexCoord[1] +
