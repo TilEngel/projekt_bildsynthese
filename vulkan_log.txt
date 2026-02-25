@@ -18,7 +18,7 @@ All framebuffers created successfully!
 
 Validating G-Buffer setup...
 G-Buffer view valid: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x350000000035, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -35,7 +35,7 @@ Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (36 vertices)
 OBJ geladen: ./models/plastic_monobloc_chair.obj :)
 [DEBUG] Vertex buffer created via staging buffer (10068 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x4d000000004d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -46,7 +46,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -56,7 +56,7 @@ Subpass: 1
 Pipeline Handle: 1
 OBJ geladen: ./models/garden_gnome.obj :)
 [DEBUG] Vertex buffer created via staging buffer (86574 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x5f000000005f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -67,7 +67,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -77,7 +77,7 @@ Subpass: 1
 Pipeline Handle: 1
 OBJ geladen: ./models/StreetLamp.obj :)
 [DEBUG] Vertex buffer created via staging buffer (6702 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x710000000071, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -88,7 +88,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -96,7 +96,7 @@ Vertex Shader: shaders/gbuffer.vert.spv
 Fragment Shader: shaders/gbuffer.frag.spv
 Subpass: 1
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -106,7 +106,7 @@ Subpass: 3
 Pipeline Handle: 1
 OBJ geladen: ./models/garden_gnome.obj :)
 [DEBUG] Vertex buffer created via staging buffer (86574 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -116,7 +116,7 @@ Subpass: 3
 Pipeline Handle: 1
 OBJ geladen: ./models/plastic_monobloc_chair.obj :)
 [DEBUG] Vertex buffer created via staging buffer (10068 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -132,7 +132,7 @@ material [ '01___Default' ] not found in .mtl
 
 OBJ geladen: ./models/sonnenschirm.obj :)
 [DEBUG] Vertex buffer created via staging buffer (133920 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xad00000000ad, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -143,7 +143,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -153,7 +153,7 @@ Subpass: 1
 Pipeline Handle: 1
 OBJ geladen: ./models/snow.obj :)
 [DEBUG] Vertex buffer created via staging buffer (187035 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xbf00000000bf, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -164,7 +164,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -172,13 +172,16 @@ Vertex Shader: shaders/gbuffer.vert.spv
 Fragment Shader: shaders/gbuffer.frag.spv
 Subpass: 1
 Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "14043_16_oz__Beer_Bottle_cap_label". Use the value of `d` for dissolve (line 8 in .mtl.)
-Both `d` and `Tr` parameters defined for "14043_16_oz__Beer_Bottle_alcohol". Use the value of `d` for dissolve (line 22 in .mtl.)
-Both `d` and `Tr` parameters defined for "14043_16_oz__Beer_Bottle_bottle". Use the value of `d` for dissolve (line 34 in .mtl.)
+[tinyobjloader WARN] Material file [ 14043_16_oz._Beer_Bottle_v1_l3.mtl ] not found in a path : models/mtl/
+Failed to load material file(s). Use default material.
+material [ '14043_16_oz__Beer_Bottle_cap_label' ] not found in .mtl
+material [ '14043_16_oz__Beer_Bottle_alcohol' ] not found in .mtl
+material [ '14043_16_oz__Beer_Bottle_cap_label' ] not found in .mtl
+material [ '14043_16_oz__Beer_Bottle_bottle' ] not found in .mtl
 
 OBJ geladen: ./models/beer.obj :)
 [DEBUG] Vertex buffer created via staging buffer (546816 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xd100000000d1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -189,7 +192,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -199,7 +202,7 @@ Subpass: 1
 Pipeline Handle: 1
 OBJ geladen: ./models/utility_box.obj :)
 [DEBUG] Vertex buffer created via staging buffer (13212 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xe300000000e3, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -210,7 +213,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -218,7 +221,7 @@ Vertex Shader: shaders/gbuffer.vert.spv
 Fragment Shader: shaders/gbuffer.frag.spv
 Subpass: 1
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xeb00000000eb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -232,7 +235,7 @@ Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (6 vertices)
 OBJ geladen: ./models/dosen.obj :)
 [DEBUG] Vertex buffer created via staging buffer (19728 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1030000000103, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -243,7 +246,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -253,7 +256,7 @@ Subpass: 1
 Pipeline Handle: 1
 OBJ geladen: ./models/barrier.obj :)
 [DEBUG] Vertex buffer created via staging buffer (127734 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1150000000115, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -264,7 +267,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -283,7 +286,7 @@ Both `d` and `Tr` parameters defined for "wheel_tire". Use the value of `d` for 
 
 OBJ geladen: ./models/bus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (513024 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1270000000127, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -294,7 +297,7 @@ Vertex Shader: shaders/depth_only.vert.spv
 Fragment Shader: shaders/depth_only.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: GBUFFER
@@ -302,7 +305,7 @@ Vertex Shader: shaders/gbuffer.vert.spv
 Fragment Shader: shaders/gbuffer.frag.spv
 Subpass: 1
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x12f000000012f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -319,7 +322,7 @@ material [ 'Materiais.001' ] not found in .mtl
 
 OBJ geladen: ./models/untitled.obj :)
 [DEBUG] Vertex buffer created via staging buffer (36 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x13d000000013d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -332,7 +335,7 @@ Subpass: 3
 Pipeline Handle: 1
 OBJ geladen: ./models/Desert.obj :)
 [DEBUG] Vertex buffer created via staging buffer (1843968 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x14b000000014b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -345,7 +348,7 @@ Subpass: 3
 Pipeline Handle: 1
 OBJ geladen: ./models/table.obj :)
 [DEBUG] Vertex buffer created via staging buffer (7524 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1590000000159, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -362,7 +365,7 @@ material [ '13___Default' ] not found in .mtl
 
 OBJ geladen: ./models/horse.obj :)
 [DEBUG] Vertex buffer created via staging buffer (126768 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1670000000167, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -377,7 +380,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1750000000175, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -392,7 +395,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1830000000183, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -407,7 +410,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1910000000191, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -422,7 +425,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x19f000000019f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -437,7 +440,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1ad00000001ad, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -452,7 +455,7 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1bb00000001bb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -467,9 +470,65 @@ Pipeline Handle: 1
 
 OBJ geladen: ./models/cactus.obj :)
 [DEBUG] Vertex buffer created via staging buffer (55008 vertices)
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+Tessellation state: patchControlPoints = 3
+[VALIDATION] Validation Error: [ VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0xf35c5127 | vkCreateGraphicsPipelines parameter, VkPolygonMode pCreateInfos[0]->pRasterizationState->polygonMode cannot be VK_POLYGON_MODE_POINT or VK_POLYGON_MODE_LINE if VkPhysicalDeviceFeatures->fillModeNonSolid is false. The Vulkan spec states: If the fillModeNonSolid feature is not enabled, polygonMode must be VK_POLYGON_MODE_FILL (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413)
+ Severity: 4096
+ Type: 2
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1cc00000001cc, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | tessellation evaluation shader writes to output location 1.0 which is not consumed by fragment shader. Enable VK_KHR_maintenance4 device extension to allow relaxed interface matching between input and output vectors.
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: TESSELLATION
+Vertex Shader: ./shaders/tessellation.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 3
+Pipeline Handle: 1
+[tinyobjloader WARN] Material file [ Untitled.mtl ] not found in a path : models/mtl/
+Failed to load material file(s). Use default material.
+
+OBJ geladen: ./models/sphere.obj :)
+[DEBUG] Vertex buffer created via staging buffer (48384 vertices)
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Error: [ VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0xf35c5127 | vkCreateGraphicsPipelines parameter, VkPolygonMode pCreateInfos[0]->pRasterizationState->polygonMode cannot be VK_POLYGON_MODE_POINT or VK_POLYGON_MODE_LINE if VkPhysicalDeviceFeatures->fillModeNonSolid is false. The Vulkan spec states: If the fillModeNonSolid feature is not enabled, polygonMode must be VK_POLYGON_MODE_FILL (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413)
+ Severity: 4096
+ Type: 2
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1d900000001d9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: UNKNOWN
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 3
+Pipeline Handle: 1
+[tinyobjloader WARN] Material file [ Untitled.mtl ] not found in a path : models/mtl/
+Failed to load material file(s). Use default material.
+
+OBJ geladen: ./models/sphere.obj :)
+[DEBUG] Vertex buffer created via staging buffer (48384 vertices)
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1e700000001e7, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 3
+Pipeline Handle: 1
+[tinyobjloader WARN] Material file [ 10837_WizardHat_LOD3.mtl ] not found in a path : models/mtl/
+Failed to load material file(s). Use default material.
+material [ '_10837_WizardHat_LOD3_10837_WizardHat_LOD3_10837_WizardHatDefault1' ] not found in .mtl
+
+OBJ geladen: ./models/wizardHat.obj :)
+[DEBUG] Vertex buffer created via staging buffer (43680 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1c900000001c9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1f500000001f5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -481,8 +540,8 @@ Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1d700000001d7, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2030000000203, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -494,8 +553,8 @@ Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1e500000001e5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2110000000211, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -507,8 +566,8 @@ Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1f300000001f3, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x21f000000021f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -519,8 +578,8 @@ Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (19260 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2010000000201, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x22d000000022d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -539,7 +598,7 @@ Cubemap render pass created
 Cubemap framebuffers created
 Cubemap sampler created
 ReflectionProbe created at position (-15, 1, -40)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -552,11 +611,11 @@ Pipeline Handle: 1
 OBJ geladen: ./models/fish_zwei.obj :)
 [DEBUG] Vertex buffer created via staging buffer (73728 vertices)
 Reflective object created with cubemap
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x22b000000022b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2570000000257, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x22b000000022b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 2 not consumed by vertex shader
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2570000000257, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 2 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -566,7 +625,7 @@ Vertex Shader: shaders/skybox.vert.spv
 Fragment Shader: shaders/skybox.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -574,7 +633,7 @@ Vertex Shader: shaders/lit.vert.spv
 Fragment Shader: shaders/lit.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -582,7 +641,7 @@ Vertex Shader: shaders/lit.vert.spv
 Fragment Shader: shaders/lit.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x260000000026
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x260000000026
 
 === PIPELINE CREATED ===
 Type: STANDARD
@@ -590,161 +649,40 @@ Vertex Shader: shaders/lit.vert.spv
 Fragment Shader: shaders/lit.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x23b000000023b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x23f000000023f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2430000000243, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2470000000247, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x24b000000024b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x24f000000024f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2530000000253, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2570000000257, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x25b000000025b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x25f000000025f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2630000000263, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2670000000267, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
 === PIPELINE CREATED ===
 Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
+Vertex Shader: shaders/testapp.vert.spv
+Fragment Shader: shaders/testapp.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x26b000000026b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
 === PIPELINE CREATED ===
 Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x26f000000026f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
 === PIPELINE CREATED ===
 Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2730000000273, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
@@ -755,8 +693,162 @@ Vertex Shader: ./shaders/testapp.vert.spv
 Fragment Shader: ./shaders/testapp.frag.spv
 Subpass: 0
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x250000000025
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
 [VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2770000000277, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x27b000000027b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x27f000000027f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2830000000283, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2870000000287, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x28b000000028b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x28f000000028f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2930000000293, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2970000000297, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | vertex shader writes to output location 1.0 which is not consumed by fragment shader. Enable VK_KHR_maintenance4 device extension to allow relaxed interface matching between input and output vectors.
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/tessellation.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x29b000000029b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x29f000000029f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a300000002a3, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: shaders/testapp.vert.spv
+Fragment Shader: shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a700000002a7, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: shaders/testapp.vert.spv
+Fragment Shader: shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2ab00000002ab, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+ Severity: 256
+ Type: 4
+
+=== PIPELINE CREATED ===
+Type: STANDARD
+Vertex Shader: ./shaders/testapp.vert.spv
+Fragment Shader: ./shaders/testapp.frag.spv
+Subpass: 0
+Pipeline Handle: 1
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x250000000025
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2af00000002af, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -767,8 +859,8 @@ Fragment Shader: shaders/snow.frag.spv
 Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (6 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2850000000285, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2bd00000002bd, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -779,8 +871,8 @@ Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
 [DEBUG] Vertex buffer created via staging buffer (6 vertices)
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2930000000293, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2cb00000002cb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -796,11 +888,11 @@ Mirror normal: (0, 0, 1)
 Object 25 marked as reflectable
 Object 22 marked as reflectable
 Object 18 marked as reflectable
-Object 38 marked as reflectable
+Object 41 marked as reflectable
 Object 17 marked as reflectable
 Object 23 marked as reflectable
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a100000002a1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2d900000002d9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -810,8 +902,8 @@ Vertex Shader: shaders/testapp.vert.spv
 Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a500000002a5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2dd00000002dd, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -821,8 +913,8 @@ Vertex Shader: shaders/testapp.vert.spv
 Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a900000002a9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e100000002e1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -832,8 +924,8 @@ Vertex Shader: shaders/testapp.vert.spv
 Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2ad00000002ad, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e500000002e5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -843,8 +935,8 @@ Vertex Shader: shaders/testapp.vert.spv
 Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2b100000002b1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e900000002e9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -854,8 +946,8 @@ Vertex Shader: shaders/testapp.vert.spv
 Fragment Shader: shaders/testapp.frag.spv
 Subpass: 3
 Pipeline Handle: 1
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2b500000002b5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x240000000024
+[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2ed00000002ed, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
  Severity: 256
  Type: 4
 
@@ -867,7 +959,7 @@ Subpass: 3
 Pipeline Handle: 1
 Created 6 reflections for mirror
 Creating lighting quad...
-Creating pipeline layout with device: 0x558cdc9ec5c0, layout: 0x270000000027
+Creating pipeline layout with device: 0x55d08d8fd1b0, layout: 0x270000000027
 
 === PIPELINE CREATED ===
 Type: LIGHTING
@@ -879,7 +971,7 @@ Pipeline Handle: 1
 Lighting quad created successfully!
 
 === Frame 0 Initialization ===
-Allocating 39 normal descriptor sets...
+Allocating 42 normal descriptor sets...
 Allocating 1 snow descriptor sets...
 Allocating 3 lit descriptor sets...
 Allocating 1 lighting descriptor sets...
@@ -887,7 +979,7 @@ Allocated 1 lighting descriptor sets
 Frame 0 initialized successfully!
 
 === Frame 1 Initialization ===
-Allocating 39 normal descriptor sets...
+Allocating 42 normal descriptor sets...
 Allocating 1 snow descriptor sets...
 Allocating 3 lit descriptor sets...
 Allocating 1 lighting descriptor sets...
@@ -901,179 +993,171 @@ Selected depth format with stencil support
 
 Creating 5 framebuffers...
 All framebuffers created successfully!
-=== CLEANUP STATS ===
-Unique pipelines: 49
-Unique textures: 21
-Unique vertex buffers: 33
-Deferred objects: 10
-Total objects: 4854406335186611430 PROBLEM!!!
-
-
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1ea00000001ea, type = VK_OBJECT_TYPE_BUFFER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkBuffer 0x1ea00000001ea[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1fa00000001fa, type = VK_OBJECT_TYPE_BUFFER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkBuffer 0x1fa00000001fa[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1ce00000001ce, type = VK_OBJECT_TYPE_BUFFER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkBuffer 0x1ce00000001ce[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2160000000216, type = VK_OBJECT_TYPE_BUFFER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkBuffer 0x2160000000216[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1d200000001d2, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x1d200000001d2[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xa800000000a8, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0xa800000000a8[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xa800000000a8, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0xa800000000a8[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1100000000110, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x1100000000110[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1100000000110, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x1100000000110[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xfe00000000fe, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0xfe00000000fe[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xfe00000000fe, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0xfe00000000fe[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x21a000000021a, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x21a000000021a[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1ee00000001ee, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x1ee00000001ee[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xba00000000ba, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0xba00000000ba[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xba00000000ba, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0xba00000000ba[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6c000000006c, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x6c000000006c[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6c000000006c, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x6c000000006c[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1fe00000001fe, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x1fe00000001fe[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xde00000000de, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0xde00000000de[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xde00000000de, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0xde00000000de[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x480000000048, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x480000000048[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x480000000048, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x480000000048[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcc00000000cc, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0xcc00000000cc[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcc00000000cc, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0xcc00000000cc[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5a000000005a, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x5a000000005a[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5a000000005a, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x5a000000005a[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1220000000122, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImage 0x1220000000122[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1220000000122, type = VK_OBJECT_TYPE_IMAGE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImage 0x1220000000122[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xa900000000a9, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0xa900000000a9[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xa900000000a9, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0xa900000000a9[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1eb00000001eb, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1eb00000001eb[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1110000000111, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x1110000000111[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1110000000111, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1110000000111[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x21b000000021b, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x21b000000021b[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xff00000000ff, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0xff00000000ff[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xff00000000ff, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0xff00000000ff[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1cf00000001cf, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1cf00000001cf[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2170000000217, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x2170000000217[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1d300000001d3, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1d300000001d3[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1fb00000001fb, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x1fb00000001fb[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbb00000000bb, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0xbb00000000bb[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1ff00000001ff, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x1ff00000001ff[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6d000000006d, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x6d000000006d[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbb00000000bb, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0xbb00000000bb[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1230000000123, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1230000000123[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6d000000006d, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x6d000000006d[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x490000000049, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x490000000049[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1230000000123, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x1230000000123[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xdf00000000df, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0xdf00000000df[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x490000000049, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x490000000049[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1ef00000001ef, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x1ef00000001ef[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xdf00000000df, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0xdf00000000df[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5b000000005b, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0x5b000000005b[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5b000000005b, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0x5b000000005b[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcd00000000cd, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkDeviceMemory 0xcd00000000cd[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcd00000000cd, type = VK_OBJECT_TYPE_DEVICE_MEMORY; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkDeviceMemory 0xcd00000000cd[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbc00000000bc, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0xbc00000000bc[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x21c000000021c, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x21c000000021c[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xaa00000000aa, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0xaa00000000aa[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbc00000000bc, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0xbc00000000bc[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1120000000112, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x1120000000112[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xaa00000000aa, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0xaa00000000aa[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6e000000006e, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x6e000000006e[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1120000000112, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x1120000000112[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1000000000100, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x1000000000100[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6e000000006e, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x6e000000006e[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1d400000001d4, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x1d400000001d4[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1000000000100, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x1000000000100[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1240000000124, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x1240000000124[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1240000000124, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x1240000000124[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x4a000000004a, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x4a000000004a[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x4a000000004a, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x4a000000004a[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1f000000001f0, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x1f000000001f0[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2000000000200, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x2000000000200[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5c000000005c, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0x5c000000005c[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5c000000005c, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0x5c000000005c[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xe000000000e0, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0xe000000000e0[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xe000000000e0, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0xe000000000e0[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xce00000000ce, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkImageView 0xce00000000ce[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xce00000000ce, type = VK_OBJECT_TYPE_IMAGE_VIEW; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkImageView 0xce00000000ce[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1e400000001e4, type = VK_OBJECT_TYPE_PIPELINE_LAYOUT; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkPipelineLayout 0x1e400000001e4[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2100000000210, type = VK_OBJECT_TYPE_PIPELINE_LAYOUT; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkPipelineLayout 0x2100000000210[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1c800000001c8, type = VK_OBJECT_TYPE_PIPELINE_LAYOUT; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkPipelineLayout 0x1c800000001c8[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1f400000001f4, type = VK_OBJECT_TYPE_PIPELINE_LAYOUT; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkPipelineLayout 0x1f400000001f4[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1e700000001e7, type = VK_OBJECT_TYPE_PIPELINE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkPipeline 0x1e700000001e7[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1f700000001f7, type = VK_OBJECT_TYPE_PIPELINE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkPipeline 0x1f700000001f7[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1cb00000001cb, type = VK_OBJECT_TYPE_PIPELINE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkPipeline 0x1cb00000001cb[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2130000000213, type = VK_OBJECT_TYPE_PIPELINE; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkPipeline 0x2130000000213[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbd00000000bd, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0xbd00000000bd[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x21d000000021d, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x21d000000021d[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xab00000000ab, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0xab00000000ab[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xbd00000000bd, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0xbd00000000bd[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1130000000113, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x1130000000113[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xab00000000ab, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0xab00000000ab[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1d500000001d5, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x1d500000001d5[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1130000000113, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x1130000000113[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6f000000006f, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x6f000000006f[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x6f000000006f, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x6f000000006f[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1010000000101, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x1010000000101[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1010000000101, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x1010000000101[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x4b000000004b, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x4b000000004b[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x4b000000004b, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x4b000000004b[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1f100000001f1, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x1f100000001f1[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xe100000000e1, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0xe100000000e1[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xe100000000e1, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0xe100000000e1[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x2010000000201, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x2010000000201[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5d000000005d, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x5d000000005d[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x5d000000005d, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x5d000000005d[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1250000000125, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0x1250000000125[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0x1250000000125, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0x1250000000125[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
-[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x558cdc9ec5c0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcf00000000cf, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x558cdc9ec5c0[], VkSampler 0xcf00000000cf[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
+[VALIDATION] Validation Error: [ VUID-vkDestroyDevice-device-00378 ] Object 0: handle = 0x55d08d8fd1b0, type = VK_OBJECT_TYPE_DEVICE; Object 1: handle = 0xcf00000000cf, type = VK_OBJECT_TYPE_SAMPLER; | MessageID = 0x71500fba | OBJ ERROR : For VkDevice 0x55d08d8fd1b0[], VkSampler 0xcf00000000cf[] has not been destroyed. The Vulkan spec states: All child objects created on device must have been destroyed prior to destroying device (https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-vkDestroyDevice-device-00378)
  Severity: 4096
  Type: 2
