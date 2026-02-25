@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "helper/Rendering/GraphicsPipeline.hpp"
 #include "helper/Texture/Texture.hpp"
+#include "helper/Texture/CubeMap.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <unordered_set>
@@ -42,6 +43,7 @@ struct RenderObject {
     bool isSnow = false;
     bool isLit = false;
     bool isDeferred = false; 
+    CubeMap* cubemap = nullptr;
 };
 
 // Deferred Render Object - hat 2 Pipelines
