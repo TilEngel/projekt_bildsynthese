@@ -364,6 +364,7 @@ DeferredRenderObject ObjectFactory::createDeferredObject(const char* modelPath,c
     deferredObj.gbufferPass.vertexCount = static_cast<uint32_t>(vertices.size());
     deferredObj.gbufferPass.textureImageView = tex->getImageView();
     deferredObj.gbufferPass.textureSampler = tex->getSampler();
+    deferredObj.gbufferPass.texture = tex;
     deferredObj.gbufferPass.pipeline = gbufferPipeline;
     deferredObj.gbufferPass.modelMatrix = modelMatrix;
     deferredObj.gbufferPass.instanceCount = 1;
