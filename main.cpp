@@ -791,6 +791,17 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         delete reflectionProbe;
     }
 
+    // LightSource Objekte
+    for (size_t i = 0; i < scene->getLightCount(); i++) {
+        const RenderObject& obj = scene->getLights()[i].renderObject;
+
+        if (obj.texture)
+            uniqueTextures.insert(obj.texture);
+        if (obj.pipeline)
+            uniquePipelines.insert(obj.pipeline);
+        insertUniqueBuffer(obj.vertexBuffer, obj.vertexBufferMemory);
+    }
+
     // Reflektierte Objekte (teilen sich Ressourcen!)
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
         const RenderObject& obj = scene->getReflectedObject(i);
@@ -821,7 +832,7 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         vkDestroyBuffer(device, buffer, nullptr);
     }
 
-    // LightingQuad separat destroyen (nicht in _objects enthalten)
+    // LightingQuad separat destroyen
     if (scene->hasLightingQuad()) {
         const RenderObject& lq = scene->getLightingQuad();
         if (lq.vertexBuffer != VK_NULL_HANDLE)
@@ -881,14 +892,6 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
 
     // Command Pool
     inst.destroyCommandPool(device, commandPool);
-
-    // DEBUG
-    // std::cout << "=== CLEANUP STATS ===" << std::endl;
-    // std::cout << "Unique pipelines: " << uniquePipelines.size() << std::endl;
-    // std::cout << "Unique textures: " << uniqueTextures.size() << std::endl;
-    // std::cout << "Unique vertex buffers: " << uniqueVertexBuffers.size() << std::endl;
-    // std::cout << "Deferred objects: " << scene->getDeferredObjectCount() << std::endl;
-    // std::cout << "Total objects: " << scene->getObjectCount() << std::endl;
 
     //  Device
     inst.destroyDevice(device);
