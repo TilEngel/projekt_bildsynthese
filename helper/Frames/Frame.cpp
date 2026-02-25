@@ -1047,7 +1047,7 @@ void Frame::updateLitUniformBuffer(Camera* camera, Scene* scene) {
     ubo.proj = glm::perspective(
         glm::radians(camera->getZoom()),
         static_cast<float>(extent.width) / static_cast<float>(extent.height),
-        0.1f, 100.0f
+        0.1f, 200.0f
     );
     ubo.proj[1][1] *= -1.0f;
     
@@ -1076,7 +1076,7 @@ void Frame::updateLightingUniformBuffer(Camera* camera, Scene* scene) {
     glm::mat4 proj = glm::perspective(
         glm::radians(camera->getZoom()),
         static_cast<float>(extent.width) / static_cast<float>(extent.height),
-        0.1f, 100.0f
+        0.1f, 200.0f
     );
     proj[1][1] *= -1.0f;
     
