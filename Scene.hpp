@@ -1,4 +1,3 @@
-// Scene.hpp
 #pragma once
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -28,6 +27,7 @@ struct LitUniformBufferObject {
     PointLight lights[4];
 };
 
+//Jedes Objekt in der Szene ist ein RenderObjekt
 struct RenderObject {
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
     VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
@@ -66,8 +66,14 @@ struct DeferredObjectInfo {
     size_t gbufferPassIndex;
 };
 
+/**
+ * Klasse repräsentiert die Objekte in der Szene an sich
+ * Soll ein Objekt gezeichnet werden, wird es als RenderObjekt zur Szene hinzugefügt
+ * Eigenschaften der Objekte können hier abgefragt werden
+ */
 class Scene {
 public:
+    //Fügt ein Objekt obj der Szene hinzu, so dass es gerendert wird
     void setRenderObject(RenderObject obj) {
         if (obj.isSnow) {
             _snowObjectIndices.push_back(_objects.size());
@@ -83,27 +89,28 @@ public:
     
     //Deferred Objekt hinzufügen
     void setDeferredRenderObject(DeferredRenderObject& deferredObj) {
-    // Depth Pass Object
-    deferredObj.depthPass.isDeferred = true;
-    _objects.push_back(deferredObj.depthPass);
-    size_t depthIndex = _objects.size() - 1;
+        // Depth Pass Object
+        deferredObj.depthPass.isDeferred = true;
+        _objects.push_back(deferredObj.depthPass);
+        size_t depthIndex = _objects.size() - 1;
+        
+        // G-Buffer Pass Object
+        deferredObj.gbufferPass.isDeferred = true;
+        _objects.push_back(deferredObj.gbufferPass);
+        size_t gbufferIndex = _objects.size() - 1;
+        
+        
+        // Speichere die Indices
+        DeferredObjectInfo info;
+        info.depthPassIndex = depthIndex;
+        info.gbufferPassIndex = gbufferIndex;
+        _deferredObjectInfos.push_back(info);
+        
+        _deferredObjectIndices.push_back(depthIndex);
+        _deferredObjectIndices.push_back(gbufferIndex);
+    }
     
-    // G-Buffer Pass Object
-    deferredObj.gbufferPass.isDeferred = true;
-    _objects.push_back(deferredObj.gbufferPass);
-    size_t gbufferIndex = _objects.size() - 1;
-    
-    
-    // Speichere die Indices
-    DeferredObjectInfo info;
-    info.depthPassIndex = depthIndex;
-    info.gbufferPassIndex = gbufferIndex;
-    _deferredObjectInfos.push_back(info);
-    
-    _deferredObjectIndices.push_back(depthIndex);
-    _deferredObjectIndices.push_back(gbufferIndex);
-}
-    
+    //Lichtquellen-Objekt der Szene hinzufügen
     void addLightSource(const LightSourceObject& light) {
         if (_lights.size() >= 4) {
             return;
@@ -111,6 +118,7 @@ public:
         _lights.push_back(light);
     }
     
+    //Position der Lichtquelle aktualisieren
     void updateLightPosition(size_t index, const glm::vec3& newPos) {
         if (index < _lights.size()) {
             _lights[index].position = newPos;
@@ -119,18 +127,17 @@ public:
         }
     }
     
+    //---Getter und Setter
+
     const std::vector<LightSourceObject>& getLights() const { return _lights; }
     size_t getLightCount() const { return _lights.size(); }
-    
     size_t getObjectCount() const { return _objects.size(); }
     size_t getSnowObjectCount() const { return _snowObjectIndices.size(); }
     size_t getNormalObjectCount() const { 
-        return _objects.size() - _snowObjectIndices.size() - _litObjectIndices.size() 
-               - _deferredObjectIndices.size(); 
+        return _objects.size() - _snowObjectIndices.size() - _litObjectIndices.size()  - _deferredObjectIndices.size(); 
     }
     size_t getLitObjectCount() const { return _litObjectIndices.size(); }
     size_t getDeferredObjectCount() const { return _deferredObjectInfos.size(); }
-    
     size_t getLitDescriptorSetCount() const {
         // Lit objects die NICHT deferred sind
         size_t count = 0;
@@ -141,7 +148,6 @@ public:
         }
         return count;
     }
-
     size_t getNormalDescriptorSetCount() const {
         size_t count = 0;
         for (size_t i = 0; i < _objects.size(); i++) {
@@ -157,26 +163,55 @@ public:
         // Jedes deferred object hat 2 render objects (depth + gbuffer)
         return _deferredObjectInfos.size() * 2;
     }
+    VkRenderPass getRenderPass() const {
+        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
+        return _objects[0].pipeline->getRenderPass();
+    }
+    
+    VkPipeline getPipeline() const {
+        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
+        return _objects[0].pipeline->getPipeline();
+    }
+    
+    VkPipelineLayout getPipelineLayout(size_t objectIndex = 0) const {
+        if (_objects.empty() || !_objects[objectIndex].pipeline) return VK_NULL_HANDLE;
+        return _objects[objectIndex].pipeline->getPipelineLayout();
+    }
+    void setDescriptorSetLayout(VkDescriptorSetLayout layout) {
+        _descriptorSetLayout = layout;
+    }
+    VkDescriptorSetLayout getDescriptorSetLayout() const {
+        return _descriptorSetLayout;
+    }
+
+    //Lighting Quad für deferred
+    void setLightingQuad(const RenderObject& quad) {
+        _lightingQuad = quad;
+        _hasLightingQuad = true;
+    }
+    bool hasLightingQuad() const { return _hasLightingQuad; }
+    const RenderObject& getLightingQuad() const { return _lightingQuad; }
 
     const RenderObject& getObject(size_t index) const { return _objects[index]; }
     RenderObject& getObjectMutable(size_t idx) { return _objects[idx]; }
     
+//--- is...-Methoden fragen ab, ob Objekt eine gewisse Eigenschaft hat
+
     bool isSnowObject(size_t index) const {
         return std::find(_snowObjectIndices.begin(), _snowObjectIndices.end(), index) 
                != _snowObjectIndices.end();
     }
-    
     bool isLitObject(size_t index) const {
         return std::find(_litObjectIndices.begin(), _litObjectIndices.end(), index) 
                != _litObjectIndices.end();
     }
-    
+
     bool isDeferredObject(size_t index) const {
         return std::find(_deferredObjectIndices.begin(), _deferredObjectIndices.end(), index) 
                != _deferredObjectIndices.end();
     }
     
-    // NEU: Hilfsmethoden für Deferred Rendering
+    //--Hilfsmethoden für deferred Rendering
     const DeferredObjectInfo& getDeferredInfo(size_t infoIndex) const {
         return _deferredObjectInfos[infoIndex];
     }
@@ -194,60 +229,26 @@ public:
             _objects[idx].modelMatrix = newModel;
         }
     }
-    
-    //Update deferred object (beide Passes gleichzeitig)
     void updateDeferredObject(size_t infoIndex, const glm::mat4& newModel) {
         if (infoIndex < _deferredObjectInfos.size()) {
+            //beide Passes updaten
             size_t depthIdx = _deferredObjectInfos[infoIndex].depthPassIndex;
             size_t gbufferIdx = _deferredObjectInfos[infoIndex].gbufferPassIndex;
             _objects[depthIdx].modelMatrix = newModel;
             _objects[gbufferIdx].modelMatrix = newModel;
         }
     }
-    
-    VkRenderPass getRenderPass() const {
-        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
-        return _objects[0].pipeline->getRenderPass();
-    }
-    
-    VkPipeline getPipeline() const {
-        if (_objects.empty() || !_objects[0].pipeline) return VK_NULL_HANDLE;
-        return _objects[0].pipeline->getPipeline();
-    }
-    
-    VkPipelineLayout getPipelineLayout(size_t objectIndex = 0) const {
-        if (_objects.empty() || !_objects[objectIndex].pipeline) return VK_NULL_HANDLE;
-        return _objects[objectIndex].pipeline->getPipelineLayout();
-    }
-    
-    void setDescriptorSetLayout(VkDescriptorSetLayout layout) {
-        _descriptorSetLayout = layout;
-    }
-    
-    VkDescriptorSetLayout getDescriptorSetLayout() const {
-        return _descriptorSetLayout;
-    }
+     
 
-    //Lighting Quad für deferred
-    void setLightingQuad(const RenderObject& quad) {
-        _lightingQuad = quad;
-        _hasLightingQuad = true;
-    }
-    
-    bool hasLightingQuad() const { return _hasLightingQuad; }
-    const RenderObject& getLightingQuad() const { return _lightingQuad; }
-
-    // Mirror-spezifische Methoden
+    //--- Mirror-spezifische Methoden
     void setMirrorMarkObject(const RenderObject& obj) {
         _mirrorMarkIndices.push_back(_objects.size());
         _objects.push_back(obj);
     }
-
     void setMirrorBlendObject(const RenderObject& obj) {
         _mirrorBlendIndices.push_back(_objects.size());
         _objects.push_back(obj);
     }
-
     void addReflectedObject(const RenderObject& obj, size_t originalIndex) {
         _reflectedObjects.push_back(obj);
         _reflectedDescriptorIndices.push_back(originalIndex);
@@ -309,12 +310,12 @@ public:
         }
     }
 
-    //Render To Texture
+    //---Render To Texture
+
     // Markiert ein Objekt als reflektierend (es selbst wird nicht in der Cubemap gerendert)
     void markObjectAsReflective(size_t index) {
         _reflectiveObjectIndices.insert(index);
     }
-
     bool isReflectiveObject(size_t index) const {
         return _reflectiveObjectIndices.find(index) != _reflectiveObjectIndices.end();
     }

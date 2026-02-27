@@ -1,4 +1,3 @@
-// ObjectFactory.cpp (Merged)
 #include "ObjectFactory.hpp"
 #include "helper/ObjectLoading/loadObj.hpp"
 #include "helper/Texture/CubeMap.hpp"
