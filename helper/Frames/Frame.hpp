@@ -1,4 +1,3 @@
-// Frame.hpp
 #pragma once
 
 #include <vulkan/vulkan_core.h>
@@ -33,7 +32,12 @@ struct LightingUniformBufferObject {
         alignas(4)  float radius;
     } lights[4];
 };
-
+/**
+ * Regelt allemöglichen Frame-bezogenen Sachen
+ * tatsächliches Rendern des Frames,
+ * Management der diversen Buffer und descriptorSets, sowas halt
+ * richtig krasse Klasse also o_o
+ */
 class Frame {
 public:
     Frame(VkPhysicalDevice physicalDevice, VkDevice device, SwapChain* swapChain,

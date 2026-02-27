@@ -1,7 +1,3 @@
-# ------------------------------------------------------------
-#   Portable Vulkan + GLFW Makefile (macOS / Linux / Windows)
-# ------------------------------------------------------------
-
 CXX      = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 UNAME_S := $(shell uname -s)
@@ -9,10 +5,8 @@ BUILD_DIR = build
 # Vulkan SDK env var is used if available
 VULKAN_SDK ?=
 
-# ------------------------------------------------------------
-# Platform-specific settings
-# ------------------------------------------------------------
 
+# Platform-spezifische settings
 ifeq ($(UNAME_S), Darwin)
     # macOS
     GLM_PATH = $(VULKAN_SDK)/include
@@ -38,9 +32,7 @@ else
     MKDIR = mkdir
 endif
 
-# ------------------------------------------------------------
-# Files
-# ------------------------------------------------------------
+# zu verwendene Files
 
 SRC = \
     main.cpp \
@@ -67,9 +59,8 @@ SRC = \
 OBJ = $(SRC:%.cpp=$(BUILD_DIR)/%.o)
 TARGET = projekt
 
-# ------------------------------------------------------------
 # Build
-# -----------------------------
+
 .PHONY: all clean run
 all: $(TARGET)
 $(TARGET): $(OBJ) shaders/testapp.vert.spv shaders/testapp.frag.spv \
@@ -89,9 +80,8 @@ $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# -----------------------------------
-# Shader compilation
-# ------------------------------------------
+
+# Shader compilieren
 
 %.vert.spv: %.vert
 	glslangValidator -V $< -o $@
@@ -107,10 +97,8 @@ $(BUILD_DIR)/%.o: %.cpp
 
 %.tese.spv: %.tese
 	glslangValidator -V $< -o $@
-# ------------------------------------------------------------
-# Utilities
-# ------------------------------------------------------------
 
+# Utilities
 
 run: $(TARGET)
 	./$(TARGET)

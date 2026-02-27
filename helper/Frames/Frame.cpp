@@ -1,4 +1,3 @@
-// Frame.cpp - Vollständige Implementation mit Deferred Rendering
 #include "Frame.hpp"
 #include <stdexcept>
 #include <array>
@@ -12,7 +11,7 @@
 
 void Frame::createUniformBuffer() {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-
+    // Buffer erstellen
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = bufferSize;
@@ -23,6 +22,7 @@ void Frame::createUniformBuffer() {
         throw std::runtime_error("failed to create uniform buffer!");
     }
 
+    //Speicher allokieren
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(_device, _uniformBuffer, &memRequirements);
 
@@ -35,27 +35,26 @@ void Frame::createUniformBuffer() {
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_uniformBufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate uniform buffer memory!");
     }
-
+    //binden
     vkBindBufferMemory(_device, _uniformBuffer, _uniformBufferMemory, 0);
-
     void* data = nullptr;
     vkMapMemory(_device, _uniformBufferMemory, 0, bufferSize, 0, &data);
     _uniformBufferMapped = static_cast<UniformBufferObject*>(data);
 }
 
 void Frame::createLitUniformBuffer() {
+    //der gleiche Spaß wie createUniformBuffer nur für Lit
     VkDeviceSize bufferSize = sizeof(LitUniformBufferObject);
-
+    //Buffer erstellen
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = bufferSize;
     bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
     if (vkCreateBuffer(_device, &bufferInfo, nullptr, &_litUniformBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create lit uniform buffer!");
     }
-
+    //Speicher allokieren
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(_device, _litUniformBuffer, &memRequirements);
 
@@ -64,13 +63,11 @@ void Frame::createLitUniformBuffer() {
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = _buff.findMemoryType(memRequirements.memoryTypeBits,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, _physicalDevice);
-
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_litUniformBufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate lit uniform buffer memory!");
     }
-
+    //Binden
     vkBindBufferMemory(_device, _litUniformBuffer, _litUniformBufferMemory, 0);
-
     void* data = nullptr;
     vkMapMemory(_device, _litUniformBufferMemory, 0, bufferSize, 0, &data);
     _litUniformBufferMapped = static_cast<LitUniformBufferObject*>(data);
@@ -78,7 +75,7 @@ void Frame::createLitUniformBuffer() {
 
 void Frame::createLightingUniformBuffer() {
     VkDeviceSize bufferSize = sizeof(LightingUniformBufferObject);
-
+    //Buffer erstellen
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = bufferSize;
@@ -88,7 +85,7 @@ void Frame::createLightingUniformBuffer() {
     if (vkCreateBuffer(_device, &bufferInfo, nullptr, &_lightingUniformBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create lighting uniform buffer!");
     }
-
+    //Speicher allokieren
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(_device, _lightingUniformBuffer, &memRequirements);
 
@@ -101,9 +98,8 @@ void Frame::createLightingUniformBuffer() {
     if (vkAllocateMemory(_device, &allocInfo, nullptr, &_lightingUniformBufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate lighting uniform buffer memory!");
     }
-
+    // Binden
     vkBindBufferMemory(_device, _lightingUniformBuffer, _lightingUniformBufferMemory, 0);
-
     void* data = nullptr;
     vkMapMemory(_device, _lightingUniformBufferMemory, 0, bufferSize, 0, &data);
     _lightingUniformBufferMapped = static_cast<LightingUniformBufferObject*>(data);
@@ -231,7 +227,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         deferredDescriptorIdx++;
     }
 
-    // SUBPASS 1: gbuffer pass
+    // Subpass 1 gbuffer pass
     vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
@@ -274,7 +270,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
         
         deferredDescriptorIdx++;
     }
-    // SUBPASS 2: lighting & forward-rendering
+    // Subpass 2 lighting & forward-rendering
     vkCmdNextSubpass(_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
@@ -305,7 +301,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     vkCmdSetScissor(_commandBuffer, 0, 1, &scissor);
  
     // Zähler für jede Descriptor Set Kategorie
-    size_t normalForwardIdx = 0;  // Normale forward objects (NACH deferred)
+    size_t normalForwardIdx = 0;  // Normale forward objects (nach deferred)
     size_t snowIdx = 0;
     size_t litIdx = 0;
     
@@ -438,7 +434,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
 
 
     // Gespiegelte Objekte rendern (nur wo Stencil == 1)
-    // Diese werden "hinter" der Spiegelebene gerendert
+    // werden "hinter" der Spiegelebene gerendert
     for (size_t i = 0; i < scene->getReflectedObjectCount(); i++) {
     const auto& reflObj = scene->getReflectedObject(i);
     
@@ -536,7 +532,7 @@ void Frame::recordCommandBuffer(Scene* scene, uint32_t imageIndex) {
     }
 
     // Transparenten Spiegel rendern (MIRROR_BLEND)
-    // Dieser wird über die Reflexionen gerendert
+    // wird über die Reflexionen gerendert
 
     normalForwardIdx = 0;
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
@@ -675,11 +671,11 @@ void Frame::updateDescriptorSet(Scene* scene) {
         descriptorSetIndex++;
     }
     
-    // Normale forward objekte
+    //Normale forward objekte
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
         
-        // Skip deferred, snow, lit
+        // skip deferred, snow, lit
         if (obj.isDeferred || obj.isSnow || obj.isLit) {
             continue;
         }
@@ -720,19 +716,19 @@ void Frame::updateDescriptorSet(Scene* scene) {
 
 void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
                                    VkImageView imageView, VkSampler sampler) {
-    // UBO
+    //UBO
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = _uniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
-    // Storage Buffer (Particles)
+    //Storage Buffer (Partikel)
     VkDescriptorBufferInfo storageInfo{};
     storageInfo.buffer = particleBuffer;
     storageInfo.offset = 0;
     storageInfo.range = sizeof(Particle) *NUMBER_PARTICLES;
 
-    // Texture
+    // Textur
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = imageView;
@@ -740,7 +736,7 @@ void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
 
     std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
-    // Binding 0: UBO
+    // Binding 0 UBO
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[0].dstSet = _snowDescriptorSets[index];
     descriptorWrites[0].dstBinding = 0;
@@ -748,7 +744,7 @@ void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
     descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     descriptorWrites[0].descriptorCount = 1;
     descriptorWrites[0].pBufferInfo = &bufferInfo;
-    // Binding 1: Storage Buffer
+    // Binding 1 Storage Buffer
     descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[1].dstSet = _snowDescriptorSets[index];
     descriptorWrites[1].dstBinding = 1;
@@ -757,7 +753,7 @@ void Frame::updateSnowDescriptorSet(size_t index, VkBuffer particleBuffer,
     descriptorWrites[1].descriptorCount = 1;
     descriptorWrites[1].pBufferInfo = &storageInfo;
 
-    // Binding 2: Texture
+    // Binding 2 Textur
     descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrites[2].dstSet = _snowDescriptorSets[index];
     descriptorWrites[2].dstBinding = 2;
@@ -1230,7 +1226,7 @@ void Frame::renderObjectsForCubemap(VkCommandBuffer cmd, Scene* scene,
 
     // Rendere alle normalen Forward Objects
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
-        // Skip: Reflektierendes Objekt, Deferred, Mirrors
+        //skip Reflektierendes Objekt, deferred, Mirrors
         if (i == reflectiveObjectIndex || 
             scene->isDeferredObject(i) || 
             scene->isMirrorObject(i)) {

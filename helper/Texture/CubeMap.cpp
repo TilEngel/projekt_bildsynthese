@@ -116,7 +116,7 @@ void CubeMap::copyBufferToImage() {
     InitBuffer buf;
     VkCommandBuffer commandBuffer = buf.beginSingleTimeCommands(_device, _commandPool);
 
-    // Transition: UNDEFINED -> TRANSFER_DST_OPTIMAL
+    // Transition UNDEFINED -> TRANSFER_DST_OPTIMAL
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -136,7 +136,7 @@ void CubeMap::copyBufferToImage() {
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
         0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    //copy buffer to image (alle 6 Faces)
+    //copy buffer zu image (alle 6 Faces)
     VkDeviceSize layerSize = static_cast<VkDeviceSize>(_texWidth) * _texHeight * 4;
     
     for (uint32_t face = 0; face < 6; ++face) {

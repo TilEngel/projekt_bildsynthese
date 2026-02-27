@@ -1,4 +1,3 @@
-//main.cpp
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -25,12 +24,14 @@
 #include "helper/renderToTexture/CubemapRenderTarget.hpp"
 #include "helper/renderToTexture/ReflectionProbe.hpp"
 
-size_t streetIndex;
+size_t streetIndex;     //indizes für Objekte, die im Spiegel reflektiert werden
 size_t barrierIndex;
 size_t graffittiIndex;
 size_t kastenIndex;
 size_t busIndex;
+std::vector<GraphicsPipeline*> g_cubemapPipelines; // Speicher für alle Cubemap-Pipelines
 
+//übernimmt Erstellung und Platzierung aller "unspektakulären" Objekte
 void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& factory){
     // Skybox
     std::array<const char*, 6> skyboxFaces = {
@@ -187,7 +188,7 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& fa
         "textures/desert.png", modelGround, renderPass);
     scene->setRenderObject(ground); 
 
-    //Tisch unter der reflektierenden Kugel
+    //Tisch unter dem magischen Fisch
     glm::mat4 modelTable = glm::mat4(1.0f);
     modelTable = glm::translate(modelTable, glm::vec3(-15.0f, -1.5f,-40.0f));
     modelTable= glm::scale(modelTable, glm::vec3(2.0f,2.0f,2.0f));
@@ -214,37 +215,25 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& fa
     glm::vec3 center(-15.0f, -2.0f, -40.0f);
     
     for (int i = 0; i < kaktusCount; ++i) {
-
         float angle = glm::two_pi<float>() * i / kaktusCount;
-
         float x = center.x + radius * cos(angle);
         float z = center.z + radius * sin(angle);
 
         glm::mat4 model = glm::mat4(1.0f);
 
         model = glm::translate(model, glm::vec3(x, center.y, z));
-        model = glm::rotate(model, -angle + glm::half_pi<float>(),
-                            glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, -angle + glm::half_pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
         model *= baseKaktus;
-
         RenderObject kaktus = factory.createGenericObject("./models/cactus.obj","textures/cactus.jpg",model,renderPass);
-
         scene->setRenderObject(kaktus);
     }
-    //Objekt mit Tessellation-Shader
+    //Objekt mit Tessellation-Shader (Obere Kugel des Schneemanns)
     glm::mat4 modelTess = glm::mat4(1.0f);
     modelTess = glm::translate(modelTess, glm::vec3(3.2f, 2.0f, -24.0f));
-    //modelTess = glm::scale(modelTess, glm::vec3(3.0f, 3.0f, 3.0f));
-    //RenderObject tessObject = factory.createGenericObject("./models/garden_gnome.obj","textures/garden_gnome.jpg",modelTess,renderPass);
-    RenderObject tessObject = factory.createTessellatedObject(
-        "./models/sphere.obj",
-        "textures/snow.jpg",
-        modelTess,
-        renderPass
-    );
+    RenderObject tessObject = factory.createTessellatedObject("./models/sphere.obj","textures/snow.jpg", modelTess,renderPass);
     scene->setRenderObject(tessObject);
 
-    //Objekt zum Vergleich mit tessellation
+    //Objekt zum Vergleich mit tessellation (Untere Kugel des Schneemanns)
     glm::mat4 modelLine = glm::mat4(1.0f);
     modelLine = glm::translate(modelLine, glm::vec3(3.0f,-0.5f,-24.0f));
     RenderObject lineObject = factory.createPolygonLineObject("./models/sphere.obj", "textures/snow.jpg",
@@ -261,35 +250,20 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& fa
     scene->setRenderObject(hat);
 }
 
-// Speicher für alle Cubemap-Pipelines
-std::vector<GraphicsPipeline*> g_cubemapPipelines;
+//helper, um Pipeline für Cubemap zu erstellen
+GraphicsPipeline* createCubemapPipeline( VkDevice device,VkFormat colorFormat, VkFormat depthFormat,VkRenderPass cubemapRenderPass,
+    VkDescriptorSetLayout layout,const char* vertShader,const char* fragShader) {
 
-GraphicsPipeline* createCubemapPipeline(
-    VkDevice device,
-    VkFormat colorFormat,
-    VkFormat depthFormat,
-    VkRenderPass cubemapRenderPass,
-    VkDescriptorSetLayout layout,
-    const char* vertShader,
-    const char* fragShader)
-{
-    auto* p = new GraphicsPipeline(
-        device,
-        colorFormat,
-        depthFormat,
-        vertShader,
-        fragShader,
-        cubemapRenderPass,
-        layout,
-        PipelineType::STANDARD,
-        0  // subpass 0
-    );
+    auto* p = new GraphicsPipeline( device,colorFormat, depthFormat, vertShader, fragShader,
+        cubemapRenderPass,layout,PipelineType::STANDARD,0);
     g_cubemapPipelines.push_back(p);
     return p;
 }
 
+//######### main #################
 
 int main() {
+    //##### Standard Kram (Instance, Queues, RenderPass...) ######
     InitInstance inst;
     Scene* scene = new Scene();
     
@@ -313,13 +287,10 @@ int main() {
     Surface* surface = new Surface(window, instance);
 
     uint32_t graphicsIndex, presentIndex;
-    VkPhysicalDevice physicalDevice = inst.pickPhysicalDevice(
-        instance, surface, &graphicsIndex, &presentIndex
-    );
-    
+
+    VkPhysicalDevice physicalDevice = inst.pickPhysicalDevice(instance, surface, &graphicsIndex, &presentIndex);
     VkDevice device = inst.createLogicalDevice(physicalDevice, graphicsIndex, presentIndex);
    
-    
     VkQueue graphicsQueue;
     vkGetDeviceQueue(device, graphicsIndex, 0, &graphicsQueue);
 
@@ -336,10 +307,10 @@ int main() {
     
     VkCommandPool commandPool = inst.createCommandPool(device, graphicsIndex);
     DepthBuffer* depthBuffer = new DepthBuffer(physicalDevice, device, swapChain->getExtent());
-    
+
     RenderPass rp;
     VkRenderPass renderPass = rp.createRenderPass(device, swapChain->getImageFormat(), depthBuffer->getImageFormat());
-    
+
     Framebuffers* framebuffers = new Framebuffers(device,physicalDevice, swapChain, depthBuffer, renderPass);
     
     std::cout << "\nValidating G-Buffer setup..." << std::endl;
@@ -354,7 +325,6 @@ int main() {
     VkDescriptorSetLayout litDescriptorSetLayout = inst.createLitDescriptorSetLayout(device);
     VkDescriptorSetLayout lightingDescriptorSetLayout = inst.createLightingDescriptorSetLayout(device);
     scene->setDescriptorSetLayout(descriptorSetLayout);
-
     // Schneeflocken-Simulation erstellen
     Snow* snow = new Snow(physicalDevice, device, graphicsIndex);
 
@@ -368,7 +338,7 @@ int main() {
     //"Nicht besondere" Objekte zeichnen (alle sind besonders :3)
     buildStaticObjects(scene, renderPass, factory);
 
-    // Licht 1 (Bei der Lampe)
+    // Licht 1 (Bei der linken Lampe)
     glm::mat4 modelLight1 = glm::translate(glm::mat4(1.0), glm::vec3(-6.0f,14.0f,-16.0f));
     LightSourceObject light1 = factory.createLightSource(
         modelLight1,
@@ -445,29 +415,29 @@ int main() {
     scene->markObjectAsReflective(reflectiveIndex);
     scene->setReflectionUpdateInterval(5);
 
-VkRenderPass cubemapRP = reflectionProbe->getRenderPass();
-VkFormat colorFmt = swapChain->getImageFormat();
-VkFormat depthFmt = depthBuffer->getImageFormat();
+    VkRenderPass cubemapRP = reflectionProbe->getRenderPass();
+    VkFormat colorFmt = swapChain->getImageFormat();
+    VkFormat depthFmt = depthBuffer->getImageFormat();
 
-for (size_t i = 0; i < scene->getObjectCount(); i++) {
-    RenderObject& obj = scene->getObjectMutable(i);
-    
-    if (obj.isDeferred) continue;
-    if (obj.isSnow) continue;
-    if (scene->isMirrorObject(i)) continue;
-    if (i == reflectiveIndex) continue;
-    if (obj.pipeline == nullptr) continue;
+    for (size_t i = 0; i < scene->getObjectCount(); i++) {
+        RenderObject& obj = scene->getObjectMutable(i);
+        
+        if (obj.isDeferred) continue;
+        if (obj.isSnow) continue;
+        if (scene->isMirrorObject(i)) continue;
+        if (i == reflectiveIndex) continue;
+        if (obj.pipeline == nullptr) continue;
 
-    VkDescriptorSetLayout layout = obj.isLit ? litDescriptorSetLayout : descriptorSetLayout;
+        VkDescriptorSetLayout layout = obj.isLit ? litDescriptorSetLayout : descriptorSetLayout;
 
-    obj.cubemapPipeline = createCubemapPipeline(
-        device, colorFmt, depthFmt, cubemapRP, layout,
-        obj.pipeline->getVertexShaderPath(),
-        obj.pipeline->getFragmentShaderPath()
-    );
-}
+        obj.cubemapPipeline = createCubemapPipeline(
+            device, colorFmt, depthFmt, cubemapRP, layout,
+            obj.pipeline->getVertexShaderPath(),
+            obj.pipeline->getFragmentShaderPath()
+        );
+    }
 
-    // Schneeflocken zuletzt hinzufügen
+    // Schneeflocken
     RenderObject snowflakes = factory.createSnowflake(
         "textures/snowflake.png",
         renderPass,
@@ -475,17 +445,17 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         snowDescriptorSetLayout);
     scene->setRenderObject(snowflakes);
 
-    //####### Spiegel System Setup ##############
+    //####### Spiegel System ##############
     
     MirrorSystem* mirrorSystem = new MirrorSystem(device, &factory, renderPass);
-    // Spiegel 1: Hinter dem Gnom
+    // Spiegel 1 beim Unfall
     MirrorConfig mirror1;
     mirror1.position = glm::vec3(45.0f, 2.0f, -17.0f);
     mirror1.normal = glm::vec3(0.0f, 0.0f, 1.0f); //zur Kamera zeigend
     mirror1.scale = glm::vec3(10.0f, 3.0f, 0.1f);
     mirrorSystem->addMirror(scene, mirror1);
     
-    // Spiegel 2: Rechts
+    // Spiegel 2 rechts
     // MirrorConfig mirror2;
     // mirror2.position = glm::vec3(2.0f, 1.5f, 0.0f);
     // mirror2.normal = glm::vec3(-1.0f, 0.0f, 0.0f); //nach links zeigend
@@ -493,12 +463,12 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
     // mirrorSystem->addMirror(scene, mirror2);
     
     // Objekte markieren, die gespiegelt werden sollen
-     mirrorSystem->addReflectableObject(streetIndex);
-     mirrorSystem->addReflectableObject(barrierIndex);
-     mirrorSystem->addReflectableObject(graffittiIndex);
-     mirrorSystem->addReflectableObject(camIndex);
-     mirrorSystem->addReflectableObject(kastenIndex);
-     mirrorSystem->addReflectableObject(busIndex);
+    mirrorSystem->addReflectableObject(streetIndex);
+    mirrorSystem->addReflectableObject(barrierIndex);
+    mirrorSystem->addReflectableObject(graffittiIndex);
+    mirrorSystem->addReflectableObject(camIndex);
+    mirrorSystem->addReflectableObject(kastenIndex);
+    mirrorSystem->addReflectableObject(busIndex);
     scene->markObjectAsReflectable(streetIndex);
     scene->markObjectAsReflectable(barrierIndex);
     scene->markObjectAsReflectable(graffittiIndex);
@@ -518,16 +488,16 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
     scene->setLightingQuad(lightingQuad);
     std::cout << "Lighting quad created successfully!" << std::endl;
 
-
+    //###### Vorbereitungen fürs Rendern######
     
-    // Zähle Forward Objects nach Typ
+    //Forward Objects nach Typ zählen
     size_t normalForwardCount = 0;
     size_t snowCount = 0;
     size_t litCount = 0;
 
     for (size_t i = 0; i < scene->getObjectCount(); i++) {
         const auto& obj = scene->getObject(i);
-        if (obj.isDeferred) continue;  // Deferred werden separat gezählt
+        if (obj.isDeferred) continue;  // Deferred separat gezählt
         if (obj.isSnow) {
             snowCount++;
         } else if (obj.isLit) {
@@ -557,19 +527,19 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
     // Descriptor pool
     std::array<VkDescriptorPoolSize, 4> poolSizes{};
 
-    // UBOs: Normal + Snow + Lit + Lighting 
+    //ubo Normal Snow Lit & Lighting 
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets+ maxLightingSets;
 
-    // Samplers: Normal + Snow + Lit
+    //Samplers Normal  Snow & Lit
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizes[1].descriptorCount = maxNormalSets + maxSnowSets + maxLitSets;
 
-    // Storage Buffers: Nur Snow
+    //Storage Buffers für snow
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     poolSizes[2].descriptorCount = maxSnowSets;
 
-    // Input Attachments: Nur Lighting (1 pro set)
+    //input attachments für lighting (1 pro set)
     poolSizes[3].type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
     poolSizes[3].descriptorCount = maxLightingSets * 3;
 
@@ -596,19 +566,19 @@ for (size_t i = 0; i < scene->getObjectCount(); i++) {
         std::cout << "Allocating " << normalDescriptorSets << " normal descriptor sets..." << std::endl;
         framesInFlight[i]->allocateDescriptorSets(descriptorPool, descriptorSetLayout, normalDescriptorSets);
         
-        // Snow Descriptor Sets
+        //Snow Descriptor Sets
         if (snowDescriptorSets > 0) {
             std::cout << "Allocating " << snowDescriptorSets << " snow descriptor sets..." << std::endl;
             framesInFlight[i]->allocateSnowDescriptorSets(descriptorPool, snowDescriptorSetLayout, snowDescriptorSets);
         }
         
-        // Lit Descriptor Sets
+        // lit Descriptor Sets
         if (litDescriptorSets > 0) {
             std::cout << "Allocating " << litDescriptorSets << " lit descriptor sets..." << std::endl;
             framesInFlight[i]->allocateLitDescriptorSets(descriptorPool, litDescriptorSetLayout, litDescriptorSets);
         }
         
-        // Lighting Descriptor Sets
+        //Lighting Descriptor Sets
         if (lightingDescriptorSets > 0) {
             std::cout << "Allocating " << lightingDescriptorSets << " lighting descriptor sets..." << std::endl;
             framesInFlight[i]->allocateLightingDescriptorSets(descriptorPool, lightingDescriptorSetLayout, lightingDescriptorSets);

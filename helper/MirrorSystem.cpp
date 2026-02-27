@@ -1,4 +1,3 @@
-// MirrorSystem.cpp
 #include "MirrorSystem.hpp"
 #include <iostream>
 
@@ -11,12 +10,12 @@ static glm::mat4 normalToRotation(
 
     float cosTheta = glm::clamp(glm::dot(n0, n1), -1.0f, 1.0f);
 
-    // Gleiche Richtung → keine Rotation
+    // Gleiche Richtung -> keine Rotation
     if (cosTheta > 0.9999f) {
         return glm::mat4(1.0f);
     }
 
-    // Entgegengesetzte Richtung → 180°
+    // Entgegengesetzte Richtung -> 180°
     if (cosTheta < -0.9999f) {
         glm::vec3 axis = glm::cross(n0, glm::vec3(1.0f, 0.0f, 0.0f));
         if (glm::length(axis) < 0.001f) {
@@ -35,8 +34,8 @@ static glm::mat4 normalToRotation(
 
 glm::mat4 MirrorSystem::calculateReflectionMatrix(const glm::vec3& planePoint, 
                                                    const glm::vec3& planeNormal) {
-    // Ebenengleichung: n·x + d = 0
-    // d = -n·P (wobei P ein Punkt auf der Ebene ist)
+    //Ebenengleichung n·x + d = 0
+    // d = -n·P (P ist Punkt aufEbene)
     float d = -glm::dot(planeNormal, planePoint);
     
     glm::mat4 reflectionMatrix = glm::mat4(1.0f);
@@ -54,7 +53,7 @@ glm::mat4 MirrorSystem::calculateReflectionMatrix(const glm::vec3& planePoint,
     reflectionMatrix[2][0] = -2.0f * planeNormal.z * planeNormal.x;
     reflectionMatrix[2][1] = -2.0f * planeNormal.z * planeNormal.y;
     
-    // Translation: -2*d*n
+    //translation: -2*d*n
     reflectionMatrix[3][0] = -2.0f * d * planeNormal.x;
     reflectionMatrix[3][1] = -2.0f * d * planeNormal.y;
     reflectionMatrix[3][2] = -2.0f * d * planeNormal.z;
@@ -68,7 +67,7 @@ void MirrorSystem::addMirror(Scene* scene, const MirrorConfig& config) {
     mirror.position = config.position;
     mirror.normal = glm::normalize(config.normal);
     
-    // Transformationsmatrix für den Spiegel
+    // TransMatrix für den Spiegel
     mirror.transform = glm::mat4(1.0f);
     mirror.transform = glm::translate(mirror.transform, config.position);
     mirror.transform *= normalToRotation(config.normal);
@@ -88,13 +87,13 @@ void MirrorSystem::addMirror(Scene* scene, const MirrorConfig& config) {
 }
 
 void MirrorSystem::createMirrorObjects(Scene* scene, MirrorData& mirror) {
-    // PASS 1: Spiegel-Markierung (schreibt in Stencil)
+    // Pass 1: Spiegel-markierung (schreibt in Stencil)
     RenderObject mirrorMark = _factory->createMirror(
         mirror.transform, _renderPass, PipelineType::MIRROR_MARK);
     scene->setMirrorMarkObject(mirrorMark);
     mirror.markIndex = scene->getMirrorMarkIndex();
     
-    // PASS 3: Spiegel mit Transparenz
+    // Pass 3: Spiegel mit Transparenz
     RenderObject mirrorBlend = _factory->createMirror(
         mirror.transform, _renderPass, PipelineType::MIRROR_BLEND);
     scene->setMirrorBlendObject(mirrorBlend);
@@ -107,10 +106,9 @@ void MirrorSystem::addReflectableObject(size_t objectIndex) {
 }
 
 void MirrorSystem::createReflections(Scene* scene) {
-    // Für jeden Spiegel
     for (const auto& mirror : _mirrors) {
         
-        // Für jedes zu spiegelnde Objekt
+        // für jedes zu spiegelnde Objekt
         for (size_t objIndex : _reflectableObjects) {
             createReflectedObject(scene, objIndex, mirror);
         }
@@ -131,12 +129,7 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
     // Gespiegelte Transformationsmatrix
     glm::mat4 reflectedMatrix = reflectionMatrix * originalObj.modelMatrix;
     
-    // Neues gespiegeltes RenderObject erstellen
-    // Hier müssen wir die Original-Parameter des Objekts kennen
-    // Das ist eine Limitierung - in einer vollständigen Implementierung
-    // würde man diese Informationen im RenderObject speichern
-    
-    // Für jetzt: Erstelle eine Kopie und ändere nur die Matrix
+    //Erstelle eine Kopie und ändere die Matrix
     RenderObject reflectedObj = originalObj;
     reflectedObj.modelMatrix = reflectedMatrix;
     
@@ -160,18 +153,17 @@ void MirrorSystem::createReflectedObject(Scene* scene, size_t objectIndex,
 
 
 void MirrorSystem::updateReflections(Scene* scene, size_t objectIndex) {
-    // Prüfe ob das Objekt überhaupt reflektierbar ist
+    //Prüfe ob Objekt reflektierbar ist
     auto it = std::find(_reflectableObjects.begin(), _reflectableObjects.end(), objectIndex);
     if (it == _reflectableObjects.end()) {
-        return; // Objekt ist nicht reflektierbar
+        return; // Objekt nicht reflektierbar
     }
     
-    // Finde die Position des Objekts in der reflectableObjects-Liste
+    //Position des Objekts in der reflectableObjects-Liste finden
     size_t objPositionInList = std::distance(_reflectableObjects.begin(), it);
     
     const auto& originalObj = scene->getObject(objectIndex);
     
-    // Für jeden Spiegel
     for (size_t mirrorIdx = 0; mirrorIdx < _mirrors.size(); mirrorIdx++) {
         const auto& mirror = _mirrors[mirrorIdx];
         
@@ -180,11 +172,10 @@ void MirrorSystem::updateReflections(Scene* scene, size_t objectIndex) {
         
         glm::mat4 reflectedMatrix = reflectionMatrix * originalObj.modelMatrix;
         
-        // Berechne den Index in der reflectedObjects-Liste:
-        // (Spiegel-Index * Anzahl reflektierbare Objekte) + Position des Objekts
+        //Index in der reflectedObjects-Liste
         size_t reflectionIdx = mirrorIdx * _reflectableObjects.size() + objPositionInList;
         
-        // Update nur dieses eine gespiegelte Objekt
+        //update dieses gespiegelte Objekt
         if (reflectionIdx < scene->getReflectedObjectCount()) {
             RenderObject& reflectedObj = scene->getReflectedObject(reflectionIdx);
             reflectedObj.modelMatrix = reflectedMatrix;

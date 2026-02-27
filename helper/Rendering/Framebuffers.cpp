@@ -4,73 +4,73 @@
 
 
 
-    void Framebuffers::createGBufferResources() {
-        VkExtent2D extent = _swapChain->getExtent();
-        VkFormat gBufferFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+void Framebuffers::createGBufferResources() {
+    VkExtent2D extent = _swapChain->getExtent();
+    VkFormat gBufferFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
 
-        //GBuffer Normal
-        createSingleGBuffer(extent, gBufferFormat, 
-                           _gBufferNormalImage, _gBufferNormalMemory, _gBufferNormalView);
-        
-        //GBuffer Albedo
-        createSingleGBuffer(extent, gBufferFormat,
-                           _gBufferAlbedoImage, _gBufferAlbedoMemory, _gBufferAlbedoView);
+    //GBuffer Normal
+    createSingleGBuffer(extent, gBufferFormat, 
+                        _gBufferNormalImage, _gBufferNormalMemory, _gBufferNormalView);
+    
+    //GBuffer Albedo
+    createSingleGBuffer(extent, gBufferFormat,
+                        _gBufferAlbedoImage, _gBufferAlbedoMemory, _gBufferAlbedoView);
+}
+
+// Helper zum Erstellen eines G-Buffers
+void Framebuffers::createSingleGBuffer(VkExtent2D extent, VkFormat format,
+                        VkImage& image, VkDeviceMemory& memory, VkImageView& view) {
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.format = format;
+    imageInfo.extent.width = extent.width;
+    imageInfo.extent.height = extent.height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    if (vkCreateImage(_device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create G-Buffer image!");
     }
 
-    // Helper zum Erstellen eines G-Buffers
-    void Framebuffers::createSingleGBuffer(VkExtent2D extent, VkFormat format,
-                            VkImage& image, VkDeviceMemory& memory, VkImageView& view) {
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.format = format;
-        imageInfo.extent.width = extent.width;
-        imageInfo.extent.height = extent.height;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(_device, image, &memRequirements);
+    
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(
+        memRequirements.memoryTypeBits,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
 
-        if (vkCreateImage(_device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create G-Buffer image!");
-        }
-
-        VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(_device, image, &memRequirements);
-        
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(
-            memRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
-
-        if (vkAllocateMemory(_device, &allocInfo, nullptr, &memory) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to allocate G-Buffer memory!");
-        }
-
-        vkBindImageMemory(_device, image, memory, 0);
-
-        VkImageViewCreateInfo viewInfo{};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = image;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = format;
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(_device, &viewInfo, nullptr, &view) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create G-Buffer view!");
-        }
+    if (vkAllocateMemory(_device, &allocInfo, nullptr, &memory) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to allocate G-Buffer memory!");
     }
+
+    vkBindImageMemory(_device, image, memory, 0);
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = image;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(_device, &viewInfo, nullptr, &view) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create G-Buffer view!");
+    }
+}
 
 void Framebuffers::cleanupGBufferResources() {
     // Normal G-Buffer

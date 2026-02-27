@@ -3,11 +3,13 @@
 #include <array>
 #include <stdexcept>
 #include <iostream>
-
+/** 
+* Erstellt den RenderPass, wie er für das Projekt mit deferred Rendering
+* gebraucht wird mit passenden Attachments, Subpasses, etc 
+*/
 class RenderPass {
 public:
-    //Erstellt den RenderPass, wie er für das Projekt mit deferred Rendering
-    //gebraucht wird mit passenden Attachments, Subpasses, etc
+    //einzige Methode, erstellt halt den RenderPass
     VkRenderPass createRenderPass(VkDevice device, VkFormat colorFormat, VkFormat depthFormat) {
         // Attachment indices
         enum {
@@ -27,7 +29,7 @@ public:
         //----attachments
         std::array<VkAttachmentDescription, 4> attachments{};
 
-        // Back buffer 
+        //Back buffer 
         attachments[kAttachment_BACK].format = colorFormat;
         attachments[kAttachment_BACK].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_BACK].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
@@ -47,7 +49,7 @@ public:
         attachments[kAttachment_DEPTH].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachments[kAttachment_DEPTH].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        //GBuffer 1: Normal & metallic
+        //GBuffer 1 Normal & metallic
         attachments[kAttachment_GBUFFER_NORMAL].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[kAttachment_GBUFFER_NORMAL].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_GBUFFER_NORMAL].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -57,7 +59,7 @@ public:
         attachments[kAttachment_GBUFFER_NORMAL].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachments[kAttachment_GBUFFER_NORMAL].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        //GBuffer 2: Albedo & roughness
+        //GBuffer 2 Albedo & roughness
         attachments[kAttachment_GBUFFER_ALBEDO].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[kAttachment_GBUFFER_ALBEDO].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[kAttachment_GBUFFER_ALBEDO].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -106,7 +108,7 @@ public:
         backBufferRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         //--- subpasses
         std::array<VkSubpassDescription, 4> subpasses{};
-        std::cout<<"Subpasses\n";
+        
       
         //Depth Prepass
         subpasses[kSubpass_DEPTH].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -129,7 +131,7 @@ public:
         subpasses[kSubpass_LIGHTING].pColorAttachments = &backBufferRef;
         subpasses[kSubpass_LIGHTING].pDepthStencilAttachment = &depthReadRef;
 
-        // Subpass 3: Forward - Depth wieder beschreibbar
+        // Subpass 3 Forward - Depth wieder beschreibbar
         subpasses[kSubpass_FORWARD].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpasses[kSubpass_FORWARD].colorAttachmentCount = 1;
         subpasses[kSubpass_FORWARD].pColorAttachments = &backBufferRef;
@@ -137,7 +139,7 @@ public:
 
         // ---SubPpass dependencies
         std::array<VkSubpassDependency, 4> dependencies{};
-        std::cout<<"Dependencies \n";
+        
 
         // External -> Depth Prepass
         dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -147,7 +149,7 @@ public:
         dependencies[0].srcAccessMask = 0;
         dependencies[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-        std::cout<<"0 Done\n";
+        
 
         // Depth Prepass -> GBuffer
         dependencies[1].srcSubpass = kSubpass_DEPTH;
@@ -157,7 +159,6 @@ public:
         dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
         dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-        std::cout<<"1 Done\n";
 
         //GBuffer -> Lighting
         dependencies[2].srcSubpass = kSubpass_GBUFFER;
@@ -167,7 +168,6 @@ public:
         dependencies[2].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dependencies[2].dstAccessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
         dependencies[2].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-        std::cout<<"2 Done\n";
 
         // Dependency 3: Lighting -> Forward
         dependencies[3].srcSubpass = kSubpass_LIGHTING;
@@ -190,12 +190,10 @@ public:
         renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
         renderPassInfo.pDependencies = dependencies.data();
 
-        std::cout<<"Create\n";
         VkRenderPass renderPass;
         if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create deferred render pass!");
         }
-        std::cout<<"All Done\n";
         return renderPass;
     }
 };

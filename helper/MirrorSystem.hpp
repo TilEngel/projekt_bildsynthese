@@ -1,4 +1,3 @@
-// MirrorSystem.hpp
 #pragma once
 
 #include <glm/glm.hpp>
@@ -12,22 +11,24 @@ struct MirrorConfig {
     glm::vec3 normal;
     glm::vec3 scale = glm::vec3(1.5f, 2.5f, 0.1f);
 };
-
+/**
+ * Klasse für Großen Spiegel, der mit Stencil-Buffer erstellt wird
+ */
 class MirrorSystem {
 public:
     MirrorSystem(VkDevice device,ObjectFactory* factory, VkRenderPass renderPass)
         :  _factory(factory), _renderPass(renderPass), _device(device) {}
 
-    // Fügt einen Spiegel zur Szene hinzu
+    // fügt einen Spiegel zur Szene hinzu
     void addMirror(Scene* scene, const MirrorConfig& config);
 
-    // Fügt ein Objekt hinzu, das gespiegelt werden soll
+    //Fügt ein Objekt hinzu, das gespiegelt werden soll
     void addReflectableObject(size_t objectIndex);
 
     // Erstellt alle gespiegelten Objekte für alle Spiegel
     void createReflections(Scene* scene);
 
-    //Resettet Spiegel und erschafft neue Reflexion, nötig für bewegende Objekte
+    //resettet Spiegel und erschafft neue Reflexion, nötig für bewegende Objekte
     void updateReflections(Scene* scene, size_t objectIndex);
 
     // Berechnet die Reflexionsmatrix für eine Ebene

@@ -10,6 +10,9 @@
 
 #include "../initBuffer.hpp"
 
+/**
+ * Klasse für Texturen (übernommen aus der Übung)
+ */
 class Texture {
 public:
     Texture(VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool commandPool, VkQueue queue, const char* filename)

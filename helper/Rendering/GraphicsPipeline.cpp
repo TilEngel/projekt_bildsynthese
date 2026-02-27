@@ -6,7 +6,7 @@
 #include <array>
 #include <vulkan/vulkan_core.h>
 
-// Helper: SPIR-V file lesen
+// Helper um SPIR-V file lesen
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("Failed to open shader file!");
@@ -19,7 +19,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// Helper:  shader-Modul erstellen
+// Helper zum shader-Modul erstellen
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -34,8 +34,8 @@ VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code
 }
 
 void GraphicsPipeline::createPipelineLayout() {
-    std::cout << "Creating pipeline layout with device: " << _device 
-              << ", layout: " << _descriptorSetLayout << std::endl;
+    // std::cout << "Creating pipeline layout with device: " << _device 
+    //           << ", layout: " << _descriptorSetLayout << std::endl;
     
     if (_device == VK_NULL_HANDLE) {
         throw std::runtime_error("Device is NULL!");
@@ -403,25 +403,25 @@ void GraphicsPipeline::createPipeline() {
     if (tescModule != VK_NULL_HANDLE) vkDestroyShaderModule(_device, tescModule, nullptr);
     if (teseModule != VK_NULL_HANDLE) vkDestroyShaderModule(_device, teseModule, nullptr);
 
-    std::cout << "\n=== PIPELINE CREATED ===" << std::endl;
-    std::cout << "Type: ";
-    switch (_pipelineType) {
-        case PipelineType::STANDARD: std::cout << "STANDARD"; break;
-        case PipelineType::DEPTH_ONLY: std::cout << "DEPTH_ONLY"; break;
-        case PipelineType::GBUFFER: std::cout << "GBUFFER"; break;
-        case PipelineType::LIGHTING: std::cout << "LIGHTING"; break;
-        case PipelineType::SKYBOX: std::cout << "SKYBOX"; break;
-        case PipelineType::TESSELLATION: std::cout << "TESSELLATION"; break;
-        case PipelineType::MIRROR_MARK: std::cout << "MIRROR_MARK"; break;
-        case PipelineType::MIRROR_REFLECT: std::cout << "MIRROR_REFLECT"; break;
-        case PipelineType::MIRROR_BLEND: std::cout << "MIRROR_BLEND"; break;
-        default: std::cout << "UNKNOWN"; break;
-    }
-    std::cout << std::endl;
-    std::cout << "Vertex Shader: " << _vertexShaderPath << std::endl;
-    std::cout << "Fragment Shader: " << _fragmentShaderPath << std::endl;
-    std::cout << "Subpass: " << _subpassIndex << std::endl;
-    std::cout << "Pipeline Handle: " << (_graphicsPipeline != VK_NULL_HANDLE) << std::endl;
+    // std::cout << "\n=== PIPELINE CREATED ===" << std::endl;
+    // std::cout << "Type: ";
+    // switch (_pipelineType) {
+    //     case PipelineType::STANDARD: std::cout << "STANDARD"; break;
+    //     case PipelineType::DEPTH_ONLY: std::cout << "DEPTH_ONLY"; break;
+    //     case PipelineType::GBUFFER: std::cout << "GBUFFER"; break;
+    //     case PipelineType::LIGHTING: std::cout << "LIGHTING"; break;
+    //     case PipelineType::SKYBOX: std::cout << "SKYBOX"; break;
+    //     case PipelineType::TESSELLATION: std::cout << "TESSELLATION"; break;
+    //     case PipelineType::MIRROR_MARK: std::cout << "MIRROR_MARK"; break;
+    //     case PipelineType::MIRROR_REFLECT: std::cout << "MIRROR_REFLECT"; break;
+    //     case PipelineType::MIRROR_BLEND: std::cout << "MIRROR_BLEND"; break;
+    //     default: std::cout << "UNKNOWN"; break;
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Vertex Shader: " << _vertexShaderPath << std::endl;
+    // std::cout << "Fragment Shader: " << _fragmentShaderPath << std::endl;
+    // std::cout << "Subpass: " << _subpassIndex << std::endl;
+    // std::cout << "Pipeline Handle: " << (_graphicsPipeline != VK_NULL_HANDLE) << std::endl;
 }
 
 void GraphicsPipeline::cleanupPipelineLayout() {

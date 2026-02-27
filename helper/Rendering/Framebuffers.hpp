@@ -7,6 +7,9 @@
 #include "Swapchain.hpp"
 #include "Depthbuffer.hpp"
 
+/**
+ * Es sollte klar sein, was ein Framebuffer halt so tut
+ */
 class Framebuffers {
 public:
     Framebuffers(VkDevice device, VkPhysicalDevice physicalDevice, SwapChain* swapChain, 

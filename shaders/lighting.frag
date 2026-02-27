@@ -1,4 +1,4 @@
-//lighting.frag- letzte Phase von deferred Shading
+//letzte Phase von deferred Shading
 #version 450
 
 layout(input_attachment_index = 0, binding = 0) uniform subpassInput gBufferNormalInput;

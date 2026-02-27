@@ -1,4 +1,4 @@
-//snow.frag
+//Fragment Shader für den Schnee
 #version 450
 
 layout(set = 0, binding = 2) uniform sampler2D tex;

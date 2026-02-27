@@ -1,4 +1,4 @@
-//gbuffer.vert
+//Vertex Shader für den GBuffer
 #version 450
 
 layout(binding = 0) uniform UniformBufferObject {
@@ -23,7 +23,6 @@ void main() {
     fragWorldPos = worldPos.xyz;
     
     // Normale in World Space transformieren
-    // Verwende die Inverse-Transpose der Model-Matrix für korrekte Normalen-Transformation
     mat3 normalMatrix = transpose(inverse(mat3(push.model)));
     fragWorldNormal = normalize(normalMatrix * inNormal);
     

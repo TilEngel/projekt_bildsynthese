@@ -6,7 +6,9 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <cstdint>
-
+/**
+ * Klasse für das Window (übernommen aus der Übung)
+ */
 class Window {
 public:
 

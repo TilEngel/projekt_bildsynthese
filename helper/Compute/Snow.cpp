@@ -9,7 +9,7 @@
 #include "../initBuffer.hpp"
 #include <array>
 
-// Helper: Datei (compute Shader) einlesen
+// Helper zum Datei (compute Shader) einlesen
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("failed to open file: " + filename);
@@ -21,7 +21,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// Helper: Buffer erstellen & Speicher allokieren
+// Helper zum Buffer erstellen & Speicher allokieren
 static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize size, 
                          VkBufferUsageFlags usage, VkMemoryPropertyFlags memProps,
                          VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
@@ -52,9 +52,7 @@ static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDev
 }
 
 Snow::Snow(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t queueIndex) 
-    : _physicalDevice(physicalDevice)
-    , _device(device)
-    , _computeQueueIndex(queueIndex) {
+    : _physicalDevice(physicalDevice), _device(device), _computeQueueIndex(queueIndex) {
     createDescriptorSetLayout();
     createPipelineLayout();
     createPipeline();
@@ -162,12 +160,12 @@ void Snow::createStorageBuffers() {
     std::random_device rd;
     std::mt19937 gen(rd());
     
-    // Schneeflocken verteilen sich über die Szene
+    //Startpositionen der Schneeflocken
     std::uniform_real_distribution<float> posX(1.2f, 8.2f);
     std::uniform_real_distribution<float> posY(10.0f, 9.0f);  //Starten oben
     std::uniform_real_distribution<float> posZ(-23.0f,-17.0f);
     
-    // Langsame Fallgeschwindigkeit mit leichter Variation
+    // Langsame Fallgeschwindigkeit mit Variation
     std::uniform_real_distribution<float> velX(-0.025f, 0.025f);
     std::uniform_real_distribution<float> velY(-0.0325f, -0.0002f);  //langsam nach unten
     std::uniform_real_distribution<float> velZ(-0.015f, 0.015f);

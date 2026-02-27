@@ -1,4 +1,4 @@
-//fragment-shader
+//Standard fragment-shader
 #version 450
 
 layout(set = 0, binding = 1) uniform sampler2D tex;

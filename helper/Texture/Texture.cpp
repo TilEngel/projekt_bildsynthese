@@ -46,7 +46,7 @@ void Texture::createImageBuffer(const char* filename) {
 
     vkBindBufferMemory(_device, _imageBuffer, _imageBufferMemory, 0);
 
-    // copy pixel data into mapped memory
+    //pixel Daten -> mapped memory
     void* data;
     vkMapMemory(_device, _imageBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, static_cast<size_t>(imageSize));
@@ -150,7 +150,7 @@ void Texture::copyBufferToImage() {
     barrierToTransfer.subresourceRange.levelCount = _mipLevels;
     barrierToTransfer.subresourceRange.baseArrayLayer = 0;
     barrierToTransfer.subresourceRange.layerCount = 1;
-    barrierToTransfer.srcAccessMask = 0; // as oldLayout is undefined
+    barrierToTransfer.srcAccessMask = 0; 
     barrierToTransfer.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
     vkCmdPipelineBarrier(
@@ -245,7 +245,7 @@ void Texture::copyBufferToImage() {
             VK_FILTER_LINEAR
         );
 
-        // Transition previous level to SHADER_READ_ONLY_OPTIMAL
+        //Level zu SHADER_READ_ONLY_OPTIMAL
         VkImageMemoryBarrier barrierRead{};
         barrierRead.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrierRead.image = _textureImage;
@@ -322,7 +322,7 @@ void Texture::createTextureSampler() {
     samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
-    // Geräteeigenschaften und Features abfragen
+    // Geräteeigenschaften & features abfragen
     VkPhysicalDeviceProperties props{};
     vkGetPhysicalDeviceProperties(_physicalDevice, &props);
 

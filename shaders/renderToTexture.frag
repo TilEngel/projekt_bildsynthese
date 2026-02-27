@@ -1,4 +1,4 @@
-//renderToTexture.frag
+//Render-To-Texture fragment Shader
 #version 450
 
 layout(location = 0) in vec3 fragWorldPos;
@@ -24,14 +24,14 @@ void main() {
     float metallic = 0.9;
     float roughness = 0.1;
     
-    // Einfaches Ambient
+    //Einfaches Ambient
     vec3 ambient = 0.15 * baseColor;
     
     // Reflexion
     vec3 reflectDir = reflect(-viewDir, normal);
     vec3 reflectionColor = texture(cubemapSampler, reflectDir).rgb;
     
-    // Fresnel
+    //Fresnel
     float F0 = mix(0.04, 0.95, metallic);
     float fresnel = F0 + (1.0 - F0) * pow(1.0 - max(dot(viewDir, normal), 0.0), 5.0);
     fresnel *= (1.0 - roughness * 0.5);
@@ -43,7 +43,7 @@ void main() {
         fresnel
     );
     
-    // Metall-Tinting
+    // Metall-tinting
     if (metallic > 0.5) {
         finalColor *= mix(vec3(1.0), baseColor, metallic * 0.6);
     }

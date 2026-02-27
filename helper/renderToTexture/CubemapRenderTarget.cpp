@@ -102,7 +102,7 @@ void CubemapRenderTarget::createCubemapImage() {
 }
 
 void CubemapRenderTarget::createCubemapViews() {
-    // Individual Face Views für Framebuffer
+    //individuelle Face-views für Framebuffer
     for (uint32_t i = 0; i < 6; i++) {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -120,7 +120,7 @@ void CubemapRenderTarget::createCubemapViews() {
         }
     }
 
-    // Kompletter Cubemap View für Shader
+    // komplette Cubemap View für Shader
     VkImageViewCreateInfo cubemapViewInfo{};
     cubemapViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     cubemapViewInfo.image = _cubemapImage;
@@ -261,8 +261,8 @@ void CubemapRenderTarget::createFramebuffers() {
     for (uint32_t i = 0; i < 6; i++) {
         // Für jeden Face ein eigenes Framebuffer mit dem entsprechenden Layer
         VkImageView attachments[2];
-        attachments[0] = _faceViews[i];  // Color attachment für diesen Face
-        attachments[1] = _depthView;     // Shared depth (alle Layers)
+        attachments[0] = _faceViews[i]; 
+        attachments[1] = _depthView;
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
