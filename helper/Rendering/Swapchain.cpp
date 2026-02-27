@@ -25,7 +25,7 @@ void SwapChain::create() {
             break;
         }
     }
-    // Fallback auf SRGB, falls UNORM nicht verfügbar
+    //Fallback auf srgb, falls UNORM nicht verfügbar
     if (selectedFormat.format != VK_FORMAT_B8G8R8A8_UNORM) {
         for (const auto& f : formats) {
             if (f.format == VK_FORMAT_B8G8R8A8_SRGB &&
@@ -48,9 +48,7 @@ void SwapChain::create() {
             break;
         }
     }
-
-    //Choose Swap Extent
-
+    //Swap Extent wählen
     if (capabilities.currentExtent.width != UINT32_MAX) {
         // Vulkan darf Extent vorgeben
         _extent = capabilities.currentExtent;
@@ -75,7 +73,6 @@ void SwapChain::create() {
     }
 
     //Sharing Mode auswählen
-
     uint32_t qIndices[2] = { _graphicsQueueFamilyIndex, _presentQueueFamilyIndex };
     bool sameFamily = (_graphicsQueueFamilyIndex == _presentQueueFamilyIndex);
 
@@ -114,10 +111,8 @@ void SwapChain::create() {
     // SwapChain Images holen
     uint32_t count = 0;
     vkGetSwapchainImagesKHR(_device, _swapChain, &count, nullptr);
-
     _images.resize(count);
     vkGetSwapchainImagesKHR(_device, _swapChain, &count, _images.data());
-
 
     std::cout << "SwapChain created with " << count
               << " images, format=" << selectedFormat.format
@@ -139,7 +134,6 @@ void SwapChain::cleanup() {
 //image views für swapchain images erstellen
 void SwapChain::createImageViews() {
     cleanupImageViews(); //sicherstellen dass keine alten Views existieren
-
     _swapChainImageViews.reserve(_images.size());
 
     for (size_t i = 0; i < _images.size(); ++i) {
@@ -177,7 +171,6 @@ void SwapChain::createSemaphores() {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     semaphoreInfo.flags = 0;
-
     _presentationSemaphores.reserve(_images.size());
 
     for (size_t i = 0; i < _images.size(); ++i) {
@@ -187,7 +180,6 @@ void SwapChain::createSemaphores() {
         }
         _presentationSemaphores.push_back(sem);
     }
-
     std::cout << "Created " << _presentationSemaphores.size() << " presentation semaphores\n";
 }
 
@@ -219,7 +211,6 @@ uint32_t SwapChain::acquireNextImage(VkSemaphore semaphore, VkFence fence) {
     if (_swapChain == VK_NULL_HANDLE) {
         throw std::runtime_error("AcquireNextImage called but swapchain is not created.");
     }
-
     uint32_t imageIndex = 0;
     VkResult result = vkAcquireNextImageKHR(_device,
                                             _swapChain,
@@ -234,7 +225,6 @@ uint32_t SwapChain::acquireNextImage(VkSemaphore semaphore, VkFence fence) {
         throw std::runtime_error("Failed to acquire next swap chain image (vkAcquireNextImageKHR returned error).");
     }
 }
-
 
 // present Image mit index imageIndex
 bool SwapChain::presentImage(uint32_t imageIndex) {

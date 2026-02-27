@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Window.hpp"
-
+/**
+ * Klasse fürs Surface (aus Übung übernommen)
+ */
 class Surface {
 public:
     Surface(Window* window, VkInstance instance)

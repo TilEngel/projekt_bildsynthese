@@ -30,7 +30,7 @@ Window::Window() {
         throw std::runtime_error("Failed to create GLFW window");
     }
 
-    // setze "user pointer" auf das Objekt
+    //setze "user pointer" auf das Objekt
     glfwSetWindowUserPointer(_window, this);
 
     //setze framebuffer resize callback
@@ -73,7 +73,7 @@ VkExtent2D Window::getExtent() {
     }
     int width = 0, height = 0;
     glfwGetFramebufferSize(_window, &width, &height);
-    //falls das Fenster minimiert ist, kann height==0 sein  warten/neu prüfen
+    //falls Fenster minimiert ist, kann height==0 sein  warten/neu prüfen
     return VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 }
 
@@ -94,7 +94,7 @@ VkSurfaceKHR Window::createSurface(VkInstance instance) {
     return surface;
 }
 
-// statischer Callback: setzt das Flag im zugehörigen Window-Objekt
+// statischer Callback setzt das Flag im zugehörigen Window-Objekt
 void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
     (void) width; (void) height;
     // window Objekt aus dem User-Pointer holen
@@ -104,11 +104,11 @@ void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height
     }
 }
 
-//liefert die aktuelle Cursorposition im Fenster 
+//liefert aktuelle Cursorposition im Fenster 
 void Window::getCursorPos(double* xpos, double* ypos){
     if(_window){
         glfwGetCursorPos(_window, xpos, ypos);
-    }else{ //Falls gerade kein Window existiert
+    }else{ //Falls kein Window existiert
         if(xpos){
             *xpos = 0.0;
         }

@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
-
+/**
+ * Steuerbare Kamera
+ */
 class Camera {
 public:
     Camera(glm::vec3 position = glm::vec3(4.0f, 4.0f, 4.0f),

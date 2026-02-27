@@ -5,7 +5,9 @@
 #include <vulkan/vulkan_core.h>
 
 #include "Surface.hpp"
-
+/**
+ * Klasse für die Swapchain (aus Übung übernommen)
+ */
 class SwapChain {
 public:
     SwapChain(Surface* surface, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue presentQueue, uint32_t graphicsQueueFamilyIndex, uint32_t presentQueueFamilyIndex)

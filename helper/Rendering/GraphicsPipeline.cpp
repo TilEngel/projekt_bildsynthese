@@ -6,7 +6,7 @@
 #include <array>
 #include <vulkan/vulkan_core.h>
 
-// Helper: SPIR-V file lesen
+// Helper um SPIR-V file lesen
 static std::vector<char> readFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) throw std::runtime_error("Failed to open shader file!");
@@ -19,7 +19,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-// Helper:  shader-Modul erstellen
+// Helper zum shader-Modul erstellen
 VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

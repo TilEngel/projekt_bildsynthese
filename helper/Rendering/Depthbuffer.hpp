@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vulkan/vulkan_core.h>
-
+/**
+ * DepthBuffer Klasse (übernommen aus der Übung)
+ */
 class DepthBuffer {
 public:
     DepthBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkExtent2D extent)

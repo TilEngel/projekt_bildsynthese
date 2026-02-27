@@ -1,4 +1,3 @@
-// initBuffer.cpp
 #include "initBuffer.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"
@@ -151,7 +150,7 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
 
     vkBindBufferMemory(device, _vertexBuffer, _vertexBufferMemory, 0);
 
-    // 3) staging -> device lokal
+    //staging -> device lokal
     copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, _vertexBuffer, bufferSize);
 
     // Cleanup

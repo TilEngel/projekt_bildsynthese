@@ -18,8 +18,8 @@ enum class PipelineType {
     GBUFFER,          // G-Buffer generation (subpass 1)
     LIGHTING,          // Deferred lighting (subpass 2)
     SKYBOX,              //Extra für die Skybox
-    TESSELLATION,
-    LINE
+    TESSELLATION,       //Tesseliertes Objekt
+    LINE                //Whireframe Objekt
 };
 
 enum class SubpassIndex {
@@ -28,6 +28,7 @@ enum class SubpassIndex {
     LIGHTING = 2
 };
 
+// Klasse für GraphicsPipeline (Aus der Übung übernommen)
 class GraphicsPipeline {
 public:
     GraphicsPipeline(VkDevice device,

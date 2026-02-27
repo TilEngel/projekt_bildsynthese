@@ -26,7 +26,7 @@ class Snow {
 public:
     Snow(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t queueIndex);
     
-    //Gibt CommandBuffer mit Compute-Operationen zurück
+    //gibt CommandBuffer mit Compute-Operationen zurück
     VkCommandBuffer getCommandBuffer() { return _commandBuffer; }
     //Aktueller Buffer mit Partikelpositionen
     VkBuffer getCurrentBuffer() { return _currBuffer; }

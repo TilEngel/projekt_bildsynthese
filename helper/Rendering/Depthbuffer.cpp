@@ -13,7 +13,7 @@ void DepthBuffer::createDepthImage(VkExtent2D extent)
     const std::vector<VkFormat> candidates = {
         VK_FORMAT_D24_UNORM_S8_UINT,      //Bevorzugt: 24-bit depth + 8-bit stencil
         VK_FORMAT_D32_SFLOAT_S8_UINT,     //alternative mit 32-bit depth + stencil
-        VK_FORMAT_D32_SFLOAT               // Fallback ohne Stencil (für Mirror nicht ideal)
+        VK_FORMAT_D32_SFLOAT               // Fallback ohne Stencil (für Mirror nicht so ideal)
     };
 
     _depthImageFormat = VK_FORMAT_UNDEFINED;

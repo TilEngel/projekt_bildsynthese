@@ -1,4 +1,3 @@
-// Surface.cpp
 #include "Surface.hpp"
 
 #include <vector>

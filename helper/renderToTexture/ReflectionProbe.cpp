@@ -1,7 +1,7 @@
 #include "ReflectionProbe.hpp"
 
 std::array<glm::mat4, 6> ReflectionProbe::getCubeFaceViews() const {
-    // Vulkan Cubemap Standard: +X, -X, +Y, -Y, +Z, -Z
+   
     return {
         // Face 0: +X (right)
         glm::lookAt(_position, _position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
@@ -26,7 +26,7 @@ std::array<glm::mat4, 6> ReflectionProbe::getCubeFaceViews() const {
 //90Grad FOV Projection für Cubemap
 glm::mat4 ReflectionProbe::getProjection() const {
     glm::mat4 proj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
-    proj[1][1] *= -1.0f; // Y-Flip
+    proj[1][1] *= -1.0f; // y-flip
     return proj;
 }
 

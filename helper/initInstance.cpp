@@ -315,14 +315,14 @@ void InitInstance::destroyDescriptorPool(VkDevice device, VkDescriptorPool descr
 }
 
 VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice device) {
-    // Binding 0: Uniform Buffer
+    // Binding 0 Uniform Buffer
     VkDescriptorSetLayoutBinding ubo{};
     ubo.binding = 0;
     ubo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     ubo.descriptorCount = 1;
     ubo.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
 
-    // Binding 1: Combined Image Sampler
+    // Binding 1 combined Image Sampler
     VkDescriptorSetLayoutBinding sampler{};
     sampler.binding = 1;
     sampler.descriptorCount = 1;
@@ -343,21 +343,21 @@ VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice d
     return layout;
 }
 VkDescriptorSetLayout InitInstance::createSnowDescriptorSetLayout(VkDevice device) {
-    // Binding 0: UBO (model, view, proj)
+    // Binding 0 UBO (model, view, proj)
     VkDescriptorSetLayoutBinding uboBinding{};
     uboBinding.binding = 0;
     uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboBinding.descriptorCount = 1;
     uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 1: Storage Buffer (Particles)
+    // Binding 1 Storage Buffer (Partikel)
     VkDescriptorSetLayoutBinding storageBinding{};
     storageBinding.binding = 1;
     storageBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     storageBinding.descriptorCount = 1;
     storageBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 2: Texture Sampler
+    // Binding texture Sampler
     VkDescriptorSetLayoutBinding samplerBinding{};
     samplerBinding.binding = 2;
     samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -381,14 +381,14 @@ VkDescriptorSetLayout InitInstance::createSnowDescriptorSetLayout(VkDevice devic
     return descriptorSetLayout;
 }
 VkDescriptorSetLayout InitInstance::createLitDescriptorSetLayout(VkDevice device) {
-    // Binding 0: UBO mit Licht-Daten
+    // Binding 0 UBO mit Licht-Daten
     VkDescriptorSetLayoutBinding uboBinding{};
     uboBinding.binding = 0;
     uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboBinding.descriptorCount = 1;
     uboBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    // Binding 1: Texture Sampler
+    // Binding 1 texture Sampler
     VkDescriptorSetLayoutBinding samplerBinding{};
     samplerBinding.binding = 1;
     samplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -420,7 +420,7 @@ void InitInstance::destroyDescriptorSetLayout(VkDevice device, VkDescriptorSetLa
 
 
 VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice device) {
-    //4 Bindings: Normal, Albedo, Depth, UBO
+    //4 Bindings Normal, Albedo, Depth, UBO
     
     //Normal
     VkDescriptorSetLayoutBinding normalBinding{};
@@ -442,7 +442,7 @@ VkDescriptorSetLayout InitInstance::createLightingDescriptorSetLayout(VkDevice d
     depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     //UBO
     VkDescriptorSetLayoutBinding uboBinding{};
-    uboBinding.binding = 3;  // ✅ Jetzt Binding 3!
+    uboBinding.binding = 3; 
     uboBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboBinding.descriptorCount = 1;
     uboBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
