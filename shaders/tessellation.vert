@@ -1,4 +1,4 @@
-//tessellation.vert
+//Vertex Shader für Tessellation (macht nicht viel, ist aber nötig)
 #version 450
 
 layout(location = 0) in vec3 inPosition;
@@ -9,7 +9,7 @@ layout(location = 1) out vec3 outNormal;
 layout(location = 0) out vec2 outTexCoord;
 
 void main() {
-    // Nur Passthrough - keine Transformation hier!
+    // Nur Passthrough, keine Transformation hier
     gl_Position = vec4(inPosition, 1.0);
     outNormal = inNormal;
     outTexCoord = inTexCoord;

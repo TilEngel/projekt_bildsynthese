@@ -1,4 +1,4 @@
-//lighting.vert
+//Hier passiert nicht viel o-O
 #version 450
 
 vec2 positions[6] = vec2[](

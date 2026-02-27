@@ -16,9 +16,8 @@ static const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
 
-/* ============================================================
-   Debug Callback
-   ============================================================ */
+
+// Debug Callback
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
@@ -28,10 +27,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     std::cerr << "[VALIDATION] " << data->pMessage << "\n Severity: "<< severity << "\n Type: "<< type << std::endl;
     return VK_FALSE;
 }
-
+//Hilfsfunktion für Debug-messenger
 static VkDebugUtilsMessengerCreateInfoEXT makeDebugCreateInfo() {
     VkDebugUtilsMessengerCreateInfoEXT info{};
     info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    //Nur warnings, keine Infos
     info.messageSeverity =
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -43,9 +43,8 @@ static VkDebugUtilsMessengerCreateInfoEXT makeDebugCreateInfo() {
     return info;
 }
 
-/* ============================================================
-   Instance
-   ============================================================ */
+
+// Instance erstellen
 VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
 
 #ifdef __APPLE__
@@ -57,7 +56,7 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
 
-    /* ---- Layer Check ---- */
+    // ---- Layer Check
     if (enableValidationLayers) {
         uint32_t layerCount = 0;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -75,7 +74,7 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
         }
     }
 
-    /* ---- App Info ---- */
+    //---- App Info
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Vulkan Instance";
@@ -84,12 +83,12 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
-    /* ---- Debug Create Info ---- */
+    //---- Debug Create Info
     VkDebugUtilsMessengerCreateInfoEXT debugInfo{};
     if (enableValidationLayers)
         debugInfo = makeDebugCreateInfo();
 
-    /* ---- Instance Create ---- */
+    // ---- Instance-Erstellung
     VkInstanceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     info.pApplicationInfo = &appInfo;
@@ -114,7 +113,7 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
     if (vkCreateInstance(&info, nullptr, &instance) != VK_SUCCESS)
         throw std::runtime_error("vkCreateInstance failed");
 
-    /* ---- Debug Messenger ---- */
+    //---- Debug Messenger
     if (enableValidationLayers) {
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)
             vkGetInstanceProcAddr(instance,
@@ -130,7 +129,7 @@ VkInstance InitInstance::createInstance(std::vector<const char*> extensions) {
 }
 
 void InitInstance::destroyInstance(VkInstance instance) {
-
+    //Debug-messenger Aufräumen
     if (enableValidationLayers && debugMessenger != VK_NULL_HANDLE) {
         auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)
             vkGetInstanceProcAddr(instance,
@@ -138,14 +137,13 @@ void InitInstance::destroyInstance(VkInstance instance) {
         if (func)
             func(instance, debugMessenger, nullptr);
     }
-
+    //Instance zersören
     if (instance != VK_NULL_HANDLE)
         vkDestroyInstance(instance, nullptr);
 }
 
-/* ============================================================
-   Physical Device
-   ============================================================ */
+
+// Physical Device auswählen
 VkPhysicalDevice InitInstance::pickPhysicalDevice(
     VkInstance instance,
     Surface* surface,
@@ -161,7 +159,7 @@ VkPhysicalDevice InitInstance::pickPhysicalDevice(
     vkEnumeratePhysicalDevices(instance, &count, devices.data());
 
     for (auto dev : devices) {
-
+        //prüfe, ob SwapChain-Extensions vorhanden
         uint32_t extCount = 0;
         vkEnumerateDeviceExtensionProperties(dev, nullptr, &extCount, nullptr);
         std::vector<VkExtensionProperties> exts(extCount);
@@ -174,7 +172,7 @@ VkPhysicalDevice InitInstance::pickPhysicalDevice(
 
         if (!hasSwapchain || !surface->isAdequate(dev))
             continue;
-
+        //Passende Queue-families suchen
         uint32_t qCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(dev, &qCount, nullptr);
         std::vector<VkQueueFamilyProperties> qfam(qCount);
@@ -198,9 +196,9 @@ VkPhysicalDevice InitInstance::pickPhysicalDevice(
     throw std::runtime_error("Keine geeignete GPU");
 }
 
-/* ============================================================
-   Logical Device
-   ============================================================ */
+
+//Logical Device
+
 VkDevice InitInstance::createLogicalDevice(
     VkPhysicalDevice physicalDevice,
     uint32_t gQueue,
@@ -224,15 +222,14 @@ VkDevice InitInstance::createLogicalDevice(
     };
 
 #ifdef __APPLE__
-    //extensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+    //extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
-    //Features prüfen
+    //unterstützte Features prüfen
     VkPhysicalDeviceFeatures supportedFeatures{};
     vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
     
     if (!supportedFeatures.tessellationShader) {
         std::cerr << "WARNING: Tessellation shaders not supported on this device!" << std::endl;
-        // Optional: throw std::runtime_error("Tessellation not supported!");
     } else {
         std::cout << "Tessellation shaders supported!" << std::endl;
     }
@@ -240,7 +237,9 @@ VkDevice InitInstance::createLogicalDevice(
     VkPhysicalDeviceFeatures features{};
     features.samplerAnisotropy = VK_TRUE;
     features.tessellationShader = VK_TRUE;
+    features.fillModeNonSolid = VK_TRUE;
 
+    //Logical Device erstellen
     VkDeviceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     info.queueCreateInfoCount = static_cast<uint32_t>(queues.size());
@@ -342,6 +341,7 @@ VkDescriptorSetLayout InitInstance::createStandardDescriptorSetLayout(VkDevice d
 
     return layout;
 }
+
 VkDescriptorSetLayout InitInstance::createSnowDescriptorSetLayout(VkDevice device) {
     // Binding 0 UBO (model, view, proj)
     VkDescriptorSetLayoutBinding uboBinding{};

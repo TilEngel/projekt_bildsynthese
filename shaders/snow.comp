@@ -1,4 +1,4 @@
-//snow.comp
+//simpler Compute Shader, der Schneeflocken simmuliert
 #version 450 core
 
 struct Particle {

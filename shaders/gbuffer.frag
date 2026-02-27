@@ -1,4 +1,4 @@
-//gbuffer.frag
+//G-Buffer Fragment-Shader
 #version 450
 
 layout(binding = 1) uniform sampler2D texSampler;
@@ -11,10 +11,10 @@ layout(location = 0) out vec4 outGBuffer;   // Normal + Metallic
 layout(location = 1) out vec4 outAlbedo;    // Albedo RGB + Roughness
 
 void main() {
-    // Textur-Farbe
+    // Textur-farbe
     vec3 albedo = texture(texSampler, fragTexCoord).rgb;
     
-    // Verwende die interpolierte Normale aus dem Vertex Shader
+    // interpolierte Normale aus dem Vertex Shader
     vec3 normal = normalize(fragWorldNormal);
     
     // Prüfe auf ungültige Normalen
@@ -25,11 +25,11 @@ void main() {
     
     // G-Buffer: Normal RGB + Metallic A
     outGBuffer = vec4(
-        normal * 0.5 + 0.5,  // Normal xyz: [-1,1] -> [0,1]
+        normal * 0.5 + 0.5,  // Normal xyz [-1,1] -> [0,1]
         0.0                   // metallic
     );
     
-    // Albedo: Farbe RGB + roughness A
+    // Albedo: Farbe RGB +roughness A
     outAlbedo = vec4(
         albedo,    // RGB-Farbe
         0.5        // Roughness

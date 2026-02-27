@@ -1,4 +1,4 @@
-//lit.vert
+//Beleuchtete Objekte
 #version 450
 
 layout(location = 0) in vec3 aPos;
