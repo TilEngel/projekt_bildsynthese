@@ -4,7 +4,7 @@
 
 ## Beschreibung der Szene:
 Die Zwergen-Brüder hatten mit ihrem Bus einen Unfall. Während sie jetzt auf den
-Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welches ihnen der magische Fisch hergezaubert hat) und betreiben Vandalismus.
+Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welches ihnen der magische Fisch hergezaubert hat) und betreiben Vandalismus. Wir sind eine kleine Fliege, die durch das Geschehen schwirrt.
 
 --- 
 
@@ -31,7 +31,7 @@ Abschleppdienst warten, genießen sie das kühlste Bier der ganzen Wüste (welch
 | **MipMaps** | `helper/Texture/Texture` |
 | **Mehrere Pipelines** | ObjectFactory erzeugt für jedes Objekt eine eigene Pipeline |
 | **Deferred Shading** | Linker Zwerg, Regenschirm, Schneehaufen, Bier, Bus, Absperrung, Stromkasten und Graffiti-Dosen<br>Shader: `shaders/depth_only`, `gbuffer` & `lighting`<br>Implementierung: `RenderPass` & `GraphicsPipeline` |
-| **Spiegelung der Szene** | Magische Kugel im Kaktuskreis verwendet Render-to-Texture<br>Implementierung: `helper/renderToTexture/` |
+| **Spiegelung der Szene** | Magischer Fisch im Kaktuskreis verwendet Render-to-Texture<br>Implementierung: `helper/renderToTexture/` |
 | **Compute Shader** | Schnee-Simulation<br>Implementierung: `helper/Compute/Snow`, snow-Shader, Erstellung in `main.cpp` |
 | **Stencil Buffer** | Spiegel-System<br>Implementierung: `helper/MirrorSystem`, Erstellung in `main.cpp` |
 | **Tessellation** | Die obere Kugel des Schneemanns ist tesselliert, die untere nicht (beides das gleiche Modell) <br>Implementierung: `shaders/tessellation`, Kleinigkeiten in `Frame.cpp` und `GraphicsPipeline.cpp` |
