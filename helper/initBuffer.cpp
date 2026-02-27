@@ -157,7 +157,7 @@ VkBuffer InitBuffer::createVertexBuffer(VkPhysicalDevice physicalDevice, VkDevic
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
-    std::cout << "[DEBUG] Vertex buffer created via staging buffer (" << vertices.size() << " vertices)" << std::endl;
+    std::cout << "Vertex buffer created via staging buffer (" << vertices.size() << " vertices)" << std::endl << std::endl;
     outMemory = _vertexBufferMemory;
     return _vertexBuffer;
 }

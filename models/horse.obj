@@ -1,8 +1,6 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
 # File Created: 20.04.2011 14:19:02
 
-mtllib 10026_Horse_v01-it2.mtl
-
 #
 # object 10026_Horse_v01
 #
@@ -64590,7 +64588,6 @@ vt 0.4103 0.9884 0.0000
 # 22308 texture coords
 
 g 10026_Horse_v01
-usemtl 13___Default
 s 4
 f 1/1/1 2/2/2 3/3/3 4/4/4 
 f 2/2/2 5/5/5 6/6/6 3/3/3 

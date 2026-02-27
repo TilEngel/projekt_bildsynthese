@@ -1,6 +1,5 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib 10837_WizardHat_LOD3.mtl
 g default
 v -6.864756 -20.015098 -18.850649
 v -6.909156 -19.450697 -16.744050
@@ -44091,7 +44090,6 @@ vn -0.954534 -0.151205 -0.256909
 vn -0.940806 -0.220401 -0.257502
 s off
 g Default
-usemtl _10837_WizardHat_LOD3_10837_WizardHat_LOD3_10837_WizardHatDefault1
 f 1/1/1 2/2/2 3/3/3 4/4/4
 f 5/5/5 1/1/6 4/4/7 6/6/8
 f 7/7/9 8/8/10 2/2/11 1/1/12

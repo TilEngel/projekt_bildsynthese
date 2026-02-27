@@ -5,592 +5,113 @@ Created 5 swapchain image views
 Created 5 presentation semaphores
 Selected depth format with stencil support
 Attachments
-Subpasses
-Dependencies 
-0 Done
-1 Done
-2 Done
-Create
-All Done
 
 Creating 5 framebuffers...
 All framebuffers created successfully!
 
 Validating G-Buffer setup...
 G-Buffer view valid: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x350000000035, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x350000000035, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 2 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (36 vertices)
 
-=== PIPELINE CREATED ===
-Type: SKYBOX
-Vertex Shader: shaders/skybox.vert.spv
-Fragment Shader: shaders/skybox.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (36 vertices)
 OBJ geladen: ./models/plastic_monobloc_chair.obj :)
-[DEBUG] Vertex buffer created via staging buffer (10068 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x4d000000004d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (10068 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
 OBJ geladen: ./models/garden_gnome.obj :)
-[DEBUG] Vertex buffer created via staging buffer (86574 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x5f000000005f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (86574 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
 OBJ geladen: ./models/StreetLamp.obj :)
-[DEBUG] Vertex buffer created via staging buffer (6702 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x710000000071, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (6702 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/garden_gnome.obj :)
-[DEBUG] Vertex buffer created via staging buffer (86574 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
+Vertex buffer created via staging buffer (86574 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/plastic_monobloc_chair.obj :)
-[DEBUG] Vertex buffer created via staging buffer (10068 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
+Vertex buffer created via staging buffer (10068 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/StreetLamp.obj :)
-[DEBUG] Vertex buffer created via staging buffer (6702 vertices)
-[tinyobjloader WARN] Material file [ 12984_beach_umbrella_v1_L2.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-material [ '01___Default' ] not found in .mtl
+Vertex buffer created via staging buffer (6702 vertices)
 
 OBJ geladen: ./models/sonnenschirm.obj :)
-[DEBUG] Vertex buffer created via staging buffer (133920 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xad00000000ad, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (133920 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
 OBJ geladen: ./models/snow.obj :)
-[DEBUG] Vertex buffer created via staging buffer (187035 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xbf00000000bf, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ 14043_16_oz._Beer_Bottle_v1_l3.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-material [ '14043_16_oz__Beer_Bottle_cap_label' ] not found in .mtl
-material [ '14043_16_oz__Beer_Bottle_alcohol' ] not found in .mtl
-material [ '14043_16_oz__Beer_Bottle_cap_label' ] not found in .mtl
-material [ '14043_16_oz__Beer_Bottle_bottle' ] not found in .mtl
+Vertex buffer created via staging buffer (187035 vertices)
 
 OBJ geladen: ./models/beer.obj :)
-[DEBUG] Vertex buffer created via staging buffer (546816 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xd100000000d1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (546816 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
 OBJ geladen: ./models/utility_box.obj :)
-[DEBUG] Vertex buffer created via staging buffer (13212 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xe300000000e3, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (13212 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
+Vertex buffer created via staging buffer (6 vertices)
 
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0xeb00000000eb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (6 vertices)
 OBJ geladen: ./models/dosen.obj :)
-[DEBUG] Vertex buffer created via staging buffer (19728 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1030000000103, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (19728 vertices)
 
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
 OBJ geladen: ./models/barrier.obj :)
-[DEBUG] Vertex buffer created via staging buffer (127734 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1150000000115, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "glass". Use the value of `d` for dissolve (line 8 in .mtl.)
-Both `d` and `Tr` parameters defined for "black_plastic". Use the value of `d` for dissolve (line 20 in .mtl.)
-Both `d` and `Tr` parameters defined for "rubber". Use the value of `d` for dissolve (line 32 in .mtl.)
-Both `d` and `Tr` parameters defined for "09___Default". Use the value of `d` for dissolve (line 44 in .mtl.)
-Both `d` and `Tr` parameters defined for "metall". Use the value of `d` for dissolve (line 56 in .mtl.)
-Both `d` and `Tr` parameters defined for "seat". Use the value of `d` for dissolve (line 68 in .mtl.)
-Both `d` and `Tr` parameters defined for "13936_Tourist_bus_with_open_top". Use the value of `d` for dissolve (line 80 in .mtl.)
-Both `d` and `Tr` parameters defined for "wheel_tire". Use the value of `d` for dissolve (line 95 in .mtl.)
+Vertex buffer created via staging buffer (127734 vertices)
 
 OBJ geladen: ./models/bus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (513024 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1270000000127, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: DEPTH_ONLY
-Vertex Shader: shaders/depth_only.vert.spv
-Fragment Shader: shaders/depth_only.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: GBUFFER
-Vertex Shader: shaders/gbuffer.vert.spv
-Fragment Shader: shaders/gbuffer.frag.spv
-Subpass: 1
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x12f000000012f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ untitled.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-material [ 'Materiais.001' ] not found in .mtl
+Vertex buffer created via staging buffer (513024 vertices)
 
 OBJ geladen: ./models/untitled.obj :)
-[DEBUG] Vertex buffer created via staging buffer (36 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x13d000000013d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (36 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/Desert.obj :)
-[DEBUG] Vertex buffer created via staging buffer (1843968 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x14b000000014b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (1843968 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/table.obj :)
-[DEBUG] Vertex buffer created via staging buffer (7524 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1590000000159, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ 10026_Horse_v01-it2.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-material [ '13___Default' ] not found in .mtl
+Vertex buffer created via staging buffer (7524 vertices)
 
 OBJ geladen: ./models/horse.obj :)
-[DEBUG] Vertex buffer created via staging buffer (126768 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1670000000167, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (126768 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1750000000175, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1830000000183, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1910000000191, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x19f000000019f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1ad00000001ad, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1bb00000001bb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "10436_Cactus_v1". Use the value of `d` for dissolve (line 8 in .mtl.)
+Vertex buffer created via staging buffer (55008 vertices)
 
 OBJ geladen: ./models/cactus.obj :)
-[DEBUG] Vertex buffer created via staging buffer (55008 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
+Vertex buffer created via staging buffer (55008 vertices)
+
 Tessellation state: patchControlPoints = 3
-[VALIDATION] Validation Error: [ VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413 ] Object 0: handle = 0x55817db3d690, type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0xf35c5127 | vkCreateGraphicsPipelines parameter, VkPolygonMode pCreateInfos[0]->pRasterizationState->polygonMode cannot be VK_POLYGON_MODE_POINT or VK_POLYGON_MODE_LINE if VkPhysicalDeviceFeatures->fillModeNonSolid is false. The Vulkan spec states: If the fillModeNonSolid feature is not enabled, polygonMode must be VK_POLYGON_MODE_FILL (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413)
- Severity: 4096
- Type: 2
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1cc00000001cc, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | tessellation evaluation shader writes to output location 1.0 which is not consumed by fragment shader. Enable VK_KHR_maintenance4 device extension to allow relaxed interface matching between input and output vectors.
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: TESSELLATION
-Vertex Shader: ./shaders/tessellation.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ Untitled.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
+OBJ geladen: ./models/sphere.obj :)
+Vertex buffer created via staging buffer (48384 vertices)
 
 OBJ geladen: ./models/sphere.obj :)
-[DEBUG] Vertex buffer created via staging buffer (48384 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Error: [ VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413 ] Object 0: handle = 0x55817db3d690, type = VK_OBJECT_TYPE_DEVICE; | MessageID = 0xf35c5127 | vkCreateGraphicsPipelines parameter, VkPolygonMode pCreateInfos[0]->pRasterizationState->polygonMode cannot be VK_POLYGON_MODE_POINT or VK_POLYGON_MODE_LINE if VkPhysicalDeviceFeatures->fillModeNonSolid is false. The Vulkan spec states: If the fillModeNonSolid feature is not enabled, polygonMode must be VK_POLYGON_MODE_FILL (https://www.khronos.org/registry/vulkan/specs/1.3-khr-extensions/html/vkspec.html#VUID-VkPipelineRasterizationStateCreateInfo-polygonMode-01413)
- Severity: 4096
- Type: 2
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1d900000001d9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: UNKNOWN
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ Untitled.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-
-OBJ geladen: ./models/sphere.obj :)
-[DEBUG] Vertex buffer created via staging buffer (48384 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1e700000001e7, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Material file [ 10837_WizardHat_LOD3.mtl ] not found in a path : models/mtl/
-Failed to load material file(s). Use default material.
-material [ '_10837_WizardHat_LOD3_10837_WizardHat_LOD3_10837_WizardHatDefault1' ] not found in .mtl
+Vertex buffer created via staging buffer (48384 vertices)
 
 OBJ geladen: ./models/wizardHat.obj :)
-[DEBUG] Vertex buffer created via staging buffer (43680 vertices)
+Vertex buffer created via staging buffer (43680 vertices)
+
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x1f500000001f5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (19260 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2030000000203, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (19260 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2110000000211, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (19260 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (19260 vertices)
 OBJ geladen: models/lightbulb.obj :)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x21f000000021f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (19260 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (19260 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x22d000000022d, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 OBJ geladen: ./models/fly.obj :)
-[DEBUG] Vertex buffer created via staging buffer (115380 vertices)
+Vertex buffer created via staging buffer (115380 vertices)
+
 Cubemap image created: 1024x1024
 Cubemap views created
 Depth resources created
@@ -598,291 +119,16 @@ Cubemap render pass created
 Cubemap framebuffers created
 Cubemap sampler created
 ReflectionProbe created at position (-15, 1, -40)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/renderToTexture.vert.spv
-Fragment Shader: shaders/renderToTexture.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[tinyobjloader WARN] Both `d` and `Tr` parameters defined for "01___12265_Fish". Use the value of `d` for dissolve (line 8 in .mtl.)
-
 OBJ geladen: ./models/fish_zwei.obj :)
-[DEBUG] Vertex buffer created via staging buffer (73728 vertices)
+Vertex buffer created via staging buffer (73728 vertices)
+
 Reflective object created with cubemap
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2570000000257, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2570000000257, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 2 not consumed by vertex shader
- Severity: 256
- Type: 4
+Vertex buffer created via staging buffer (6 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/skybox.vert.spv
-Fragment Shader: shaders/skybox.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
+Vertex buffer created via staging buffer (6 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
+Vertex buffer created via staging buffer (6 vertices)
 
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x260000000026
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/lit.vert.spv
-Fragment Shader: shaders/lit.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2670000000267, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x26b000000026b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x26f000000026f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2730000000273, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2770000000277, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x27b000000027b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x27f000000027f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2830000000283, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2870000000287, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x28b000000028b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x28f000000028f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2930000000293, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2970000000297, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | vertex shader writes to output location 1.0 which is not consumed by fragment shader. Enable VK_KHR_maintenance4 device extension to allow relaxed interface matching between input and output vectors.
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/tessellation.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x29b000000029b, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x29f000000029f, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a300000002a3, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2a700000002a7, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2ab00000002ab, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: ./shaders/testapp.vert.spv
-Fragment Shader: ./shaders/testapp.frag.spv
-Subpass: 0
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x250000000025
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2af00000002af, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: STANDARD
-Vertex Shader: shaders/snow.vert.spv
-Fragment Shader: shaders/snow.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (6 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2bd00000002bd, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_MARK
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (6 vertices)
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2cb00000002cb, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_BLEND
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/mirror.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (6 vertices)
 Mirror added at position (45, 2, -17)
 Mirror normal: (0, 0, 1)
 Object 25 marked as reflectable
@@ -891,83 +137,10 @@ Object 18 marked as reflectable
 Object 41 marked as reflectable
 Object 17 marked as reflectable
 Object 23 marked as reflectable
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2d900000002d9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2dd00000002dd, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e100000002e1, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e500000002e5, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2e900000002e9, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x240000000024
-[VALIDATION] Validation Performance Warning: [ UNASSIGNED-CoreValidation-Shader-OutputNotConsumed ] Object 0: handle = 0x2ed00000002ed, type = VK_OBJECT_TYPE_SHADER_MODULE; | MessageID = 0x609a13b | Vertex attribute at location 1 not consumed by vertex shader
- Severity: 256
- Type: 4
-
-=== PIPELINE CREATED ===
-Type: MIRROR_REFLECT
-Vertex Shader: shaders/testapp.vert.spv
-Fragment Shader: shaders/testapp.frag.spv
-Subpass: 3
-Pipeline Handle: 1
 Created 6 reflections for mirror
 Creating lighting quad...
-Creating pipeline layout with device: 0x55817db3d690, layout: 0x270000000027
+Vertex buffer created via staging buffer (6 vertices)
 
-=== PIPELINE CREATED ===
-Type: LIGHTING
-Vertex Shader: shaders/lighting.vert.spv
-Fragment Shader: shaders/lighting.frag.spv
-Subpass: 2
-Pipeline Handle: 1
-[DEBUG] Vertex buffer created via staging buffer (6 vertices)
 Lighting quad created successfully!
 
 === Frame 0 Initialization ===

@@ -6,7 +6,6 @@ layout(triangles, equal_spacing, ccw) in;
 layout(location = 1) in vec3 inNormal[];
 layout(location = 0) in vec2 inTexCoord[];
 
-layout(location = 1) out vec3 fragNormal;
 layout(location = 0) out vec2 fragTexCoord;
 
 layout(push_constant) uniform PushConstants {
@@ -38,7 +37,6 @@ void main() {
     pos += normal * displacement;
 
 gl_Position = ubo.proj * ubo.view * pc.model * vec4(pos, 1.0);
-    fragNormal = normalize(mat3(pc.model) * normal);
     fragTexCoord = gl_TessCoord.x * inTexCoord[0] +
                    gl_TessCoord.y * inTexCoord[1] +
                    gl_TessCoord.z * inTexCoord[2];

@@ -182,7 +182,7 @@ void buildStaticObjects(Scene* scene, VkRenderPass renderPass, ObjectFactory& fa
     //Wüste
     glm::mat4 modelGround = glm::mat4(1.0f);
     modelGround = glm::rotate(modelGround, glm::radians(90.0f), glm::vec3(0.005f,1.0f,0.005f));
-    modelGround = glm::translate(modelGround, glm::vec3(0.0,-2.0f,0.0f));
+    modelGround = glm::translate(modelGround, glm::vec3(0.0,-2.00f,0.0f));
     modelGround = glm::scale(modelGround, glm::vec3(1.2f, 0.3f, 1.0f));
     RenderObject ground = factory.createGenericObject("./models/Desert.obj",
         "textures/desert.png", modelGround, renderPass);
@@ -427,6 +427,8 @@ int main() {
         if (scene->isMirrorObject(i)) continue;
         if (i == reflectiveIndex) continue;
         if (obj.pipeline == nullptr) continue;
+        if (obj.pipeline->getPipelineType() == PipelineType::TESSELLATION) continue;
+        if (obj.pipeline->getPipelineType() == PipelineType::LINE) continue;
 
         VkDescriptorSetLayout layout = obj.isLit ? litDescriptorSetLayout : descriptorSetLayout;
 
